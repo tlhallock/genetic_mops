@@ -17,8 +17,14 @@ int main(int argc, char **argv)
 
 	pareto_set *set = pareto_set_read(in);
 
+	fclose(in);
+
+	printf("Found %d points\n", set->size);
+
 	pareto_set_backtrack(set);
 
 	pareto_set_del(set);
+
+	return 0;
 }
 

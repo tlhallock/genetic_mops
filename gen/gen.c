@@ -11,7 +11,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define N_POINTS 10
+#define N_POINTS 50
 
 double func(double x)
 {

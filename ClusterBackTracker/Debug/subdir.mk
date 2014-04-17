@@ -6,16 +6,19 @@
 C_SRCS += \
 ../backsolver.c \
 ../main.c \
+../memory_manager.c \
 ../pareto_set.c 
 
 OBJS += \
 ./backsolver.o \
 ./main.o \
+./memory_manager.o \
 ./pareto_set.o 
 
 C_DEPS += \
 ./backsolver.d \
 ./main.d \
+./memory_manager.d \
 ./pareto_set.d 
 
 
