@@ -6,18 +6,16 @@
  */
 
 #include "pareto_header.h"
-#include "memory_manager.h"
-
 #include <float.h>
 
 pareto_set *pareto_set_new(unsigned int capacity, unsigned int dim)
 {
-	pareto_set *ret = (pareto_set *) allocate(sizeof(*ret));
+	pareto_set *ret = (pareto_set *) malloc(sizeof(*ret));
 
 	ret->size = 0;
 	ret->capacity = capacity;
 	ret->dim = dim;
-	ret->points = (double **) allocate(sizeof(*ret->points) * capacity);
+	ret->points = (double **) malloc(sizeof(*ret->points) * capacity);
 
 	int i;
 	for (i = 0; i < capacity; i++)
@@ -32,10 +30,10 @@ void pareto_set_del(pareto_set *set)
 	int i;
 	for (i = 0; i < set->size; i++)
 	{
-		destroy(set->points[i]);
+		free(set->points[i]);
 	}
-	destroy(set->points);
-	destroy(set);
+	free(set->points);
+	free(set);
 }
 
 void pareto_set_add(pareto_set *set, double *point)
@@ -46,7 +44,7 @@ void pareto_set_add(pareto_set *set, double *point)
 		return;
 	}
 
-	set->points[set->size] = (double *) allocate(sizeof(*set->points[set->size]) * set->dim);
+	set->points[set->size] = (double *) malloc(sizeof(*set->points[set->size]) * set->dim);
 	int i;
 	for (i = 0; i < set->dim; i++)
 	{
@@ -55,16 +53,16 @@ void pareto_set_add(pareto_set *set, double *point)
 	set->size++;
 }
 
-mask *pareto_set_mask_new(pareto_set *set)
+mask *pareto_set_mask_new(pareto_set *set, bool initial)
 {
-	mask *ret = (mask *) allocate(sizeof(*ret));
-	ret->size = set->size;
-	ret->mask = (char *) allocate(sizeof(*ret->mask) * set->size);
+	mask *ret = (mask *) malloc(sizeof(*ret));
+	ret->size = initial ? set->size : 0;
+	ret->mask = (char *) malloc(sizeof(*ret->mask) * set->size);
 
 	int i;
 	for (i = 0; i < ret->size; i++)
 	{
-		ret->mask[i] = 1;
+		ret->mask[i] = initial;
 	}
 
 	return ret;
@@ -72,13 +70,27 @@ mask *pareto_set_mask_new(pareto_set *set)
 
 void pareto_set_mask_del(mask *msk)
 {
-	destroy(msk->mask);
-	destroy(msk);
+	free(msk->mask);
+	free(msk);
 }
 
 void pareto_set_mask_on(mask *msk, int i, bool on)
 {
+	if (on == msk->mask[i])
+	{
+		return;
+	}
+
 	msk->mask[i] = on;
+
+	if (on)
+	{
+		msk->size++;
+	}
+	else
+	{
+		msk->size--;
+	}
 }
 
 bool pareto_set_get_delta(dist_lookup *lookup, mask *msk, double *out_delta, int *p1, int *p2)
@@ -170,16 +182,16 @@ bool pareto_set_get_epsilon(dist_lookup *lookup, mask *msk, double *out_epsilon,
 
 dist_lookup *pareto_set_distance_lookup_new(pareto_set *set, double (*metric)(double *p1, double *p2))
 {
-	dist_lookup *ret = (dist_lookup *) allocate(sizeof(*ret));
+	dist_lookup *ret = (dist_lookup *) malloc(sizeof(*ret));
 
 	ret->npoints = set->size;
 	ret->dim = set->dim;
-	ret->distances = (double **) allocate (sizeof (*ret->distances) * ret->npoints);
+	ret->distances = (double **) malloc (sizeof (*ret->distances) * ret->npoints);
 
 	int i;
 	for (i = 0; i < ret->npoints; i++)
 	{
-		ret->distances[i] = (double *) allocate(i * sizeof(*ret->distances[i]));
+		ret->distances[i] = (double *) malloc(i * sizeof(*ret->distances[i]));
 	}
 
 	for (i = 0; i < set->size; i++)
@@ -200,10 +212,10 @@ void pareto_set_distance_lookup_del(dist_lookup *lookup)
 
 	for (i = 0; i < lookup->npoints; i++)
 	{
-		destroy(lookup->distances[i]);
+		free(lookup->distances[i]);
 	}
-	destroy(lookup->distances);
-	destroy(lookup);
+	free(lookup->distances);
+	free(lookup);
 }
 
 double pareto_set_distance_lookup_get(dist_lookup *lookup, int i, int j)
@@ -249,7 +261,7 @@ pareto_set *pareto_set_read(FILE *in)
 
 	pareto_set *ret = pareto_set_new((unsigned int) num, (unsigned int) dim);
 
-	double *point = (double *) allocate (sizeof (*point) * dim);
+	double *point = (double *) malloc (sizeof (*point) * dim);
 
 	int i;
 	for (i=0;i<num;i++)
@@ -262,7 +274,7 @@ pareto_set *pareto_set_read(FILE *in)
 		pareto_set_add(ret, point);
 	}
 
-	destroy(point);
+	free(point);
 
 	return ret;
 }

@@ -8,6 +8,7 @@ CC_SRCS += \
 ../src/qtree.cc \
 ../src/qtree_it.cc \
 ../src/qtree_mop.cc \
+../src/qtree_point.cc \
 ../src/qtree_test_utils.cc 
 
 OBJS += \
@@ -15,6 +16,7 @@ OBJS += \
 ./src/qtree.o \
 ./src/qtree_it.o \
 ./src/qtree_mop.o \
+./src/qtree_point.o \
 ./src/qtree_test_utils.o 
 
 CC_DEPS += \
@@ -22,6 +24,7 @@ CC_DEPS += \
 ./src/qtree.d \
 ./src/qtree_it.d \
 ./src/qtree_mop.d \
+./src/qtree_point.d \
 ./src/qtree_test_utils.d 
 
 

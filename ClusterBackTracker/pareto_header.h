@@ -40,7 +40,7 @@ void pareto_set_del(pareto_set *set);
 
 void pareto_set_add(pareto_set *set, double *point);
 
-mask *pareto_set_mask_new(pareto_set *set);
+mask *pareto_set_mask_new(pareto_set *set, bool initial);
 void pareto_set_mask_del(mask *msk);
 void pareto_set_mask_on(mask *msk, int i, bool on);
 

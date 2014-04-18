@@ -25,6 +25,7 @@ private:
 	double infeasible_cost;
 	double mutation_factor;
 	double (*get_index)(double);
+
 	void bread();
 	void find_fittest();
 	void mutate();

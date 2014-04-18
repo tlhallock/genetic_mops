@@ -10,6 +10,7 @@
 
 
 #define DIMENSION 4
+#define TWO_TO_DIM 16
 
 #define TOL .00000001
 

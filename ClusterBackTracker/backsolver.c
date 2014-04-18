@@ -18,11 +18,18 @@ typedef struct
 {
 	pareto_set *set;
 	dist_lookup *lookup;
+
 	mask *msk;
+	mask *determined;
+
+	int *determined_frames;
+	int determined_frame_index;
+
 	int depth;
+
 	double epsilon;
 	double delta;
-	int *masked;
+
 	int masked_index;
 } recursion_object;
 
@@ -59,17 +66,52 @@ double metric(double *p1, double *p2)
 static void print_current_bracktrace(mask *msk, int npoints)
 {
 	int j;
-			for (j = 0; j < npoints; j++)
+	for (j = 0; j < npoints; j++)
+	{
+		if (msk->mask[j])
+		{
+			putchar('1');
+		} else
+		{
+			putchar('0');
+		}
+	}
+	putchar('\n');
+}
+
+static int prune(recursion_object *r)
+{
+	int idx1, idx2;
+	double epsilon = 0, delta = 0;
+
+
+	if (!pareto_set_get_delta(r->lookup, r->msk, &delta, &idx1, &idx2))
+	{
+		return -1; // too few points
+	}
+
+	while (delta < r->delta)
+	{
+		if (!pareto_set_get_delta(r->lookup, r->msk, &delta, &idx1, &idx2))
+		{
+			return true; // too few points
+		}
+
+		int to_remove = idx1;
+		if (r->determined->mask[idx1])
+		{
+			to_remove = idx2;
+			if (r->determined->mask[idx2])
 			{
-				if (msk->mask[j])
-				{
-					putchar('1');
-				} else
-				{
-					putchar('0');
-				}
+				return true;
 			}
-			putchar('\n');
+		}
+
+		pareto_set_mask_on(r->msk, to_remove, 0);
+
+	}
+
+	return false;
 }
 
 static void backtrack(recursion_object *r)
@@ -98,6 +140,15 @@ static void backtrack(recursion_object *r)
 
 		return;
 	}
+
+	if (r->determined->mask[r->depth])
+	{
+		r->depth++;
+		backtrack(r);
+		return;
+	}
+
+
 	if (!pareto_set_get_delta(r->lookup, r->msk, &delta, &idx1, &idx2))
 	{
 		return; // too few points
@@ -122,38 +173,49 @@ static void backtrack(recursion_object *r)
 		return;
 	}
 
+	pareto_set_mask_on(r->determined, r->depth, 1);
+	{
+		// try with bit on
+		r->depth++;
+		pareto_set_mask_on(r->msk, r->depth, 0);
+		backtrack(r);
+		r->depth--;
+	}
 
-	// try with bit on
-	r->depth++;
-	backtrack(r);
-	r->depth--;
-
-	// try with bit off
-	r->msk->size--;
-	r->depth++;
-	pareto_set_mask_on(r->msk, r->depth, 0);
-	backtrack(r);
-	r->depth--;
-	r->msk->size++;
+	{
+		// try with bit off
+		r->msk->size--;
+		r->depth++;
+		pareto_set_mask_on(r->msk, r->depth, 0);
+		backtrack(r);
+		r->depth--;
+		r->msk->size++;
+	}
+	pareto_set_mask_on(r->determined, r->depth, 0);
 }
 
 void pareto_set_backtrack(pareto_set *set, double delta, double epsilon)
 {
-	mask *msk = pareto_set_mask_new(set);
+	mask *msk = pareto_set_mask_new(set, true);
+	mask *det = pareto_set_mask_new(set, false);
 	dist_lookup *lookup = pareto_set_distance_lookup_new(set, &metric);
 
 	recursion_object obj;
 	obj.set = set;
 	obj.depth = 0;
+
 	obj.lookup = lookup;
 	obj.msk = msk;
+	obj.determined = det;
+	obj.determined_frames = (int *) malloc (sizeof (*obj.masked) * set->size);
+	obj.determined_frame_index = 0;
+
 	obj.epsilon = epsilon;
 	obj.delta = delta;
-	obj.masked = (int *) malloc (sizeof (*obj.masked) * set->size);
-	obj.masked_index = 0;
 
 	backtrack(&obj);
 
 	pareto_set_mask_del(msk);
+	pareto_set_mask_del(det);
 	pareto_set_distance_lookup_del(lookup);
 }

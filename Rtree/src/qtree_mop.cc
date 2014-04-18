@@ -8,227 +8,99 @@
 
 #include "qtree.h"
 
-bool qtree_branch_is_empty(qtree_branch *branch);
-int qtree_branch_count(qtree_branch *branch);
 
-
-static bool qtree_is_pareto(void *ptr, qtree_type type, qtree_point *point, double llx, double lly, double urx, double ury)
+static bool qtree_branch_is_optimal(void *ptr, qtree_type type, qtree_point *point, int dim, int two_2_dim)
 {
 	if (type == QTREE_TYPE_NULL)
 	{
 		return true;
 	}
 
-	bool all_children_more_optimal = false;
-	bool within_x = llx < point->x && point->x < urx;
-	bool within_y = lly < point->y && point->y < ury;
-	if (!within_x && !within_y)
-	{
-		if (urx < point->x && ury < point->y)
-		{
-			all_children_more_optimal = true;
-		}
-		else if(llx > point->x && lly > point->y)
-		{
-			return true;
-		}
-	}
-
 	if (type == QTREE_TYPE_LEAF)
 	{
-		qtree_leaf *leaf = (qtree_leaf *)ptr;
-		if (all_children_more_optimal)
-		{
-			return leaf->size == 0;
-		}
+		qtree_leaf *leaf = (qtree_leaf *) ptr;
 
-		for (int i=0;i<BRANCH_FACTOR;i++)
+		for (int i = 0; i < BRANCH_FACTOR; i++)
 		{
-			if (leaf->points[i].x > point->x)
+			if (qtree_point_dominates(leaf->points[i], point, dim))
 			{
-				continue;
+				return false;
 			}
-			if (leaf->points[i].y > point->y)
-			{
-				continue;
-			}
-			return false;
 		}
 		return true;
 	}
 
 	// type == QTREE_TYPE_BRANCH
 	qtree_branch *branch = (qtree_branch *) ptr;
-	if (all_children_more_optimal)
+
+	// prune regions this point dominates...
+	if (qtree_point_dominates(point, branch->lb, dim))
 	{
-		return qtree_branch_is_empty(branch);
+		return true;
 	}
 
-	double n_llx;
-	double n_lly;
-	double n_urx;
-	double n_ury;
-	bool is_pareto;
-	double width = urx - llx;
-
-	void *n_ptr;
-
-//	LOWER_LEFT:
-	n_llx = llx;
-	n_lly = lly;
-	n_urx = urx - width / 2;
-	n_ury = ury - width / 2;
-	type = branch->types[LOWER_LEFT];
-	n_ptr = branch->branches[LOWER_LEFT];
-	is_pareto = qtree_is_pareto(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-	if (!is_pareto)
+	// this could be done in a better fashion
+	for (int i = 0; i < two_2_dim; i++)
 	{
-		return false;
-	}
-//	UPPER_LEFT:
-	n_llx = llx;
-	n_lly = lly + width / 2;
-	n_urx = urx - width / 2;
-	n_ury = ury;
-	type = branch->types[UPPER_LEFT];
-	n_ptr = branch->branches[UPPER_LEFT];
-	is_pareto = qtree_is_pareto(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-	if (!is_pareto)
-	{
-		return false;
-	}
-//	LOWER_RIGHT:
-	n_llx = llx + width / 2;
-	n_lly = lly;
-	n_urx = urx;
-	n_ury = ury - width / 2;
-	type = branch->types[LOWER_RIGHT];
-	n_ptr = branch->branches[LOWER_RIGHT];
-	is_pareto = qtree_is_pareto(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-	if (!is_pareto)
-	{
-		return false;
-	}
-
-//	UPPER_RIGHT:
-	n_llx = llx + width / 2;
-	n_lly = lly + width / 2;
-	n_urx = urx;
-	n_ury = ury;
-	type = branch->types[UPPER_RIGHT];
-	n_ptr = branch->branches[UPPER_RIGHT];
-	is_pareto = qtree_is_pareto(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-	if (!is_pareto)
-	{
-		return false;
+		if (!qtree_branch_is_optimal(branch->branches[i], branch->types[i], point, dim, two_2_dim))
+		{
+			return false;
+		}
 	}
 
 	return true;
 }
 
 
-static int count_dominating(void *ptr, qtree_type type, qtree_point *point, double llx, double lly, double urx, double ury)
+bool qtree_is_optimal(qtree *tree, qtree_point *point)
+{
+	return qtree_branch_is_optimal(tree->root, QTREE_TYPE_BRANCH, point, tree->dim, tree->two_2_dim);
+}
+
+
+static int qtree_branch_count_dominating(void *ptr, qtree_type type, qtree_point *point, int dim, int two_2_dim)
 {
 	if (type == QTREE_TYPE_NULL)
 	{
-		return 0;
-	}
-
-	bool all_children_more_optimal = false;
-	bool within_x = llx < point->x && point->x < urx;
-	bool within_y = lly < point->y && point->y < ury;
-	if (!within_x && !within_y)
-	{
-		if (urx < point->x && ury < point->y)
-		{
-			all_children_more_optimal = true;
-		}
-		else if(llx > point->x && lly > point->y)
-		{
-			return 0;
-		}
+		return true;
 	}
 
 	if (type == QTREE_TYPE_LEAF)
 	{
-		qtree_leaf *leaf = (qtree_leaf *)ptr;
-		if (all_children_more_optimal)
-		{
-			return leaf->size;
-		}
+		qtree_leaf *leaf = (qtree_leaf *) ptr;
 
 		int count = 0;
-		for (int i=0;i<BRANCH_FACTOR;i++)
+		for (int i = 0; i < BRANCH_FACTOR; i++)
 		{
-			if (leaf->points[i].x > point->x)
+			if (qtree_point_dominates(leaf->points[i], point, dim))
 			{
-				continue;
+				count++;
 			}
-			if (leaf->points[i].y > point->y)
-			{
-				continue;
-			}
-			count++;
 		}
 		return count;
 	}
 
 	// type == QTREE_TYPE_BRANCH
 	qtree_branch *branch = (qtree_branch *) ptr;
-	if (all_children_more_optimal)
+
+	// prune regions this point dominates...
+	if (qtree_point_dominates(point, branch->lb, dim))
 	{
-		return qtree_branch_count(branch);
+		return 0;
 	}
 
 	int count = 0;
-	double n_llx;
-	double n_lly;
-	double n_urx;
-	double n_ury;
-	double width = urx - llx;
-
-	void *n_ptr;
-
-//	LOWER_LEFT:
-	n_llx = llx;
-	n_lly = lly;
-	n_urx = urx - width / 2;
-	n_ury = ury - width / 2;
-	type = branch->types[LOWER_LEFT];
-	n_ptr = branch->branches[LOWER_LEFT];
-	count += count_dominating(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-
-//	UPPER_LEFT:
-	n_llx = llx;
-	n_lly = lly + width / 2;
-	n_urx = urx - width / 2;
-	n_ury = ury;
-	type = branch->types[UPPER_LEFT];
-	n_ptr = branch->branches[UPPER_LEFT];
-	count += count_dominating(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-
-//	LOWER_RIGHT:
-	n_llx = llx + width / 2;
-	n_lly = lly;
-	n_urx = urx;
-	n_ury = ury - width / 2;
-	type = branch->types[LOWER_RIGHT];
-	n_ptr = branch->branches[LOWER_RIGHT];
-	count += count_dominating(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-
-
-//	UPPER_RIGHT:
-	n_llx = llx + width / 2;
-	n_lly = lly + width / 2;
-	n_urx = urx;
-	n_ury = ury;
-	type = branch->types[UPPER_RIGHT];
-	n_ptr = branch->branches[UPPER_RIGHT];
-	count += count_dominating(n_ptr, type, point, n_llx, n_lly, n_urx, n_ury);
-
+	// this could be done in a better fashion
+	for (int i = 0; i < two_2_dim; i++)
+	{
+		count += qtree_branch_count_dominating(branch->branches[i], branch->types[i], point, dim, two_2_dim);
+	}
 	return count;
 }
 
-
+int qtree_count_dominating(qtree *tree, qtree_point *point)
+{
+	return qtree_branch_count_dominating(tree->root, QTREE_TYPE_BRANCH, point, tree->dim, tree->two_2_dim);
+}
 
 
