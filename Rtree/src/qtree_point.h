@@ -1,7 +1,7 @@
 /*
  * qtree_point.h
  *
- *  Created on: Apr 17, 2014
+ *  
  *      Author: rever
  */
 
@@ -9,6 +9,10 @@
 #define QTREE_POINT_H_
 
 #include <stdio.h>
+
+
+namespace qtree
+{
 
 typedef double qtree_point;
 
@@ -27,5 +31,6 @@ void qtree_point_del(qtree_point *point);
 bool qtree_point_equals(qtree_point *point1, qtree_point *point2, int dim);
 
 bool qtree_point_dominates(qtree_point *point1,  qtree_point *point2, int dim);
+}
 
 #endif /* QTREE_POINT_H_ */

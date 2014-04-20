@@ -1,7 +1,7 @@
 /*
  * pareto_header.h
  *
- *  Created on: Apr 16, 2014
+ *  
  *      Author: rever
  */
 

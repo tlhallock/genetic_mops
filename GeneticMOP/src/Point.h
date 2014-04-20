@@ -1,7 +1,7 @@
 /*
  * Point.h
  *
- *  Created on: Apr 6, 2014
+ *  
  *      Author: thallock
  */
 

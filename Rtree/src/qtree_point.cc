@@ -1,7 +1,7 @@
 /*
  * qtree_point.cc
  *
- *  Created on: Apr 17, 2014
+ *  
  *      Author: rever
  */
 
@@ -11,6 +11,10 @@
 #include <limits.h>
 #include <stdlib.h>
 
+
+namespace qtree
+{
+
 void qtree_point_print(FILE *out, qtree_point *point, int dim, bool newline)
 {
 	int j;
@@ -18,7 +22,10 @@ void qtree_point_print(FILE *out, qtree_point *point, int dim, bool newline)
 	{
 		fprintf(out, "%lf ", point[j]);
 	}
-	fputc('\n', out);
+	if (newline)
+	{
+		fputc('\n', out);
+	}
 }
 
 
@@ -90,4 +97,6 @@ bool qtree_point_dominates(qtree_point *point1, qtree_point *point2, int dim)
 	}
 
 	return true;
+}
+
 }

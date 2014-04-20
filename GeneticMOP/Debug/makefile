@@ -38,7 +38,10 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: GeneticMOP
+all: pre-build main-build
+
+# Main-build Target
+main-build: GeneticMOP
 
 # Tool invocations
 GeneticMOP: $(OBJS) $(USER_OBJS)
@@ -53,7 +56,12 @@ clean:
 	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) GeneticMOP
 	-@echo ' '
 
+pre-build:
+	-@echo 'create the r-tree library'
+	-"/school/genetic_mops/Rtree/create_library.sh" "/school/genetic_mops/Rtree"
+	-@echo ' '
+
 .PHONY: all clean dependents
-.SECONDARY:
+.SECONDARY: main-build pre-build
 
 -include ../makefile.targets

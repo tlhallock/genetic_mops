@@ -1,7 +1,7 @@
 /*
  * qtree_it.cc
  *
- *  Created on: Apr 6, 2014
+ *  
  *      Author: thallock
  */
 
@@ -9,6 +9,8 @@
 #include "qtree.h"
 #include <stdlib.h>
 
+namespace qtree
+{
 
 void qtree_it_del(qtree_it *it)
 {
@@ -37,4 +39,6 @@ bool qtree_it_next(qtree_it *it)
 	}
 
 	return false;
+}
+
 }

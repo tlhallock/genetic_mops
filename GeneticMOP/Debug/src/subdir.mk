@@ -10,6 +10,7 @@ CPP_SRCS += \
 ../src/IncrementalSampleSolver.cpp \
 ../src/MOP.cpp \
 ../src/RandomSampleSolver.cpp \
+../src/RtreeImageSet.cpp \
 ../src/VectorImageSet.cpp 
 
 CC_SRCS += \
@@ -22,6 +23,7 @@ OBJS += \
 ./src/IncrementalSampleSolver.o \
 ./src/MOP.o \
 ./src/RandomSampleSolver.o \
+./src/RtreeImageSet.o \
 ./src/VectorImageSet.o \
 ./src/utils.o 
 
@@ -35,6 +37,7 @@ CPP_DEPS += \
 ./src/IncrementalSampleSolver.d \
 ./src/MOP.d \
 ./src/RandomSampleSolver.d \
+./src/RtreeImageSet.d \
 ./src/VectorImageSet.d 
 
 
@@ -42,14 +45,14 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/school/genetic_mops/Rtree/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
 src/%.o: ../src/%.cc
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/school/genetic_mops/Rtree/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

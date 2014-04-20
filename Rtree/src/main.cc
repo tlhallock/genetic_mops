@@ -8,9 +8,13 @@
 
 
 // from test file
+
+namespace qtree
+{
 void test_add_remove_contains();
+}
 
 int main()
 {
-	test_add_remove_contains();
+	qtree::test_add_remove_contains();
 }

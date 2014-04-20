@@ -1,7 +1,7 @@
 /*
  * qtree_test_utils.cc
  *
- *  Created on: Apr 5, 2014
+ *  
  *      Author: thallock
  */
 
@@ -15,6 +15,9 @@
 #include <stdio.h>
 
 #define NPOINTS 1000
+
+namespace qtree
+{
 
 static bool qtree_leaf_verify_bounds(qtree_leaf *leaf, double llx, double lly, double urx, double ury, int depth, bool verbose)
 {
@@ -186,6 +189,7 @@ bool qtree_verify_bounds(qtree *tree, bool verbose)
 //	double urx = llx + tree->width;
 //	double ury = lly + tree->width;
 //	return qtree_branch_verify_bounds(tree->root, llx, lly, urx, ury, 0, verbose);
+	return true;
 }
 
 
@@ -201,8 +205,8 @@ void test_add_remove_contains()
 	lb[0] = 0;
 	lb[1] = 0;
 	qtree_point *ub = qtree_point_new0(dim);
-	lb[0] = 1;
-	lb[1] = 1;
+	ub[0] = 1;
+	ub[1] = 1;
 	qtree *tree = qtree_new(lb, ub, dim);
 
 	qtree_point *random_points[NPOINTS];
@@ -305,7 +309,7 @@ void test_add_remove_contains()
 
 
 
-
+}
 
 
 

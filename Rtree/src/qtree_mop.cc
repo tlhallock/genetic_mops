@@ -1,13 +1,16 @@
 /*
  * qtree_mop.cc
  *
- *  Created on: Apr 6, 2014
+ *  
  *      Author: thallock
  */
 
 
 #include "qtree.h"
 
+
+namespace qtree
+{
 
 static bool qtree_branch_is_optimal(void *ptr, qtree_type type, qtree_point *point, int dim, int two_2_dim)
 {
@@ -52,7 +55,7 @@ static bool qtree_branch_is_optimal(void *ptr, qtree_type type, qtree_point *poi
 }
 
 
-bool qtree_is_optimal(qtree *tree, qtree_point *point)
+bool qtree_is_pareto(qtree *tree, qtree_point *point)
 {
 	return qtree_branch_is_optimal(tree->root, QTREE_TYPE_BRANCH, point, tree->dim, tree->two_2_dim);
 }
@@ -103,4 +106,4 @@ int qtree_count_dominating(qtree *tree, qtree_point *point)
 	return qtree_branch_count_dominating(tree->root, QTREE_TYPE_BRANCH, point, tree->dim, tree->two_2_dim);
 }
 
-
+}

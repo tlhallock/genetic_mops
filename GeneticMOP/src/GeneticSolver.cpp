@@ -1,7 +1,7 @@
 /*
  * GeneticSolver.cpp
  *
- *  Created on: Apr 5, 2014
+ *  
  *      Author: thallock
  */
 

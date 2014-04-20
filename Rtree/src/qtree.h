@@ -1,7 +1,7 @@
 /*
  * qtree.h
  *
- *  Created on: Apr 3, 2014
+ *  
  *      Author: rever
  */
 
@@ -12,6 +12,9 @@
 #include "qtree_point.h"
 
 #include <stdio.h>
+
+namespace qtree
+{
 
 #define BRANCH_FACTOR 1
 
@@ -50,7 +53,6 @@ typedef struct
 	int two_2_dim;
 	qtree_point *lb;
 	qtree_point *ub;
-	double width;
 	qtree_branch *root;
 } qtree;
 
@@ -81,6 +83,14 @@ bool qtree_verify_bounds(qtree *tree, bool verbose);
 
 bool qtree_point_equals(qtree_point *point1, qtree_point *point2);
 
-bool is_pareto(qtree_point *point);
+size_t qtree_get_memory_usage(qtree *tree);
+int qtree_count(qtree *tree);
+void qtree_clear(qtree *tree);
+
+void qtree_apply(qtree *tree, void (*fctn) (qtree_point *pnt, void *arg), void *arg);
+
+void qtree_get_min(qtree *tree, double *y_out, int dim);
+
+}
 
 #endif /* qtree_H_ */
