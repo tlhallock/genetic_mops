@@ -13,8 +13,8 @@
 
 double *copy_point(double *vec, int dim)
 {
-	double *ret_val = (double *) malloc (sizeof (*vec) * dim);
-	for (int i=0;i<dim;i++)
+	double *ret_val = (double *) malloc(sizeof(*ret_val) * dim);
+	for (int i = 0; i < dim; i++)
 	{
 		ret_val[i] = vec[i];
 	}

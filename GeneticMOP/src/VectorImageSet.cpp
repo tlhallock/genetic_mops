@@ -112,9 +112,9 @@ static double vector_image_get_min_distance(double *point, std::vector<double *>
 	for (std::vector<double *>::iterator it = all->begin(); it != all->end(); ++it)
 	{
 		bool points_are_equal = true;
-		for (int i=0;i<dim;i++)
+		for (int i = 0; i < dim; i++)
 		{
-			if (point[i] != *it[i])
+			if (point[i] != (*it)[i])
 			{
 				points_are_equal = false;
 				break;
@@ -140,12 +140,10 @@ double VectorImageSet::get_epsilon(double (*norm)(double *, double *, int dim))
 {
 	get_pareto_solutions();
 
-	double max_dist = DBL_MAX;
+	double max_dist = -DBL_MAX;
 
 	for (std::vector<double *>::iterator it = pareto_set->begin(); it != pareto_set->end(); ++it)
 	{
-		double current_min_dist = 0;
-
 		double dist = vector_image_get_min_distance(*it, pareto_set, norm, ydim);
 		if (dist > max_dist)
 		{
@@ -164,8 +162,6 @@ double VectorImageSet::get_delta(double (*norm)(double *, double *, int dim))
 
 	for (std::vector<double *>::iterator it = pareto_set->begin(); it != pareto_set->end(); ++it)
 	{
-		double current_min_dist = 0;
-
 		double dist = vector_image_get_min_distance(*it, pareto_set, norm, ydim);
 		if (dist < min_dist)
 		{

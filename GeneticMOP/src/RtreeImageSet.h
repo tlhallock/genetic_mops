@@ -27,7 +27,7 @@ public:
 		image(qtree::qtree_new(lb, ub, _ydim)),
 		pareto_set(NULL) {};
 
-	virtual ~RtreeImageSet() {};
+	virtual ~RtreeImageSet();
 
 	std::vector<double *> *get_pareto_solutions();
 	void get_nadir_point(double *y_out);

@@ -9,13 +9,9 @@
 #define CONFIG_H_
 
 
-#define DIMENSION 4
-#define TWO_TO_DIM 16
-
 #define TOL .00000001
 
 #define IS_ZERO(x)  ((x) >= 0 ? ((x) < TOL) : ((x) > TOL))
-
 
 #define ERROR_CHECKING 1
 

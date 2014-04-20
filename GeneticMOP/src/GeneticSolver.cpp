@@ -13,6 +13,29 @@
 #include <limits.h>
 #include <float.h>
 
+GeneticSolver::GeneticSolver(int _breed_size, int _xdim, double _infeasible_cost, int _population_size, double _mutation_factor, double (*_get_index)(double)) :
+		population_size(_population_size),
+		breed_size(_breed_size),
+		current_fit((double **) malloc(sizeof(*current_fit) * _breed_size)),
+		xdim(_xdim),
+		offspring((double *) malloc(sizeof(*offspring) * _xdim)),
+		x_population(),
+		y_population(),
+		infeasible_cost(_infeasible_cost),
+		mutation_factor(_mutation_factor),
+		get_index(_get_index)
+{
+	for (int i = 0; i < _breed_size; i++)
+	{
+		current_fit[i] = NULL;
+	}
+}
+GeneticSolver::~GeneticSolver()
+{
+	free(current_fit);
+	free(offspring);
+}
+
 static double get_distance(double *p1, double *p2, int dim)
 {
 	double sum = 0;
@@ -191,6 +214,7 @@ void GeneticSolver::solve(BoundedMopStats *board, int num_to_find, long timeout)
 
 	for (unsigned int i = 0; i < x_population.size(); i++)
 	{
+		free (x_population[i]);
 		free (y_population[i]);
 	}
 

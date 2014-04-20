@@ -93,6 +93,12 @@ int RtreeImageSet::get_dim()
 
 void RtreeImageSet::add_point(double *y)
 {
+	if (!qtree::qtree_in_bounds(image, y))
+	{
+		puts("Ignoring invalid point");
+		return;
+	}
+
 	if (pareto_set != NULL)
 	{
 		delete pareto_set;
@@ -114,4 +120,13 @@ double RtreeImageSet::get_delta(double (*norm)(double *, double *, int dim))
 void RtreeImageSet::clear()
 {
 	qtree::qtree_clear(image);
+}
+
+RtreeImageSet::~RtreeImageSet()
+{
+	if (pareto_set != NULL)
+	{
+		delete pareto_set;
+	}
+	qtree::qtree_del(image);
 }

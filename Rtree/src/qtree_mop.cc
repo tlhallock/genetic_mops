@@ -23,7 +23,7 @@ static bool qtree_branch_is_optimal(void *ptr, qtree_type type, qtree_point *poi
 	{
 		qtree_leaf *leaf = (qtree_leaf *) ptr;
 
-		for (int i = 0; i < BRANCH_FACTOR; i++)
+		for (int i = 0; i < leaf->size; i++)
 		{
 			if (qtree_point_dominates(leaf->points[i], point, dim))
 			{

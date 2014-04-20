@@ -87,7 +87,7 @@ static bool qtree_branch_verify_bounds(qtree_branch *branch, double llx, double 
 		return true;
 	}
 
-	for (int i=0;i<4;i++)
+	for (int i = 0; i < 4; i++)
 	{
 		if (verbose)
 		{
@@ -103,7 +103,7 @@ static bool qtree_branch_verify_bounds(qtree_branch *branch, double llx, double 
 		double n_urx = urx;
 		double n_ury = ury;
 
-		switch(i)
+		switch (i)
 		{
 		case UPPER_RIGHT:
 			n_llx += width / 2;
@@ -144,14 +144,14 @@ static bool qtree_branch_verify_bounds(qtree_branch *branch, double llx, double 
 		}
 
 		qtree_type type = branch->types[i];
-		switch(type)
+		switch (type)
 		{
 		case QTREE_TYPE_BRANCH:
 			if (verbose)
 			{
 				puts("branch");
 			}
-			if (!qtree_branch_verify_bounds((qtree_branch *)branch->branches[i], n_llx, n_lly, n_urx, n_ury, depth + 1, verbose))
+			if (!qtree_branch_verify_bounds((qtree_branch *) branch->branches[i], n_llx, n_lly, n_urx, n_ury, depth + 1, verbose))
 			{
 				return false;
 			}
@@ -192,22 +192,27 @@ bool qtree_verify_bounds(qtree *tree, bool verbose)
 	return true;
 }
 
-
-
 void test_add_remove_contains()
 {
 
 	srand(500000);
 
-	int dim = 2;
+	int dim = 3;
 
 	qtree_point *lb = qtree_point_new0(dim);
-	lb[0] = 0;
-	lb[1] = 0;
+	for (int i = 0; i < dim; i++)
+	{
+		lb[i] = 0;
+	}
 	qtree_point *ub = qtree_point_new0(dim);
-	ub[0] = 1;
-	ub[1] = 1;
+	for (int i = 0; i < dim; i++)
+	{
+		ub[i] = 1;
+	}
 	qtree *tree = qtree_new(lb, ub, dim);
+
+	qtree_point_del(lb);
+	qtree_point_del(ub);
 
 	qtree_point *random_points[NPOINTS];
 	bool added[NPOINTS];
@@ -224,7 +229,7 @@ void test_add_remove_contains()
 			random_points[i] = qtree_point_new_rand(dim);
 
 			is_new_point = true;
-			for (int j=0;j<i;j++)
+			for (int j = 0; j < i; j++)
 			{
 				if (!qtree_point_equals(random_points[j], random_points[i], dim))
 				{
@@ -238,7 +243,7 @@ void test_add_remove_contains()
 		added[i] = false;
 	}
 
-	for (;;)
+	for (int i = 0; i < 100000; i++)
 	{
 		int index = rand() % NPOINTS;
 		qtree_point *point = random_points[index];
@@ -267,8 +272,7 @@ void test_add_remove_contains()
 				puts("Fail 1533513");
 				exit(1);
 			}
-		}
-		else
+		} else
 		{
 			std::cout << "Removing ";
 			qtree_point_print(stdout, point, dim, true);
@@ -303,11 +307,13 @@ void test_add_remove_contains()
 		}
 	}
 
+	for (int i = 0; i < NPOINTS; i++)
+	{
+		qtree_point_del(random_points[i]);
+	}
+
 	qtree_del(tree);
 }
-
-
-
 
 }
 

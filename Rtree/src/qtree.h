@@ -16,7 +16,7 @@
 namespace qtree
 {
 
-#define BRANCH_FACTOR 1
+#define BRANCH_FACTOR 50
 
 #define UPPER_RIGHT 0
 #define UPPER_LEFT 1
@@ -89,7 +89,8 @@ void qtree_clear(qtree *tree);
 
 void qtree_apply(qtree *tree, void (*fctn) (qtree_point *pnt, void *arg), void *arg);
 
-void qtree_get_min(qtree *tree, double *y_out, int dim);
+void qtree_get_min(qtree *tree, qtree_point *y_out, int dim);
+bool qtree_in_bounds(qtree *tree, qtree_point *point);
 
 }
 

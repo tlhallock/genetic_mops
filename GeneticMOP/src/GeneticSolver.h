@@ -32,22 +32,8 @@ private:
 	void sort(BoundedMopStats *board);
 	double get_fitness(BoundedMopStats *board, double *x, double *y);
 public:
-	GeneticSolver(int _orgy_size, int _xdim, double _infeasible_cost, int _population_size, double _mutation_factor, double (*_get_index)(double)) :
-		population_size(_population_size),
-		breed_size(_orgy_size),
-		current_fit((double **) malloc(sizeof(*current_fit) * _orgy_size)),
-		xdim(_xdim),
-		offspring((double *) malloc(sizeof(*offspring) * xdim)),
-		x_population(),
-		y_population(),
-		infeasible_cost(_infeasible_cost),
-		mutation_factor(_mutation_factor),
-		get_index(_get_index)
-		{for (int i=0;i<breed_size;i++) current_fit[i] =
-				(double *) malloc (sizeof (*current_fit[i]) * xdim);}
-	virtual ~GeneticSolver()
-	{/*for (int i=0;i<orgy_size;i++) free(current_fit[i]);
-		free(current_fit); free(offspring);*/}
+	GeneticSolver(int breed_size, int _xdim, double _infeasible_cost, int _population_size, double _mutation_factor, double (*_get_index)(double));
+	virtual ~GeneticSolver();
 
 	void solve(BoundedMopStats *board, int num_to_find, long timeout);
 };

@@ -12,7 +12,8 @@ using namespace std;
 #include<limits.h>
 
 #include <stdio.h>
-#include <math.h>
+
+#include "math_functions.h"
 
 #include "VectorImageSet.h"
 #include "GeneticSolver.h"
@@ -22,73 +23,45 @@ using namespace std;
 
 #define NUM_GUESSES 500
 
-void objective_function_1(double *x, double *y_out)
+double get_index(double r)
 {
-	y_out[0] = x[0];
-	y_out[1] = x[1];
+	return r * r * r * r * r * r * r;
 }
 
-void objective_function_2(double *x, double *y_out)
+void test_pareto_equivalence();
+static void compare_solvers();
+
+
+int main()
 {
-	y_out[0] = x[0] * x[0] + x[0] * x[1];
-	y_out[1] = x[1] * x[1] + x[0] * x[1];
+	long seed = time(NULL);
+	srand(seed);
+
+//	test_pareto_equivalence();
+
+	compare_solvers();
+
+	return 0;
 }
 
-void objective_function_3(double *x, double *y_out)
+void compare_dfs()
 {
-	y_out[0] = x[0];
-	y_out[1] = x[1];
+	VectorImageSet image(2);
 
-	y_out[0] -= .5;
-	y_out[1] -= .5;
+	// unit square
+	double xmin[2];
+	xmin[0] = 0;
+	xmin[1] = 0;
+	double xmax[2];
+	xmax[0] = 1;
+	xmax[1] = 1;
 
-	double dist = 2 * sqrt(y_out[0] * y_out[0] + y_out[1] * y_out[1]);
+	BoundedMopStats board(2, 2, (double *) &xmin, (double *) &xmax, &image, &objective_function_4, &is_feasible_function_2);
 
-	dist *= dist * dist * dist * dist;
-
-	y_out[0] = +100 * dist;
-	y_out[1] = -100 * dist;
+	DepthFirstRecursiveStencil solver(.01, &l_inf, 7, 3);
+	solver.solve(&board);
 }
 
-void objective_function_4(double *x, double *y_out)
-{
-	double x_diff = x[0];
-	double y_diff = x[1];
-
-	x_diff *= x_diff;
-	y_diff *= y_diff;
-
-	double dist = .02 * exp(sqrt(x_diff + y_diff));
-
-	y_out[0] =  dist;
-	y_out[1] = -dist;
-}
-
-bool is_feasible_function_1(double *x)
-{
-	double shift = x[0] - 1;
-	return shift * shift < x[1];
-}
-
-bool is_feasible_function_2(double *x)
-{
-	return true;
-}
-
-double l_inf(double *p1, double *p2, int dim)
-{
-	double max_dist = -1;
-	for (int i=0; i<dim; i++)
-	{
-		double diff = p1[i] - p2[i];
-		diff = diff > 0 ? diff : -diff;
-		if (diff > max_dist)
-		{
-			max_dist = diff;
-		}
-	}
-	return max_dist;
-}
 
 void summarize(ImageSet *image, const char *filename)
 {
@@ -113,11 +86,11 @@ void summarize(ImageSet *image, const char *filename)
 	std::cout << "Difference: " << std::endl;
 	print_point(stdout, diff, image->get_dim(), true);
 
-//	std::cout << "epsilon = " << image->get_epsilon(&l_inf) << std::endl;
-//	std::cout << "delta   = " << image->get_delta(&l_inf)   << std::endl;
+	std::cout << "epsilon = " << image->get_epsilon(&l_inf) << std::endl;
+	std::cout << "delta   = " << image->get_delta(&l_inf)   << std::endl;
 
 	std::vector<double*> *paretos = image->get_pareto_solutions();
-	std::cout << "Number of ideal points: " << paretos->size() << std::endl;
+	std::cout << "Number of pareto points: " << paretos->size() << std::endl;
 
 	FILE *pareto_file = fopen(filename, "w");
 	for (std::vector<double *>::iterator it = paretos->begin(); it != paretos->end(); ++it)
@@ -129,13 +102,9 @@ void summarize(ImageSet *image, const char *filename)
 	printf("\n\n\n");
 }
 
-double get_index(double r)
+static void compare_solvers()
 {
-	return r * r * r * r * r * r * r;
-}
 
-int main()
-{
 	long seed = time(NULL);
 	srand(seed);
 
@@ -161,12 +130,6 @@ int main()
 	BoundedMopStats board(2, 2, (double *)&xmin, (double *)&xmax, &image,
 //			&objective_function_1, &is_feasible_function_1);
 			&objective_function_4, &is_feasible_function_2);
-
-	{
-		DepthFirstRecursiveStencil solver(.01, &l_inf, 7, 3);
-		solver.solve(&board);
-		return 0;
-	}
 
 	{
 		puts("Using random sampling.");
@@ -210,6 +173,4 @@ int main()
 
 		summarize(&image, "inc_pareto.txt");
 	}
-
-	return 0;
 }

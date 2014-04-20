@@ -73,12 +73,11 @@ bool qtree_point_equals(qtree_point *point1, qtree_point *point2, int dim)
 	return true;
 }
 
-
 qtree_point *qtree_point_new_rand(int dim)
 {
 	qtree_point *ret = qtree_point_new0(dim);
 
-	for (int i=0;i<dim;i++)
+	for (int i = 0; i < dim; i++)
 	{
 		ret[i] = rand() / (double) INT_MAX;
 	}
@@ -90,7 +89,7 @@ bool qtree_point_dominates(qtree_point *point1, qtree_point *point2, int dim)
 {
 	for (int i = 0; i < dim; i++)
 	{
-		if (point2[i] < point1[i])
+		if (point2[i] <= point1[i])
 		{
 			return false;
 		}

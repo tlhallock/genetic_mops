@@ -11,7 +11,9 @@ CPP_SRCS += \
 ../src/MOP.cpp \
 ../src/RandomSampleSolver.cpp \
 ../src/RtreeImageSet.cpp \
-../src/VectorImageSet.cpp 
+../src/TestImageSet.cpp \
+../src/VectorImageSet.cpp \
+../src/math_functions.cpp 
 
 CC_SRCS += \
 ../src/utils.cc 
@@ -24,7 +26,9 @@ OBJS += \
 ./src/MOP.o \
 ./src/RandomSampleSolver.o \
 ./src/RtreeImageSet.o \
+./src/TestImageSet.o \
 ./src/VectorImageSet.o \
+./src/math_functions.o \
 ./src/utils.o 
 
 CC_DEPS += \
@@ -38,7 +42,9 @@ CPP_DEPS += \
 ./src/MOP.d \
 ./src/RandomSampleSolver.d \
 ./src/RtreeImageSet.d \
-./src/VectorImageSet.d 
+./src/TestImageSet.d \
+./src/VectorImageSet.d \
+./src/math_functions.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

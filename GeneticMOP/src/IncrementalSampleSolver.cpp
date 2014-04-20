@@ -16,27 +16,22 @@
 #include <vector>
 #include <algorithm>
 
-
-static void set_pareto_optimals_with_x(
-		std::vector<double *> *initial_x, std::vector<double *> *next_x,
-		std::vector<double *> *initial_y, std::vector<double *> *next_y,
-		int dim, bool trim)
+static void set_pareto_optimals_with_x(std::vector<double *> *initial_x, std::vector<double *> *next_x, std::vector<double *> *initial_y, std::vector<double *> *next_y, int dim, bool trim)
 {
 
-	for (unsigned int i=0;i<initial_y->size();i++)
+	for (unsigned int i = 0; i < initial_y->size(); i++)
 	{
 		bool ignore = trim && rand() % 2;
-		if (is_pareto_optimal(initial_y->at(i), initial_y, dim)
-				&& !ignore)
+		if (is_pareto_optimal(initial_y->at(i), initial_y, dim) && !ignore)
 		{
 			next_x->push_back(initial_x->at(i));
 			next_y->push_back(initial_y->at(i));
 		}
 	}
 
-	for (unsigned int i=0;i<initial_y->size();i++)
+	for (unsigned int i = 0; i < initial_y->size(); i++)
 	{
-		if (std::find(initial_y->begin(), initial_y->end(), initial_y->at(i)) != initial_y->end())
+		if (std::find(next_y->begin(), next_y->end(), initial_y->at(i)) != next_y->end())
 		{
 			continue;
 		}
@@ -47,7 +42,6 @@ static void set_pareto_optimals_with_x(
 
 	initial_x->clear();
 	initial_y->clear();
-
 }
 
 
@@ -127,6 +121,9 @@ void IncrementalSampleSolver::solve(BoundedMopStats *board, int num_turns, long 
 		free(initial_x->at(i));
 		free(initial_y->at(i));
 	}
+
+	delete initial_x;
+	delete initial_y;
 
 	delete next_x;
 	delete next_y;
