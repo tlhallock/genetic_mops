@@ -7,33 +7,25 @@
 
 
 
-#include "qtree.h"
+#include "Qtree.h"
 
-
+#include <stdlib.h>
 
 namespace qtree
 {
-int QtreeBranch::get_dim()
+/*
+ * should duplicate the points...
+ */
+QtreeBranch::QtreeBranch(QtreeBranch* _parent, qtree_point* _lb, qtree_point* _ub, int _dim, int _two_2_dim) :
+	dim(_dim),
+	two_2_dim(_two_2_dim),
+	lb(lb),
+	ub(_ub),
+	parent(_parent),
+	types((qtree_type *) malloc (sizeof (*types) * two_2_dim)),
+	branches((void **) malloc (sizeof (*branches) * two_2_dim))
 {
-
-}
-
-int QtreeBranch::get_two_2_dim()
-{
-}
-
-QtreeBranch::QtreeBranch(QtreeBranch* _parent, qtree_point* _lb, qtree_point* _ub, int two_2_dim)
-{
-	parent = _parent;
-
-	lb = _lb;
-	ub = _ub;
-
-	types = (qtree_type *) malloc (sizeof (*types) * two_2_dim);
-	branches = (void **) malloc (sizeof (*branches) * two_2_dim);
-
-	int i;
-	for (i=0; i<two_2_dim; i++)
+	for (int i = 0; i < two_2_dim; i++)
 	{
 		types[i] = QTREE_TYPE_NULL;
 		branches[i] = NULL;
@@ -65,7 +57,6 @@ QtreeBranch::~QtreeBranch()
 	free(ub);
 	free(types);
 	free(branches);
-	free(branch);
 }
 
 void QtreeBranch::print(FILE* out, int depth)
@@ -137,7 +128,7 @@ void QtreeBranch::get_min(double* y_out, int dim_of_interest)
 			((QtreeBranch *) branches[i])->get_min(y_out, dim_of_interest);
 			break;
 		case QTREE_TYPE_LEAF:
-			((QtreeLeaf *) branches[i], y_out, dim_of_interest);
+			((QtreeLeaf *) branches[i])->get_min(y_out, dim_of_interest);
 			break;
 		case QTREE_TYPE_NULL:
 			break;
@@ -150,7 +141,7 @@ void QtreeBranch::get_min(double* y_out, int dim_of_interest)
 
 void QtreeBranch::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
 {
-	for (int i=0;i<two_2_dim;i++)
+	for (int i=0;i<get_two_2_dim();i++)
 	{
 		qtree_type type = types[i];
 		switch(type)
@@ -195,24 +186,22 @@ int QtreeBranch::count()
 
 QtreeLeaf* QtreeBranch::get_leaf(int quadrant)
 {
-	int type = types[quadrant];
-	if (type == QTREE_TYPE_LEAF)
-	{
-		return (QtreeLeaf *) branches[quadrant];
-	}
-	else if (type == QTREE_TYPE_NULL)
-	{
-		QtreeLeaf *new_leaf = new QtreeLeaf(branch, dim);
-		types[quadrant] = QTREE_TYPE_LEAF;
-		branches[quadrant] = new_leaf;
+	QtreeLeaf *new_leaf;
 
-		return new_leaf;
-	}
-	else
+	switch (types[quadrant])
 	{
+	case QTREE_TYPE_LEAF:
+		return (QtreeLeaf *) branches[quadrant];
+	case QTREE_TYPE_NULL:
+		new_leaf = new QtreeLeaf(this, get_dim(), get_two_2_dim());
+		set_branch(quadrant, QTREE_TYPE_LEAF, new_leaf);
+		return new_leaf;
+	case QTREE_TYPE_BRANCH:
+	default:
 		puts("Error 204810463");
 		exit(1);
 	}
+	return NULL;
 }
 
 QtreeLeaf* QtreeBranch::find(qtree_point* point)
@@ -220,9 +209,10 @@ QtreeLeaf* QtreeBranch::find(qtree_point* point)
 	int quadrant;
 	qtree_type type = QTREE_TYPE_BRANCH;
 
+	QtreeBranch *branch = this;
 	for(;;)
 	{
-		quadrant = qtree_get_quadrant(lb, ub, point, dim);
+		quadrant = qtree_get_quadrant(branch->lb, branch->ub, point, get_dim());
 		type = ((QtreeBranch *) branch)->types[quadrant];
 
 		if (type != QTREE_TYPE_BRANCH)
@@ -230,24 +220,23 @@ QtreeLeaf* QtreeBranch::find(qtree_point* point)
 			break;
 		}
 
-		branch = (QtreeBranch *) branches[quadrant];
+		branch = (QtreeBranch *) branch->branches[quadrant];
 	}
 
-	return QtreeBranch_get_leaf(branch, quadrant, dim);
+	return branch->get_leaf(quadrant);
 }
 
 int QtreeBranch::get_parents_quad()
 {
-	QtreeBranch *parent = parent;
 	if (parent == NULL)
 	{
 		puts("Error 15285298750");
 		exit(1);
 	}
 
-	for (int i = 0; i < two_2_dim; i++)
+	for (int i = 0; i < get_two_2_dim(); i++)
 	{
-		if (parent->branches[i] == branch)
+		if (parent->branches[i] == this)
 		{
 			return i;
 		}

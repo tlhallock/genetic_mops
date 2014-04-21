@@ -6,28 +6,21 @@
  */
 
 
-#include "qtree.h"
+#include "Qtree.h"
 
 
 namespace qtree
 {
 
-int QtreeLeaf::get_dim()
+QtreeLeaf::QtreeLeaf(QtreeBranch* _parent, int _dim, int _two_2_dim) :
+		size(0),
+		parent(_parent),
+		dim(_dim),
+		two_2_dim(_two_2_dim)
 {
-}
-
-int QtreeLeaf::get_two_2_dim()
-{
-}
-
-QtreeLeaf::QtreeLeaf(QtreeBranch* _parent, int dim)
-{
-	size = 0;
-	parent = _parent;
-
-	for (int i=0;i<BRANCH_FACTOR;i++)
+	for (int i = 0; i < BRANCH_FACTOR; i++)
 	{
-		points[i] = qtree_point_new0(dim);
+		points[i] = qtree_point_new(dim);
 	}
 }
 
@@ -39,7 +32,7 @@ QtreeLeaf::~QtreeLeaf()
 	}
 }
 
-void QtreeLeaf::qtree_leaf_get_min(double* y_out, int dim_of_interest)
+void QtreeLeaf::get_min(double* y_out, int dim_of_interest)
 {
 	for (int i = 0; i < BRANCH_FACTOR; i++)
 	{
@@ -53,7 +46,7 @@ void QtreeLeaf::qtree_leaf_get_min(double* y_out, int dim_of_interest)
 	}
 }
 
-void QtreeLeaf::qtree_leaf_apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
+void QtreeLeaf::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
 {
 	int i;
 	for(i=0;i<size;i++)
@@ -63,7 +56,7 @@ void QtreeLeaf::qtree_leaf_apply(void (*fctn)(qtree_point* pnt, void* arg), void
 
 }
 
-int QtreeLeaf::qtree_leaf_index_of(qtree_point* point)
+int QtreeLeaf::index_of(qtree_point* point)
 {
 	for (int i=0; i<size; i++)
 	{
@@ -76,10 +69,9 @@ int QtreeLeaf::qtree_leaf_index_of(qtree_point* point)
 	return -19571938;
 }
 
-int QtreeLeaf::qtree_leaf_get_parents_quad()
+int QtreeLeaf::get_parents_quad()
 {
-	QtreeBranch *parent = parent;
-	for (int i=0;i<get_two_2_dim();i++)
+	for (int i = 0; i < get_two_2_dim(); i++)
 	{
 		if (parent->branches[i] == this)
 		{
@@ -90,7 +82,7 @@ int QtreeLeaf::qtree_leaf_get_parents_quad()
 
 }
 
-void QtreeLeaf::qtree_leaf_print(FILE* out, int depth)
+void QtreeLeaf::print(FILE* out, int depth)
 {
 	int i, j;
 
@@ -107,6 +99,15 @@ void QtreeLeaf::qtree_leaf_print(FILE* out, int depth)
 			fputc('\t', out);
 		}
 		qtree_point_print(out, points[i], get_dim(), true);
+	}
+}
+
+void QtreeLeaf::assign(qtree_point *point)
+{
+	int osize = size++;
+	for (int i = 0; i < get_dim(); i++)
+	{
+		points[osize][i] = point[i];
 	}
 }
 

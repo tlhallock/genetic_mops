@@ -28,10 +28,26 @@ void qtree_point_print(FILE *out, qtree_point *point, int dim, bool newline)
 	}
 }
 
+qtree_point *qtree_point_new(int dim)
+{
+	return (qtree_point *) malloc(sizeof(qtree_point) * dim);
+}
+
+qtree_point *qtree_point_new(int dim, double initial)
+{
+	qtree_point *ret_val = qtree_point_new(dim);
+
+	for (int i = 0; i < dim; i++)
+	{
+		ret_val[i] = initial;
+	}
+
+	return ret_val;
+}
 
 qtree_point *qtree_point_new(int dim, double *vals)
 {
-	qtree_point *ret_val = qtree_point_new0(dim);
+	qtree_point *ret_val = qtree_point_new(dim);
 
 	for (int i = 0; i < dim; i++)
 	{
@@ -41,14 +57,10 @@ qtree_point *qtree_point_new(int dim, double *vals)
 	return ret_val;
 }
 
+
 qtree_point *qtree_point_dup(int dim, qtree_point *other)
 {
 	return qtree_point_new(dim, other);
-}
-
-qtree_point *qtree_point_new0(int dim)
-{
-	return (qtree_point *) malloc(sizeof(qtree_point) * dim);
 }
 
 void qtree_point_del(qtree_point *point)
@@ -75,7 +87,7 @@ bool qtree_point_equals(qtree_point *point1, qtree_point *point2, int dim)
 
 qtree_point *qtree_point_new_rand(int dim)
 {
-	qtree_point *ret = qtree_point_new0(dim);
+	qtree_point *ret = qtree_point_new(dim);
 
 	for (int i = 0; i < dim; i++)
 	{

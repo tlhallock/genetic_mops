@@ -5,7 +5,7 @@
  *      Author: thallock
  */
 
-#include "qtree.h"
+#include "Qtree.h"
 
 #include <iostream>
 
@@ -18,11 +18,11 @@
 
 namespace qtree
 {
-
-static bool qtree_leaf_verify_bounds(qtree_leaf *leaf, double llx, double lly, double urx, double ury, int depth, bool verbose)
-{
-	for (int i = 0; i < leaf->size; i++)
-	{
+//
+//static bool qtree_leaf_verify_bounds(qtree_leaf *leaf, double llx, double lly, double urx, double ury, int depth, bool verbose)
+//{
+//	for (int i = 0; i < leaf->size; i++)
+//	{
 //		if (verbose)
 //		{
 //			for (int j = 0; j < depth; j++)
@@ -75,122 +75,122 @@ static bool qtree_leaf_verify_bounds(qtree_leaf *leaf, double llx, double lly, d
 //				return false;
 //			}
 //		}
-	}
+//	}
+//
+//	return true;
+//}
+//
+//static bool qtree_branch_verify_bounds(qtree_branch *branch, double llx, double lly, double urx, double ury, int depth, bool verbose)
+//{
+//	if (branch == NULL)
+//	{
+//		return true;
+//	}
+//
+//	for (int i = 0; i < 4; i++)
+//	{
+//		if (verbose)
+//		{
+//			for (int j = 0; j < depth; j++)
+//			{
+//				fputc('\t', stdout);
+//			}
+//		}
+//
+//		double width = urx - llx;
+//		double n_llx = llx;
+//		double n_lly = lly;
+//		double n_urx = urx;
+//		double n_ury = ury;
+//
+//		switch (i)
+//		{
+//		case UPPER_RIGHT:
+//			n_llx += width / 2;
+//			n_lly += width / 2;
+//			if (verbose)
+//			{
+//				printf("upper right: ");
+//			}
+//			break;
+//		case UPPER_LEFT:
+//			n_lly += width / 2;
+//			n_urx -= width / 2;
+//			if (verbose)
+//			{
+//				printf("upper left : ");
+//			}
+//			break;
+//		case LOWER_LEFT:
+//			n_urx -= width / 2;
+//			n_ury -= width / 2;
+//			if (verbose)
+//			{
+//				printf("lower left : ");
+//			}
+//			break;
+//		case LOWER_RIGHT:
+//			n_llx += width / 2;
+//			n_ury -= width / 2;
+//			if (verbose)
+//			{
+//				printf("lower right: ");
+//			}
+//			break;
+//		}
+//		if (verbose)
+//		{
+//			printf("%lf %lf %lf %lf ", n_llx, n_lly, n_urx, n_ury);
+//		}
+//
+//		qtree_type type = branch->types[i];
+//		switch (type)
+//		{
+//		case QTREE_TYPE_BRANCH:
+//			if (verbose)
+//			{
+//				puts("branch");
+//			}
+//			if (!qtree_branch_verify_bounds((qtree_branch *) branch->branches[i], n_llx, n_lly, n_urx, n_ury, depth + 1, verbose))
+//			{
+//				return false;
+//			}
+//			break;
+//		case QTREE_TYPE_LEAF:
+//			if (verbose)
+//			{
+//				puts("leaf");
+//			}
+//			if (!qtree_leaf_verify_bounds((qtree_leaf *) branch->branches[i], n_llx, n_lly, n_urx, n_ury, depth + 1, verbose))
+//			{
+//				return false;
+//			}
+//			break;
+//		case QTREE_TYPE_NULL:
+//			if (verbose)
+//			{
+//				puts("null");
+//			}
+//			break;
+//		default:
+//			puts("Error 0760147");
+//			exit(1);
+//		}
+//	}
+//
+//	return true;
+//}
 
-	return true;
-}
 
-static bool qtree_branch_verify_bounds(qtree_branch *branch, double llx, double lly, double urx, double ury, int depth, bool verbose)
-{
-	if (branch == NULL)
-	{
-		return true;
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		if (verbose)
-		{
-			for (int j = 0; j < depth; j++)
-			{
-				fputc('\t', stdout);
-			}
-		}
-
-		double width = urx - llx;
-		double n_llx = llx;
-		double n_lly = lly;
-		double n_urx = urx;
-		double n_ury = ury;
-
-		switch (i)
-		{
-		case UPPER_RIGHT:
-			n_llx += width / 2;
-			n_lly += width / 2;
-			if (verbose)
-			{
-				printf("upper right: ");
-			}
-			break;
-		case UPPER_LEFT:
-			n_lly += width / 2;
-			n_urx -= width / 2;
-			if (verbose)
-			{
-				printf("upper left : ");
-			}
-			break;
-		case LOWER_LEFT:
-			n_urx -= width / 2;
-			n_ury -= width / 2;
-			if (verbose)
-			{
-				printf("lower left : ");
-			}
-			break;
-		case LOWER_RIGHT:
-			n_llx += width / 2;
-			n_ury -= width / 2;
-			if (verbose)
-			{
-				printf("lower right: ");
-			}
-			break;
-		}
-		if (verbose)
-		{
-			printf("%lf %lf %lf %lf ", n_llx, n_lly, n_urx, n_ury);
-		}
-
-		qtree_type type = branch->types[i];
-		switch (type)
-		{
-		case QTREE_TYPE_BRANCH:
-			if (verbose)
-			{
-				puts("branch");
-			}
-			if (!qtree_branch_verify_bounds((qtree_branch *) branch->branches[i], n_llx, n_lly, n_urx, n_ury, depth + 1, verbose))
-			{
-				return false;
-			}
-			break;
-		case QTREE_TYPE_LEAF:
-			if (verbose)
-			{
-				puts("leaf");
-			}
-			if (!qtree_leaf_verify_bounds((qtree_leaf *) branch->branches[i], n_llx, n_lly, n_urx, n_ury, depth + 1, verbose))
-			{
-				return false;
-			}
-			break;
-		case QTREE_TYPE_NULL:
-			if (verbose)
-			{
-				puts("null");
-			}
-			break;
-		default:
-			puts("Error 0760147");
-			exit(1);
-		}
-	}
-
-	return true;
-}
-
-
-bool qtree_verify_bounds(qtree *tree, bool verbose)
-{
-//	double llx = 0;//tree->lower_left.x;
-//	double lly = 0;//tree->lower_left.y;
-//	double urx = llx + tree->width;
-//	double ury = lly + tree->width;
-//	return qtree_branch_verify_bounds(tree->root, llx, lly, urx, ury, 0, verbose);
-	return true;
-}
+//bool qtree_verify_bounds(qtree *tree, bool verbose)
+//{
+////	double llx = 0;//tree->lower_left.x;
+////	double lly = 0;//tree->lower_left.y;
+////	double urx = llx + tree->width;
+////	double ury = lly + tree->width;
+////	return qtree_branch_verify_bounds(tree->root, llx, lly, urx, ury, 0, verbose);
+//	return true;
+//}
 
 void test_add_remove_contains()
 {
@@ -199,17 +199,17 @@ void test_add_remove_contains()
 
 	int dim = 3;
 
-	qtree_point *lb = qtree_point_new0(dim);
+	qtree_point *lb = qtree_point_new(dim);
 	for (int i = 0; i < dim; i++)
 	{
 		lb[i] = 0;
 	}
-	qtree_point *ub = qtree_point_new0(dim);
+	qtree_point *ub = qtree_point_new(dim);
 	for (int i = 0; i < dim; i++)
 	{
 		ub[i] = 1;
 	}
-	qtree *tree = qtree_new(lb, ub, dim);
+	Qtree *tree = new Qtree(lb, ub, dim);
 
 	qtree_point_del(lb);
 	qtree_point_del(ub);
@@ -221,7 +221,7 @@ void test_add_remove_contains()
 	{
 		bool is_new_point;
 
-		random_points[i] = qtree_point_new0(dim);
+		random_points[i] = qtree_point_new(dim);
 
 		do
 		{
@@ -253,21 +253,21 @@ void test_add_remove_contains()
 			std::cout << "Adding ";
 			qtree_point_print(stdout, point, dim, true);
 
-			bool contained = qtree_contains(tree, point);
+			bool contained = tree->contains(point);
 			if (added[index] != contained)
 			{
 				puts("Fail 420802");
 				exit(1);
 			}
 
-			if (contained == qtree_add(tree, point))
+			if (contained == tree->add(point))
 			{
 				puts("Fail 407");
 				exit(1);
 			}
 			added[index] = true;
 
-			if (!qtree_contains(tree, point))
+			if (!tree->contains(point))
 			{
 				puts("Fail 1533513");
 				exit(1);
@@ -277,34 +277,34 @@ void test_add_remove_contains()
 			std::cout << "Removing ";
 			qtree_point_print(stdout, point, dim, true);
 
-			bool contained = qtree_contains(tree, point);
+			bool contained = tree->contains(point);
 			if (added[index] != contained)
 			{
 				puts("Fail 420802");
 				exit(1);
 			}
 
-			if (qtree_remove(tree, point) != contained)
+			if (tree->remove(point) != contained)
 			{
 				puts("Fail 62462");
 				exit(1);
 			}
 			added[index] = false;
 
-			if (qtree_contains(tree, point))
+			if (tree->contains(point))
 			{
 				puts("Fail 1533513");
 				exit(1);
 			}
 		}
 
-		qtree_print(stdout, tree);
-		if (!qtree_verify_bounds(tree, false))
-		{
-			puts("fail");
-			qtree_verify_bounds(tree, true);
-			break;
-		}
+		tree->print(stdout);
+//		if (!qtree_verify_bounds(tree, false))
+//		{
+//			puts("fail");
+//			qtree_verify_bounds(tree, true);
+//			break;
+//		}
 	}
 
 	for (int i = 0; i < NPOINTS; i++)
@@ -312,7 +312,7 @@ void test_add_remove_contains()
 		qtree_point_del(random_points[i]);
 	}
 
-	qtree_del(tree);
+	delete tree;
 }
 
 }
