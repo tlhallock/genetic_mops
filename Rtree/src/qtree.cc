@@ -15,162 +15,78 @@
 
 namespace qtree
 {
-
-
-static void qtree_leaf_print(FILE *out, qtree_leaf *leaf, int depth, int dim)
+QtreeBranch* Qtree::qtree_root_grow(QtreeBranch* branch, qtree_point* direction, int dim, int two_2_dim)
 {
-	int i, j;
+	qtree_point *new_lower = qtree_point_new0(dim);
+	qtree_point *new_upper = qtree_point_new0(dim);
 
-	for(j=0; j<depth; j++)
+	int old_quad = 0;
+	for (int i = 0; i < dim; i++)
 	{
-		fputc('\t', out);
-	}
-	fprintf(out, "leaf d=%d s=%d:\n", depth, leaf->size);
-
-	for (i=0;i<leaf->size;i++)
-	{
-		for(j=0;j<depth+1;j++)
+		double diff = branch->ub[i] - branch->lb[i];
+		if (direction[i] > branch->ub[i])
 		{
-			fputc('\t', out);
+			// grow upper...
+			new_lower[i] = branch->lb[i];
+			new_upper[i] = branch->ub[i] + diff;
+
+			old_quad |= (1 << i);
 		}
-		qtree_point_print(out, leaf->points[i], dim, true);
-	}
-}
-
-
-static void qtree_branch_print(FILE *out, qtree_branch *branch, int depth, int dim, int two_2_dim)
-{
-	int i, j;
-
-	for (j = 0; j < depth; j++)
-	{
-		fputc('\t', out);
-	}
-	fprintf(out, "branch d=%d: lb=", depth / 2);
-	qtree_point_print(out, branch->lb, dim, false);
-	fprintf(out, "; ub=");
-	qtree_point_print(out, branch->ub, dim, false);
-	fprintf(out, ";\n");
-
-
-	for (i = 0; i < two_2_dim; i++)
-	{
-		char *type = NULL;
-		switch (branch->types[i])
+		else
 		{
-		case QTREE_TYPE_BRANCH:
-			type = "branch";
-			break;
-		case QTREE_TYPE_LEAF:
-			type = "leaf";
-			break;
-		case QTREE_TYPE_NULL:
-			type = "null";
-			break;
-		}
-
-		for (j = 0; j < depth + 1; j++)
-		{
-			fputc('\t', out);
-		}
-
-		fprintf(out, "%d: %s\n", i, type);
-
-		switch(branch->types[i])
-		{
-		case QTREE_TYPE_BRANCH:
-			qtree_branch_print(out, (qtree_branch *) branch->branches[i], depth + 2, dim, two_2_dim);
-			break;
-		case QTREE_TYPE_LEAF:
-			qtree_leaf_print(out, (qtree_leaf *) branch->branches[i], depth + 2, dim);
-			break;
-		case QTREE_TYPE_NULL:
-			break;
+			// grow lower...
+			new_lower[i] = branch->lb[i] - diff;
+			new_upper[i] = branch->ub[i];
 		}
 	}
-}
 
-void qtree_print(FILE *out, qtree *tree)
-{
-	qtree_branch_print(out, tree->root, 0, tree->dim, tree->two_2_dim);
-}
-
-
-static qtree_leaf *qtree_leaf_new(qtree_branch *parent, int dim)
-{
-	qtree_leaf *ret_val = (qtree_leaf *) malloc (sizeof (*ret_val));
-
-	ret_val->size = 0;
-	ret_val->parent = parent;
-
-	for (int i=0;i<BRANCH_FACTOR;i++)
-	{
-		ret_val->points[i] = qtree_point_new0(dim);
-	}
+	qtree_branch * ret_val = qtree_branch_new(NULL, new_lower, new_upper, two_2_dim);
+	ret_val->types[old_quad] = QTREE_TYPE_BRANCH;
+	ret_val->branches[old_quad] = branch;
+	branch->parent = ret_val;
 
 	return ret_val;
 }
 
-static void qtree_leaf_del(qtree_leaf *leaf)
+bool Qtree::in_bounds(qtree* tree, qtree_point* point)
 {
-	for (int i=0;i<BRANCH_FACTOR;i++)
+	for (int i = 0; i < tree->dim; i++)
 	{
-		free(leaf->points[i]);
-	}
-	free(leaf);
-}
-
-// the points are kept...
-static qtree_branch *qtree_branch_new(qtree_branch *parent, qtree_point *lb, qtree_point *ub, int two_2_dim)
-{
-	qtree_branch *ret_val = (qtree_branch *) malloc (sizeof (*ret_val));
-	ret_val->parent = parent;
-
-	ret_val->lb = lb;
-	ret_val->ub = ub;
-
-	ret_val->types = (qtree_type *) malloc (sizeof (*ret_val->types) * two_2_dim);
-	ret_val->branches = (void **) malloc (sizeof (*ret_val->branches) * two_2_dim);
-
-	int i;
-	for (i=0; i<two_2_dim; i++)
-	{
-		ret_val->types[i] = QTREE_TYPE_NULL;
-		ret_val->branches[i] = NULL;
-	}
-
-	return ret_val;
-}
-
-static void qtree_branch_del(qtree_branch *branch, int two_2_dim)
-{
-	int i;
-	for (i = 0; i < two_2_dim; i++)
-	{
-		switch (branch->types[i])
+		if (point[i] < tree->lb[i])
 		{
-		case QTREE_TYPE_BRANCH:
-			qtree_branch_del((qtree_branch *) branch->branches[i], two_2_dim);
-			break;
-		case QTREE_TYPE_LEAF:
-			qtree_leaf_del((qtree_leaf *) branch->branches[i]);
-			break;
-		case QTREE_TYPE_NULL:
-			break;
-		default:
-			puts("Error 195493955");
-			exit(1);
+			return false;
+		}
+		if (point[i] > tree->ub[i])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+QtreeLeaf* Qtree::find(qtree* tree, qtree_point* point)
+{
+	if (ERROR_CHECKING)
+	{
+		for (int i=0;i<tree->dim;i++)
+		{
+			if (point[i] < tree->lb[i])
+			{
+				puts("Error 20827605");
+				exit(1);
+			}
+			if (point[i] > tree->ub[i])
+			{
+				puts("Error 20agdsg605");
+				exit(1);
+			}
 		}
 	}
 
-	free(branch->lb);
-	free(branch->ub);
-	free(branch->types);
-	free(branch->branches);
-	free(branch);
+	return qtree_branch_find(tree->root, point, tree->dim);
 }
 
-qtree *qtree_new(qtree_point *lb, qtree_point *ub, int dim)
+qtree* Qtree::Qtree(qtree_point* lb, qtree_point* ub, int dim)
 {
 	qtree *ret_val = (qtree *) malloc (sizeof(*ret_val));
 
@@ -188,7 +104,7 @@ qtree *qtree_new(qtree_point *lb, qtree_point *ub, int dim)
 	return ret_val;
 }
 
-void qtree_del(qtree *tree)
+void Qtree::~Qtree()
 {
 	qtree_branch_del(tree->root, tree->two_2_dim);
 	qtree_point_del(tree->lb);
@@ -196,163 +112,13 @@ void qtree_del(qtree *tree)
 	free(tree);
 }
 
-
-int qtree_get_quadrant(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim)
+bool Qtree::add(qtree_point* point)
 {
-//	fprintf(stdout, "the quadrand of ");
-//	qtree_point_print(stdout, point, dim, true);
-//	fprintf(stdout, " in lb=");
-//	qtree_point_print(stdout, lb, dim, false);
-//	fprintf(stdout, " in ub=");
-//	qtree_point_print(stdout, ub, dim, true);
-//	fprintf(stdout, " is ");
-
-	int quad = 0;
-	int i;
-	for (i=0;i<dim;i++)
+	while (!qtree_in_bounds(tree, point))
 	{
-		double mid = (ub[i] + lb[i]) / 2;
-		if (point[i] > mid)
-		{
-			quad |= (1 << i);
-		}
-
-		if (ERROR_CHECKING)
-		{
-			if (point[i] < lb[i])
-			{
-				puts("Error 104801");
-				exit (1);
-			}
-			if (point[i] > ub[i])
-			{
-				puts("Error 10472994");
-				exit (1);
-			}
-		}
+		tree->root = qtree_root_grow(tree->root, point, tree->dim, tree->two_2_dim);
 	}
 
-//	fprintf(stdout, "%d\n", quad);
-
-	return quad;
-}
-
-static qtree_leaf *qtree_branch_get_leaf(qtree_branch *branch, int quadrant, int dim)
-{
-	int type = branch->types[quadrant];
-	if (type == QTREE_TYPE_LEAF)
-	{
-		return (qtree_leaf *) branch->branches[quadrant];
-	}
-	else if (type == QTREE_TYPE_NULL)
-	{
-		qtree_leaf *new_leaf = qtree_leaf_new(branch, dim);
-		branch->types[quadrant] = QTREE_TYPE_LEAF;
-		branch->branches[quadrant] = new_leaf;
-
-		return new_leaf;
-	}
-	else
-	{
-		puts("Error 204810463");
-		exit(1);
-	}
-}
-
-static qtree_leaf *qtree_branch_find(qtree_branch *branch, qtree_point *point, int dim)
-{
-	int quadrant;
-	qtree_type type = QTREE_TYPE_BRANCH;
-
-	for(;;)
-	{
-		quadrant = qtree_get_quadrant(branch->lb, branch->ub, point, dim);
-		type = ((qtree_branch *) branch)->types[quadrant];
-
-		if (type != QTREE_TYPE_BRANCH)
-		{
-			break;
-		}
-
-		branch = (qtree_branch *) branch->branches[quadrant];
-	}
-
-	return qtree_branch_get_leaf(branch, quadrant, dim);
-}
-
-static void qtree_point_assign(qtree_leaf *leaf, qtree_point *point, int dim)
-{
-	int size = leaf->size++;
-	for (int i = 0; i < dim; i++)
-	{
-		leaf->points[size][i] = point[i];
-	}
-}
-
-static int qtree_leaf_index_of(qtree_leaf *leaf, qtree_point *point, int dim)
-{
-	for (int i=0; i<leaf->size; i++)
-	{
-		if (qtree_point_equals(leaf->points[i], point, dim))
-		{
-			return i;
-		}
-	}
-
-	return -19571938;
-}
-
-static int qtree_leaf_get_parents_quad(qtree_leaf *leaf, int two_2_dim)
-{
-	qtree_branch *parent = leaf->parent;
-	for (int i=0;i<two_2_dim;i++)
-	{
-		if (parent->branches[i] == leaf)
-		{
-			return i;
-		}
-	}
-	return -587658765;
-}
-
-static int qtree_branch_get_parents_quad(qtree_branch *branch, int two_2_dim)
-{
-	qtree_branch *parent = branch->parent;
-	if (parent == NULL)
-	{
-		puts("Error 15285298750");
-		exit(1);
-	}
-
-	for (int i = 0; i < two_2_dim; i++)
-	{
-		if (parent->branches[i] == branch)
-		{
-			return i;
-		}
-	}
-	return -587658765;
-}
-
-void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim)
-{
-	for (int i = 0; i < dim; i++)
-	{
-		double mid = (lb[i] + ub[i]) / 2;
-
-		if (quad & (1 << i))
-		{
-			lb[i] = mid;
-		}
-		else
-		{
-			ub[i] = mid;
-		}
-	}
-}
-
-bool qtree_add(qtree *tree, qtree_point *point)
-{
 	qtree_leaf *leaf = qtree_branch_find(tree->root, point, tree->dim);
 
 	if (qtree_leaf_index_of(leaf, point, tree->dim) >= 0)
@@ -391,34 +157,16 @@ bool qtree_add(qtree *tree, qtree_point *point)
 	return true;
 }
 
-bool qtree_branch_is_empty(qtree_branch *branch, int two_2_dim)
+void Qtree::clear()
 {
-	for (int i = 0; i < two_2_dim; i++)
-	{
-		qtree_type type = branch->types[i];
-		switch(type)
-		{
-		case QTREE_TYPE_BRANCH:
-			if (!qtree_branch_is_empty((qtree_branch *) branch->branches[i], two_2_dim))
-			{
-				return false;
-			}
-			break;
-		case QTREE_TYPE_LEAF:
-			if (((qtree_leaf *) branch->branches[i])->size != 0)
-			{
-				return false;
-			}
-			break;
-		case QTREE_TYPE_NULL:
-			break;
-		}
-	}
-
-	return true;
+	qtree_branch_del(tree->root, tree->two_2_dim);
+	tree->root = qtree_branch_new(NULL,
+			qtree_point_dup(tree->dim, tree->lb),
+			qtree_point_dup(tree->dim, tree->ub),
+			tree->two_2_dim);
 }
 
-bool qtree_remove(qtree *tree, qtree_point *point)
+bool Qtree::remove(qtree_point* point)
 {
 	qtree_leaf *leaf = qtree_branch_find(tree->root, point, tree->dim);
 
@@ -464,219 +212,36 @@ bool qtree_remove(qtree *tree, qtree_point *point)
 	return true;
 }
 
-qtree_it *qtree_it_new(qtree *tree)
+int Qtree::count()
 {
-//	qtree_it *ret_val = (qtree_it *) malloc (sizeof (*ret_val));
-//
-//	ret_val->pos_size = 128;
-//	ret_val->branch_locs = (int *) malloc (sizeof *ret_val->branch_locs);
-//
-//	ret_val->depth = 0;
-//	qtree_branch *b = tree->root;
-//	while (b->types[0] == QTREE_TYPE_BRANCH)
-//	{
-//		ret_val->branch_locs[ret_val->depth++] = 0;
-//		b = (qtree_branch *) b->branches[0];
-//
-//		if (ret_val->depth > 128)
-//		{
-//			puts("Error 7210720570");
-//		}
-//	}
-//
-//	if (b->types[0] == QTREE_TYPE_NULL)
-//	{
-//		b->types[0] = QTREE_TYPE_LEAF;
-//		b->branches[0] = qtree_leaf_new(b);
-//	}
-//
-//	ret_val->leaf = (qtree_leaf *) b->branches[0];
-//
-//	return ret_val;
-	return NULL;
+	return qtree_branch_count(tree->root, tree->two_2_dim);
 }
 
-qtree_leaf *qtree_find(qtree *tree, qtree_point *point)
-{
-	if (ERROR_CHECKING)
-	{
-		for (int i=0;i<tree->dim;i++)
-		{
-			if (point[i] < tree->lb[i])
-			{
-				puts("Error 20827605");
-				exit(1);
-			}
-			if (point[i] > tree->ub[i])
-			{
-				puts("Error 20agdsg605");
-				exit(1);
-			}
-		}
-	}
-
-	return qtree_branch_find(tree->root, point, tree->dim);
-}
-
-
-bool qtree_contains(qtree *tree, qtree_point *point)
+bool Qtree::contains(qtree_point* point)
 {
 	qtree_leaf *leaf = qtree_find(tree, point);
 	return qtree_leaf_index_of(leaf, point, tree->dim) >= 0;
 }
 
-static int qtree_branch_count(qtree_branch *branch, int two_2_dim)
-{
-	int count = 0;
-
-	for (int i = 0; i < two_2_dim; i++)
-	{
-		qtree_type type = branch->types[i];
-		switch(type)
-		{
-		case QTREE_TYPE_BRANCH:
-			count += qtree_branch_count((qtree_branch *) branch->branches[i], two_2_dim);
-			break;
-		case QTREE_TYPE_LEAF:
-			count += ((qtree_leaf *) branch->branches[i])->size;
-			break;
-		case QTREE_TYPE_NULL:
-			break;
-		}
-	}
-
-	return count;
-}
-
-int qtree_count(qtree *tree)
-{
-	return qtree_branch_count(tree->root, tree->two_2_dim);
-}
-
-
-
-
-//static size_t qtree_leaf_get_memory_usage(qtree_leaf *leaf, int dim)
-//{
-//	return sizeof(*leaf) + BRANCH_FACTOR * sizeof (double);
-//}
-//static size_t qtree_branch_get_memory_usage(qtree_branch *branch, int dim, int two_2_dim)
-//{
-//	return sizeof(*branch) + BRANCH_FACTOR * sizeof (double);
-//}
-
-
-size_t qtree_get_memory_usage(qtree *tree)
-{
-	return 0;
-}
-
-void qtree_clear(qtree *tree)
-{
-	qtree_branch_del(tree->root, tree->two_2_dim);
-	tree->root = qtree_branch_new(NULL,
-			qtree_point_dup(tree->dim, tree->lb),
-			qtree_point_dup(tree->dim, tree->ub),
-			tree->two_2_dim);
-}
-
-static void qtree_leaf_apply(qtree_leaf *leaf, void (*fctn)(qtree_point *pnt, void *arg), void *arg)
-{
-	int i;
-	for(i=0;i<leaf->size;i++)
-	{
-		fctn(leaf->points[i], arg);
-	}
-}
-
-static void qtree_branch_apply(qtree_branch *branch, void (*fctn)(qtree_point *pnt, void *arg), void *arg, int two_2_dim)
-{
-	for (int i=0;i<two_2_dim;i++)
-	{
-		qtree_type type = branch->types[i];
-		switch(type)
-		{
-			case QTREE_TYPE_BRANCH:
-				qtree_branch_apply((qtree_branch *) branch->branches[i], fctn, arg, two_2_dim);
-				break;
-			case QTREE_TYPE_LEAF:
-				qtree_leaf_apply((qtree_leaf *) branch->branches[i], fctn, arg);
-				break;
-			case QTREE_TYPE_NULL:
-				break;
-			default:
-				puts("Error 10656710874");
-				exit(1);
-		}
-	}
-}
-
-void qtree_apply(qtree *tree, void (*fctn) (qtree_point *pnt, void *arg), void *arg)
-{
-	qtree_branch_apply(tree->root, fctn, arg, tree->two_2_dim);
-}
-
-
-static void qtree_leaf_get_min(qtree_leaf *leaf, double *y_out, int dim_of_interest, int dim)
-{
-	for (int i = 0; i < BRANCH_FACTOR; i++)
-	{
-		if (y_out[dim_of_interest] < leaf->points[i][dim_of_interest])
-		{
-			for (int j=0;j<dim;j++)
-			{
-				y_out[j] = leaf->points[i][j];
-			}
-		}
-	}
-}
-
-static void qtree_branch_get_min(qtree_branch *branch, double *y_out, int dim_of_interest, int dim, int two_2_dim)
-{
-	for (int i=0;i<two_2_dim;i++)
-	{
-		if (i & (1 << dim_of_interest))
-		{
-			continue;
-		}
-
-		qtree_type type = branch->types[i];
-		switch (type)
-		{
-		case QTREE_TYPE_BRANCH:
-			qtree_branch_get_min((qtree_branch *) branch->branches[i], y_out, dim_of_interest, dim, two_2_dim);
-			break;
-		case QTREE_TYPE_LEAF:
-			qtree_leaf_get_min((qtree_leaf *) branch->branches[i], y_out, dim_of_interest, dim);
-			break;
-		case QTREE_TYPE_NULL:
-			break;
-		default:
-			puts("Error 14721p854");
-		}
-	}
-
-}
-
-void qtree_get_min(qtree *tree, double *y_out, int dim)
+void Qtree::get_min(double* y_out, int dim)
 {
 	qtree_branch_get_min(tree->root, y_out, dim, tree->dim, tree->two_2_dim);
 }
 
-bool qtree_in_bounds(qtree *tree, qtree_point *point)
+void Qtree::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
 {
-	for (int i = 0; i < tree->dim; i++)
-	{
-		if (point[i] < tree->lb[i])
-		{
-			return false;
-		}
-		if (point[i] > tree->ub[i])
-		{
-			return false;
-		}
-	}
-	return true;
+	qtree_branch_apply(tree->root, fctn, arg, tree->two_2_dim);
 }
 
+size_t Qtree::get_memory_usage()
+{
+}
+
+qtree_it* Qtree::it_new()
+{
+}
+
+void Qtree::print(FILE* out)
+{
+	root->print(out, 0);
 }

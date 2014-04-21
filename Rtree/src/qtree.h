@@ -31,38 +31,90 @@ typedef enum qtree_type_
 } qtree_type;
 
 
-typedef struct qtree_branch_
+class QtreeLeaf
 {
+private:
+	int size;
+	QtreeBranch *parent;
+	qtree_point *points[BRANCH_FACTOR];
+
+	int get_dim();
+	int get_two_2_dim();
+public:
+	QtreeLeaf(QtreeBranch *parent, int dim);
+	~QtreeLeaf();
+
+	void qtree_leaf_get_min(double *y_out, int dim_of_interest);
+	void qtree_leaf_apply(void (*fctn)(qtree_point *pnt, void *arg), void *arg);
+	int qtree_leaf_index_of(qtree_point *point);
+	int qtree_leaf_get_parents_quad();
+	void qtree_leaf_print(FILE *out, int depth);
+};
+
+
+class QtreeBranch
+{
+private:
 	qtree_point *lb;
 	qtree_point *ub;
 	struct qtree_branch_ *parent;
 	qtree_type *types;
 	void **branches;
-} qtree_branch;
 
-typedef struct
-{
-	int size;
-	qtree_branch *parent;
-	qtree_point *points[BRANCH_FACTOR];
-} qtree_leaf;
 
-typedef struct
+	int get_dim();
+	int get_two_2_dim();
+public:
+	QtreeBranch(QtreeBranch *parent, qtree_point *lb, qtree_point *ub, int two_2_dim);
+	~QtreeBranch();
+
+	void print(FILE *out, int depth);
+	void get_min(double *y_out, int dim_of_interest);
+	void apply(void (*fctn)(qtree_point *pnt, void *arg), void *arg);
+	int count();
+	QtreeLeaf *get_leaf(int quadrant);
+	QtreeLeaf *find(qtree_point *point);
+	int get_parents_quad();
+	bool is_empty();
+};
+
+class Qtree
 {
+private:
 	int dim;
 	int two_2_dim;
 	qtree_point *lb;
 	qtree_point *ub;
-	qtree_branch *root;
-} qtree;
+	QtreeBranch *root;
+	static QtreeBranch *qtree_root_grow(QtreeBranch *branch, qtree_point *direction, int dim, int two_2_dim);
+	bool in_bounds(qtree *tree, qtree_point *point);
+	QtreeLeaf *find(qtree *tree, qtree_point *point);
+public:
+	qtree *Qtree(qtree_point *lb, qtree_point *ub, int dim);
+	void ~Qtree(qtree *tree);
+
+	bool add(qtree_point *point);
+	void clear();
+	bool remove(qtree_point *point);
+	int count();
+	bool contains(qtree_point *point);
+
+	void get_min(double *y_out, int dim);
+	void apply(void (*fctn) (qtree_point *pnt, void *arg), void *arg);
+
+	size_t get_memory_usage();
+	qtree_it *it_new();
+
+	void print(FILE *out);
+};
 
 typedef struct
 {
 	int depth;
 	size_t pos_size;
 	int *branch_locs;
-	qtree_leaf *leaf;
-	qtree_branch *parent;
+	QtreeLeaf *leaf;
+	QtreeBranch *parent;
 } qtree_it;
 
 qtree *qtree_new(qtree_point *lb, qtree_point *up, int dim);
