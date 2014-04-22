@@ -76,3 +76,16 @@ double l_inf(double *p1, double *p2, int dim)
 	}
 	return max_dist;
 }
+
+double l_2(double *p1, double *p2, int dim)
+{
+	double sum = 0;
+
+	for (int i = 0; i < dim; i++)
+	{
+		double diff = p1[i] - p2[i];
+		sum += diff * diff;
+	}
+
+	return sqrt(sum);
+}

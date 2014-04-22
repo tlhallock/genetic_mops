@@ -103,7 +103,7 @@ Qtree::~Qtree()
 	free(ub);
 }
 
-bool Qtree::add(qtree_point* point)
+bool Qtree::add(qtree_point* point, void *ref)
 {
 	while (!in_current_bounds(point))
 	{
@@ -304,7 +304,36 @@ void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim)
 }
 
 
-double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *))
+double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int))
+{
+	double cmin = DBL_MAX;
+	// find a reasonable distance to start with...
+	QtreeLeaf *leaf = find(point);
+	if (leaf->is_empty())
+	{
+		QtreeBranch *branch = leaf->get_parent();
+		while (branch->is_empty())
+		{
+			branch = branch->get_parent();
+			if (branch == NULL)
+			{
+				return -DBL_MAX;
+			}
+		}
+		branch->find_nearest(point, out, norm, &cmin);
+	}
+	else
+	{
+		leaf->find_nearest(point, out, norm, &cmin);
+	}
+
+	root->find_nearest(point, out, norm, &cmin);
+
+	return cmin;
+}
+
+
+double Qtree::get_nearest_in_dim(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), int dim)
 {
 	double cmin = DBL_MAX;
 	// find a reasonable distance to start with...

@@ -273,7 +273,7 @@ bool QtreeBranch::is_empty()
 	return true;
 }
 
-static bool QtreeBranch::could_improve(qtree_point *point, double (*norm)(qtree_point *, qtree_point *), double cmin)
+bool QtreeBranch::could_improve(qtree_point *point, double (*norm)(qtree_point *, qtree_point *, int), double cmin)
 {
 	double dim_dist = 0;
 	qtree_point *bound = qtree_point_new(get_dim());
@@ -286,7 +286,7 @@ static bool QtreeBranch::could_improve(qtree_point *point, double (*norm)(qtree_
 			dim_dist = d;
 		}
 
-		if (point > (ub[i] + ub[i]) / 2)
+		if (point[i] > (ub[i] + lb[i]) / 2)
 		{
 			bound[i] = ub[i];
 		}
@@ -296,12 +296,12 @@ static bool QtreeBranch::could_improve(qtree_point *point, double (*norm)(qtree_
 		}
 	}
 
-	bool ret_val = norm(bound, point) < SQRT_TWO * dim_dist;
+	bool ret_val = norm(bound, point, get_dim()) < SQRT_TWO * dim_dist;
 	qtree_point_del(bound);
 	return ret_val;
 }
 
-void QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin)
+void QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin)
 {
 	if (!could_improve(point, norm, *cmin))
 	{
@@ -316,10 +316,23 @@ void QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*no
 		case QTREE_TYPE_LEAF:
 			((QtreeLeaf *) branches[i])->find_nearest(point, out, norm, cmin);
 			break;
-		case QTREE_TYPE_LEAF:
+		case QTREE_TYPE_BRANCH:
 			((QtreeBranch *) branches[i])->find_nearest(point, out, norm, cmin);
 			break;
 		}
+	}
+}
+
+
+
+double QtreeBranch::get_nearest_in_dim(qtree_point *point, qtree_point *out, int dim)
+{
+	QtreeBranch *branch = this;
+	while(branch != NULL)
+	{
+		int quad = branch->get_parents_quad();
+
+		branch = branch->get_parent();
 	}
 }
 
