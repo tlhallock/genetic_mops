@@ -18,30 +18,33 @@ namespace qtree
 
 QtreeBranch* Qtree::grow_root(QtreeBranch* branch, qtree_point* direction)
 {
-	qtree_point *new_lower = qtree_point_new(dim);
-	qtree_point *new_upper = qtree_point_new(dim);
-
 	int old_quad = 0;
 	for (int i = 0; i < dim; i++)
 	{
-		double diff = branch->ub[i] - branch->lb[i];
-		if (direction[i] > branch->ub[i])
+		double diff = ub[i] - lb[i];
+		if (direction[i] > ub[i])
 		{
 			// grow upper...
-			new_lower[i] = branch->lb[i];
-			new_upper[i] = branch->ub[i] + diff;
+			ub[i] += diff;
 
 			old_quad |= (1 << i);
 		}
 		else
 		{
 			// grow lower...
-			new_lower[i] = branch->lb[i] - diff;
-			new_upper[i] = branch->ub[i];
+			lb[i] -= diff;
 		}
 	}
 
-	QtreeBranch * ret_val = new QtreeBranch(NULL, new_lower, new_upper, dim, two_2_dim);
+	printf("Growing to lb=");
+	qtree_point_print(stdout, lb, get_dim(), false);
+	printf(" ub=");
+	qtree_point_print(stdout, ub, get_dim(), false);
+	printf(" for ");
+	qtree_point_print(stdout, direction, get_dim(), true);
+	fflush(stdout);
+
+	QtreeBranch * ret_val = new QtreeBranch(NULL, lb, ub, dim, two_2_dim);
 	ret_val->types[old_quad] = QTREE_TYPE_BRANCH;
 	ret_val->branches[old_quad] = branch;
 	branch->parent = ret_val;
@@ -49,7 +52,7 @@ QtreeBranch* Qtree::grow_root(QtreeBranch* branch, qtree_point* direction)
 	return ret_val;
 }
 
-bool Qtree::in_bounds(qtree_point* point)
+bool Qtree::in_current_bounds(qtree_point* point)
 {
 	for (int i = 0; i < dim; i++)
 	{
@@ -67,12 +70,6 @@ bool Qtree::in_bounds(qtree_point* point)
 
 QtreeLeaf* Qtree::find(qtree_point* point)
 {
-	if (!in_bounds(point))
-	{
-		puts("Error 1715-724");
-		exit(1);
-	}
-
 	return root->find(point);
 }
 
@@ -81,44 +78,32 @@ Qtree::Qtree(qtree_point* _lb, qtree_point* _ub, int _dim) :
 		two_2_dim(1 << _dim),
 		lb(qtree_point_dup(_dim, _lb)),
 		ub(qtree_point_dup(_dim, _ub)),
-		root(new QtreeBranch(NULL,
-			qtree_point_dup(_dim, _lb),
-			qtree_point_dup(_dim, _ub),
-			_dim,
-			1 << _dim)) {}
+		root(new QtreeBranch(NULL, lb, ub, dim, two_2_dim)) {}
 
 Qtree::Qtree(int _dim) :
 		dim(_dim),
 		two_2_dim(1 << _dim),
 		lb(qtree_point_new(_dim, 0.0)),
 		ub(qtree_point_new(_dim, 1.0)),
-		root(new QtreeBranch(NULL,
-				qtree_point_new(_dim, 0.0),
-				qtree_point_new(_dim, 1.0),
-				_dim,
-				1 << _dim)) {}
+		root(new QtreeBranch(NULL, lb, ub, dim, two_2_dim)) {}
 
 Qtree::Qtree(double _lb, double _ub, int _dim) :
 		dim(_dim),
 		two_2_dim(1 << _dim),
 		lb(qtree_point_new(_dim, _lb)),
 		ub(qtree_point_new(_dim, _ub)),
-		root(new QtreeBranch(NULL,
-				qtree_point_new(_dim, _lb),
-				qtree_point_new(_dim, _ub),
-				_dim,
-				1 << _dim)) {}
+		root(new QtreeBranch(NULL, lb, ub, dim, two_2_dim)) {}
 
 Qtree::~Qtree()
 {
 	delete root;
-	delete lb;
-	delete ub;
+	free(lb);
+	free(ub);
 }
 
 bool Qtree::add(qtree_point* point)
 {
-	while (!in_bounds(point))
+	while (!in_current_bounds(point))
 	{
 		root = grow_root(root, point);
 	}
@@ -140,6 +125,9 @@ bool Qtree::add(qtree_point* point)
 		qtree_bounds_select(new_lb, new_ub, quad, dim);
 
 		QtreeBranch *new_branch = new QtreeBranch(parent, new_lb, new_ub, dim, two_2_dim);
+
+		qtree_point_del(new_lb);
+		qtree_point_del(new_ub);
 
 		parent->set_branch(quad, QTREE_TYPE_BRANCH, new_branch);
 
@@ -163,15 +151,16 @@ bool Qtree::add(qtree_point* point)
 void Qtree::clear()
 {
 	delete root;
-	root = new QtreeBranch(NULL,
-			qtree_point_dup(dim, lb),
-			qtree_point_dup(dim, ub),
-			dim,
-			two_2_dim);
+	root = new QtreeBranch(NULL, lb, ub, dim, two_2_dim);
 }
 
 bool Qtree::remove(qtree_point* point)
 {
+	if (!in_current_bounds(point))
+	{
+		return false;
+	}
+
 	QtreeLeaf *leaf = root->find(point);
 
 	int index = leaf->index_of(point);
@@ -222,6 +211,10 @@ int Qtree::count()
 
 bool Qtree::contains(qtree_point* point)
 {
+	if (!in_current_bounds(point))
+	{
+		return false;
+	}
 	QtreeLeaf *leaf = root->find(point);
 	return leaf->index_of(point) >= 0;
 }
@@ -274,6 +267,8 @@ int qtree_get_quadrant(qtree_point *lb, qtree_point *ub, qtree_point *point, int
 			if (point[i] < lb[i])
 			{
 				puts("Error 104801");
+				const char *n = NULL;
+				printf("%s", n);
 				exit (1);
 			}
 			if (point[i] > ub[i])

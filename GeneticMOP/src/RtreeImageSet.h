@@ -8,7 +8,7 @@
 #ifndef RTREEIMAGESET_H_
 #define RTREEIMAGESET_H_
 
-#include "qtree.h"
+#include "Qtree.h"
 #include "ImageSet.h"
 
 #include <vector>
@@ -16,15 +16,13 @@
 class RtreeImageSet : public ImageSet
 {
 private:
-	qtree::qtree *image;
+	qtree::Qtree image;
 	std::vector<double*> *pareto_set;
-	double *nadir_point;
-	double *ideal_point;
 
 	bool is_pareto_optimal(double *y);
 public:
-	RtreeImageSet(int _ydim, double *lb, double *ub) :
-		image(qtree::qtree_new(lb, ub, _ydim)),
+	RtreeImageSet(int _ydim) :
+		image(_ydim),
 		pareto_set(NULL) {};
 
 	virtual ~RtreeImageSet();

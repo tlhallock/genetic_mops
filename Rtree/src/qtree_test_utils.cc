@@ -227,6 +227,10 @@ void test_add_remove_contains()
 		{
 			qtree_point_del(random_points[i]);
 			random_points[i] = qtree_point_new_rand(dim);
+			for (int j = 0; j < dim; j++)
+			{
+				random_points[i][j] *= 100;
+			}
 
 			is_new_point = true;
 			for (int j = 0; j < i; j++)
@@ -298,7 +302,7 @@ void test_add_remove_contains()
 			}
 		}
 
-		tree->print(stdout);
+//		tree->print(stdout);
 //		if (!qtree_verify_bounds(tree, false))
 //		{
 //			puts("fail");

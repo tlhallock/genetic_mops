@@ -16,7 +16,7 @@
 namespace qtree
 {
 
-#define BRANCH_FACTOR 50
+#define BRANCH_FACTOR 10
 
 typedef enum qtree_type_
 {
@@ -112,6 +112,8 @@ public:
 
 
 
+
+
 class Qtree
 {
 	friend class QtreeLeaf;
@@ -123,8 +125,8 @@ private:
 	qtree_point *ub;
 	QtreeBranch *root;
 	QtreeBranch *grow_root(QtreeBranch *branch, qtree_point *direction);
-	bool in_bounds(qtree_point *point);
 	QtreeLeaf *find(qtree_point *point);
+	bool in_current_bounds(qtree_point *point);
 public:
 	Qtree(qtree_point *lb, qtree_point *ub, int dim);
 	Qtree(double _lb, double _ub, int _dim);

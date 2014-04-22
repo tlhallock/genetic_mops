@@ -25,6 +25,8 @@ qtree_point *qtree_point_new_rand(int dim);
 
 qtree_point *qtree_point_dup(int dim, qtree_point *point);
 
+void qtree_point_assign(qtree_point *left, qtree_point *right, int dim);
+
 void qtree_point_del(qtree_point *point);
 bool qtree_point_equals(qtree_point *point1, qtree_point *point2, int dim);
 bool qtree_point_dominates(qtree_point *point1,  qtree_point *point2, int dim);

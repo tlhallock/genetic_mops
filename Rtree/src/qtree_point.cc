@@ -110,4 +110,12 @@ bool qtree_point_dominates(qtree_point *point1, qtree_point *point2, int dim)
 	return true;
 }
 
+void qtree_point_assign(qtree_point *left, qtree_point *right, int dim)
+{
+	for (int i = 0; i < dim; i++)
+	{
+		left[i] = right[i];
+	}
+}
+
 }

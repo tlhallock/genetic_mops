@@ -19,8 +19,8 @@ namespace qtree
 QtreeBranch::QtreeBranch(QtreeBranch* _parent, qtree_point* _lb, qtree_point* _ub, int _dim, int _two_2_dim) :
 	dim(_dim),
 	two_2_dim(_two_2_dim),
-	lb(lb),
-	ub(_ub),
+	lb(qtree_point_dup(_dim, _lb)),
+	ub(qtree_point_dup(_dim, _ub)),
 	parent(_parent),
 	types((qtree_type *) malloc (sizeof (*types) * two_2_dim)),
 	branches((void **) malloc (sizeof (*branches) * two_2_dim))
@@ -73,10 +73,9 @@ void QtreeBranch::print(FILE* out, int depth)
 	qtree_point_print(out, ub, get_dim(), false);
 	fprintf(out, ";\n");
 
-
 	for (i = 0; i < get_two_2_dim(); i++)
 	{
-		char *type = NULL;
+		const char *type = NULL;
 		switch (types[i])
 		{
 		case QTREE_TYPE_BRANCH:
@@ -141,22 +140,22 @@ void QtreeBranch::get_min(double* y_out, int dim_of_interest)
 
 void QtreeBranch::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
 {
-	for (int i=0;i<get_two_2_dim();i++)
+	for (int i = 0; i < get_two_2_dim(); i++)
 	{
 		qtree_type type = types[i];
-		switch(type)
+		switch (type)
 		{
-			case QTREE_TYPE_BRANCH:
-				((QtreeBranch *) branches[i])->apply(fctn, arg);
-				break;
-			case QTREE_TYPE_LEAF:
-				((QtreeLeaf *) branches[i])->apply(fctn, arg);
-				break;
-			case QTREE_TYPE_NULL:
-				break;
-			default:
-				puts("Error 10656710874");
-				exit(1);
+		case QTREE_TYPE_BRANCH:
+			((QtreeBranch *) branches[i])->apply(fctn, arg);
+			break;
+		case QTREE_TYPE_LEAF:
+			((QtreeLeaf *) branches[i])->apply(fctn, arg);
+			break;
+		case QTREE_TYPE_NULL:
+			break;
+		default:
+			puts("Error 10656710874");
+			exit(1);
 		}
 	}
 }
@@ -168,7 +167,7 @@ int QtreeBranch::count()
 	for (int i = 0; i < get_two_2_dim(); i++)
 	{
 		qtree_type type = types[i];
-		switch(type)
+		switch (type)
 		{
 		case QTREE_TYPE_BRANCH:
 			count += ((QtreeBranch *) branches[i])->count();
@@ -249,7 +248,7 @@ bool QtreeBranch::is_empty()
 	for (int i = 0; i < get_two_2_dim(); i++)
 	{
 		qtree_type type = types[i];
-		switch(type)
+		switch (type)
 		{
 		case QTREE_TYPE_BRANCH:
 			if (!((QtreeBranch *) branches[i])->is_empty())
