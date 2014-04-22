@@ -60,9 +60,12 @@ public:
 	void assign(qtree_point *point);
 	int get_size() { return size; }
 	QtreeBranch *get_parent() { return parent; }
+	bool is_empty() { return size == 0; }
 
 	bool is_pareto(qtree_point *point);
 	int count_dominating(qtree_point *point);
+
+	void find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin);
 };
 
 
@@ -86,6 +89,8 @@ private:
 
 	int get_dim() { return dim; }
 	int get_two_2_dim() { return two_2_dim; }
+
+	bool could_improve(qtree_point *point, double (*norm)(qtree_point *, qtree_point *), double cmin);
 public:
 	QtreeBranch(QtreeBranch *parent, qtree_point *lb, qtree_point *ub, int dim, int two_2_dim);
 	~QtreeBranch();
@@ -107,6 +112,8 @@ public:
 
 	bool is_pareto(qtree_point *point);
 	int count_dominating(qtree_point *point);
+
+	void find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin);
 };
 
 
@@ -149,6 +156,8 @@ public:
 
 	bool is_pareto(qtree_point *point);
 	int count_dominating(qtree_point *point);
+
+	double get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *));
 
 	void print(FILE *out);
 };

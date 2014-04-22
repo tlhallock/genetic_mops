@@ -13,23 +13,23 @@
 #include <limits.h>
 #include <float.h>
 
-GeneticSolver::GeneticSolver(int _breed_size, int _xdim, double _infeasible_cost, int _population_size, double _mutation_factor, double (*_get_index)(double)) :
-		population_size(_population_size),
-		breed_size(_breed_size),
-		current_fit((double **) malloc(sizeof(*current_fit) * _breed_size)),
-		xdim(_xdim),
-		offspring((double *) malloc(sizeof(*offspring) * _xdim)),
-		x_population(),
-		y_population(),
-		infeasible_cost(_infeasible_cost),
-		mutation_factor(_mutation_factor),
-		get_index(_get_index)
+GeneticSolver::GeneticSolver(int _xdim, int _ydim, int _breed_size) :
+	xdim(_xdim),
+	ydim(_ydim),
+	breed_size(_breed_size),
+	current_fit((double **) malloc (sizeof(*current_fit) * breed_size)),
+	offspring((double *) malloc (sizeof (*offspring) * _xdim)),
+	x_pop_feas(_xdim),
+	y_pop_feas(_ydim),
+	x_pop_inf(_xdim),
+	y_pop_inf(_ydim)
 {
 	for (int i = 0; i < _breed_size; i++)
 	{
 		current_fit[i] = NULL;
 	}
 }
+
 GeneticSolver::~GeneticSolver()
 {
 	free(current_fit);
@@ -84,11 +84,11 @@ double GeneticSolver::get_fitness(BoundedMopStats *board, double *x, double *y)
 	double cost = 0;
 	if (!board->is_feasible(x))
 	{
-		double distance = find_closest(board, &x_population, x, xdim);
+		double distance = find_closest(board, &x_pop_feas, x, xdim);
 		cost += infeasible_cost * distance;
 	}
 
-	for (std::vector<double *>::iterator it = y_population.begin(); it != y_population.end(); ++it)
+	for (std::vector<double *>::iterator it = y_pop_feas.begin(); it != y_pop_feas.end(); ++it)
 	{
 		if (first_dominates_second((*it), y, board->get_y_dimension()))
 		{
@@ -124,8 +124,8 @@ void GeneticSolver::find_fittest()
 	for (int i = 0; i < breed_size; i++)
 	{
 		int index = (int) (get_index(rand() / (double) INT_MAX)
-				* x_population.size());
-		current_fit[i] = x_population[index];
+				* x_pop_feas.size());
+		current_fit[i] = x_pop_feas[index];
 
 		fprintf(debug_file, "\n\t%d\t", index);
 		print_point(debug_file, current_fit[i], xdim, false);
@@ -151,75 +151,70 @@ void GeneticSolver::mutate()
 	fclose(debug_file);
 }
 
-void GeneticSolver::solve(BoundedMopStats *board, int num_to_find, long timeout)
+void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 {
 	time_t start_time = time(0);
 
-	int xdim = board->get_x_dimension();
-	int ydim = board->get_y_dimension();
+	int xdim = mop->get_x_dimension();
+	int ydim = mop->get_y_dimension();
 
 	for (int i = 0; i < population_size; i++)
 	{
 		double *x = (double *) malloc(sizeof(*x) * xdim);
 		double *y = (double *) malloc(sizeof(*y) * ydim);
 
-		board->sample_feasible(x);
-		board->make_guess(x, y);
+		mop->sample_feasible(x);
+		mop->make_guess(x, y);
 
-		x_population.push_back(x);
-		y_population.push_back(y);
+		x_pop_feas.add(x);
+		y_pop_feas.add(y);
 	}
 
 	double *y = (double *) malloc(sizeof(*y) * ydim);
 
 	while ((time(0) - start_time) < timeout
-			&& board->get_num_points() < num_to_find)
+			&& mop->get_num_points() < num_to_find)
 	{
 		find_fittest();
 		bread();
 		mutate();
 
-		board->make_guess(offspring, y);
-
-		int next_index = x_population.size();
-		if (next_index > population_size)
+		mop->make_guess(offspring, y);
+		if (mop->is_feasible(offspring))
 		{
-			next_index = population_size;
+			x_pop_feas.add(offspring);
+			y_pop_feas.add(y);
+		}
+		else
+		{
+			x_pop_inf.add(offspring);
+			y_pop_inf.add(y);
 		}
 
-		for (int i = 0; i < xdim; i++)
-		{
-			x_population[next_index - 1][i] = offspring[i];
-		}
-		for (int i = 0; i < ydim; i++)
-		{
-			y_population[next_index - 1][i] = y[i];
-		}
-
-		sort(board);
+		select();
 
 		FILE *debug_file = fopen("ga_debug.txt", "a");
 		fprintf(debug_file, "new population: ");
-		for (unsigned int i=0;i<x_population.size(); i++)
+		for (unsigned int i=0;i<x_pop_feas.size(); i++)
 		{
-			fprintf(debug_file, "\n\t%d\t%lf\t", i, get_fitness(board, x_population[i], y_population[i]));
-			print_point(debug_file, x_population[i], xdim, false);
+			fprintf(debug_file, "\n\t%d\t%lf\t", i, get_fitness(mop, x_pop_feas[i], y_pop_feas[i]));
+			print_point(debug_file, x_pop_feas[i], xdim, false);
 			fprintf(debug_file, "   --->   ");
-			print_point(debug_file, y_population[i], board->get_y_dimension(), false);
+			print_point(debug_file, y_pop_feas[i], mop->get_y_dimension(), false);
 
 		}
 		fputc('\n', debug_file);
 		fclose(debug_file);
 	}
 
-	for (unsigned int i = 0; i < x_population.size(); i++)
+	for (unsigned int i = 0; i < x_pop_feas.size(); i++)
 	{
-		free (x_population[i]);
-		free (y_population[i]);
+		free (x_pop_feas[i]);
+		free (y_pop_feas[i]);
 	}
 
-	x_population.clear();
-	y_population.clear();
+	x_pop_feas.clear();
+	y_pop_feas.clear();
 
 	free (y);
 }
@@ -231,10 +226,10 @@ void GeneticSolver::sort(BoundedMopStats *board)
 	do
 	{
 		changed = false;
-		for (int i = x_population.size() - 2; i >= 0; i--)
+		for (int i = x_pop_feas.size() - 2; i >= 0; i--)
 		{
-			double fitness1 = get_fitness(board, x_population[i], y_population[i]);
-			double fitness2 = get_fitness(board, x_population[i + 1], y_population[i + 1]);
+			double fitness1 = get_fitness(board, x_pop_feas[i], y_pop_feas[i]);
+			double fitness2 = get_fitness(board, x_pop_feas[i + 1], y_pop_feas[i + 1]);
 
 			if (fitness1 >= fitness2)
 			{
@@ -243,13 +238,13 @@ void GeneticSolver::sort(BoundedMopStats *board)
 
 			changed = true;
 
-			double *first = x_population[i];
-			x_population[i] = x_population[i + 1];
-			x_population[i + 1] = first;
+			double *first = x_pop_feas[i];
+			x_pop_feas[i] = x_pop_feas[i + 1];
+			x_pop_feas[i + 1] = first;
 
-			first = y_population[i];
-			y_population[i] = y_population[i + 1];
-			y_population[i + 1] = first;
+			first = y_pop_feas[i];
+			y_pop_feas[i] = y_pop_feas[i + 1];
+			y_pop_feas[i + 1] = first;
 		}
 
 		if (!changed)
@@ -258,10 +253,10 @@ void GeneticSolver::sort(BoundedMopStats *board)
 		}
 
 		changed = false;
-		for (unsigned int i = 0; i < x_population.size() - 1; i++)
+		for (unsigned int i = 0; i < x_pop_feas.size() - 1; i++)
 		{
-			double fitness1 = get_fitness(board, x_population[i], y_population[i]);
-			double fitness2 = get_fitness(board, x_population[i + 1], y_population[i + 1]);
+			double fitness1 = get_fitness(board, x_pop_feas[i], y_pop_feas[i]);
+			double fitness2 = get_fitness(board, x_pop_feas[i + 1], y_pop_feas[i + 1]);
 
 			if (fitness1 >= fitness2)
 			{
@@ -270,13 +265,13 @@ void GeneticSolver::sort(BoundedMopStats *board)
 
 			changed = true;
 
-			double *first = x_population[i];
-			x_population[i] = x_population[i + 1];
-			x_population[i + 1] = first;
+			double *first = x_pop_feas[i];
+			x_pop_feas[i] = x_pop_feas[i + 1];
+			x_pop_feas[i + 1] = first;
 
-			first = y_population[i];
-			y_population[i] = y_population[i + 1];
-			y_population[i + 1] = first;
+			first = y_pop_feas[i];
+			y_pop_feas[i] = y_pop_feas[i + 1];
+			y_pop_feas[i + 1] = first;
 		}
 	} while (changed);
 }

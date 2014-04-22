@@ -8,6 +8,8 @@
 
 #include "Qtree.h"
 
+#include <float.h>
+
 
 namespace qtree
 {
@@ -108,6 +110,25 @@ void QtreeLeaf::assign(qtree_point *point)
 	for (int i = 0; i < get_dim(); i++)
 	{
 		points[osize][i] = point[i];
+	}
+}
+
+
+void QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin)
+{
+	for (int i = 0; i < get_size(); i++)
+	{
+		if (qtree_point_equals(point, points[i], get_dim()))
+		{
+			continue;
+		}
+		double distance = norm(point, points[i]);
+
+		if (!IS_ZERO(distance) && distance < *cmin)
+		{
+			*cmin = distance;
+			qtree_point_assign(out, points[i], get_dim());
+		}
 	}
 }
 

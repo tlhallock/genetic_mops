@@ -148,7 +148,7 @@ static void compare_solvers()
 
 	{
 		puts("Using genetic algorithm.");
-		GeneticSolver gasolver(2, board.get_x_dimension(), 200, 50, .1, &get_index);
+		GeneticSolver gasolver(2, 2, 3);
 
 		FILE *log = fopen("ga_points.txt", "w");
 

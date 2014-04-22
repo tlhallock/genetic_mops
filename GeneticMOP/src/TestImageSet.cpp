@@ -20,6 +20,7 @@ using namespace std;
 
 #include<limits.h>
 #include <stdio.h>
+#include <float.h>
 
 #include "math_functions.h"
 
@@ -28,7 +29,7 @@ using namespace std;
 
 #include "MOP.h"
 
-#include "qtree.h"
+#include "Qtree.h"
 
 #define DIM 5
 #define NUM_GUESSES 100000
@@ -94,4 +95,68 @@ void test_pareto_equivalence()
 
 	qtree::qtree_point_del(x_val);
 	qtree::qtree_point_del(y_val);
+}
+
+double norm(double *p1, double *p2)
+{
+	double ret_val  = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		double diff = p1[i] - p2[i];
+		diff *= diff;
+		ret_val += diff;
+	}
+	return sqrt(ret_val);
+}
+
+void test_nearest()
+{
+	int dim = 3;
+
+	int num_points = 100;
+
+	qtree::Qtree qtree;
+	std::vector<double *> vec;
+
+	double *nearest = qtree::qtree_point_new(dim);
+
+	for (int i = 0; i < num_points; i++)
+	{
+		qtree::qtree_point *point = qtree::qtree_point_new_rand(dim);
+
+		qtree.add(point);
+		vec.push_back(point);
+	}
+
+	for (int i = 0; i < 100; i++)
+	{
+		qtree::qtree_point point = qtree::qtree_point_new_rand(dim);
+
+		double nearest_q = qtree.get_nearest_point(point, nearest, &norm);
+
+		double *other_nearest = *vec.begin();
+		double other_nearest_dist = norm(other_nearest, point);
+		for (std::vector<double *>::iterator it = vec.begin(); it != vec.end(); ++it)
+		{
+			double d = norm(*it, point);
+			if (d < other_nearest_dist)
+			{
+				other_nearest_dist = d;
+				qtree::qtree_point_assign(other_nearest, *it);
+			}
+		}
+
+		printf("quad tree: dist = %lf, point = \n", nearest_q);
+		qtree::qtree_point_print(stdout, nearest_q, dim, true);
+		printf("vector: dist = %lf, point = \n", other_nearest_dist);
+		qtree::qtree_point_print(stdout, other_nearest, dim, true);
+
+		qtree::qtree_point_del(point);
+	}
+
+
+	for (int i = 0; i < num_points; i++)
+	{
+		free(vec.at(i));
+	}
 }

@@ -13,6 +13,9 @@
 
 namespace qtree
 {
+
+#define SQRT_TWO 1.41421356237
+
 /*
  * should duplicate the points...
  */
@@ -268,6 +271,56 @@ bool QtreeBranch::is_empty()
 	}
 
 	return true;
+}
+
+static bool QtreeBranch::could_improve(qtree_point *point, double (*norm)(qtree_point *, qtree_point *), double cmin)
+{
+	double dim_dist = 0;
+	qtree_point *bound = qtree_point_new(get_dim());
+
+	for (int i = 0; i < get_dim(); i++)
+	{
+		double d = ub[i] - lb[i];
+		if (d > dim_dist)
+		{
+			dim_dist = d;
+		}
+
+		if (point > (ub[i] + ub[i]) / 2)
+		{
+			bound[i] = ub[i];
+		}
+		else
+		{
+			bound[i] = lb[i];
+		}
+	}
+
+	bool ret_val = norm(bound, point) < SQRT_TWO * dim_dist;
+	qtree_point_del(bound);
+	return ret_val;
+}
+
+void QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin)
+{
+	if (!could_improve(point, norm, *cmin))
+	{
+		return;
+	}
+	for (int i = 0; i < get_two_2_dim(); i++)
+	{
+		switch(types[i])
+		{
+		case QTREE_TYPE_NULL:
+			break;
+		case QTREE_TYPE_LEAF:
+			((QtreeLeaf *) branches[i])->find_nearest(point, out, norm, cmin);
+			break;
+		case QTREE_TYPE_LEAF:
+			((QtreeBranch *) branches[i])->find_nearest(point, out, norm, cmin);
+			break;
+		}
+	}
 }
 
 }

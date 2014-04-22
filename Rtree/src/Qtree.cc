@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <float.h>
+
 
 namespace qtree
 {
@@ -299,6 +301,35 @@ void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim)
 			ub[i] = mid;
 		}
 	}
+}
+
+
+double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *))
+{
+	double cmin = DBL_MAX;
+	// find a reasonable distance to start with...
+	QtreeLeaf *leaf = find(point);
+	if (leaf->is_empty())
+	{
+		QtreeBranch *branch = leaf->get_parent();
+		while (branch->is_empty())
+		{
+			branch = branch->get_parent();
+			if (branch == NULL)
+			{
+				return -DBL_MAX;
+			}
+		}
+		branch->find_nearest(point, out, norm, &cmin);
+	}
+	else
+	{
+		leaf->find_nearest(point, out, norm, &cmin);
+	}
+
+	root->find_nearest(point, out, norm, &cmin);
+
+	return cmin;
 }
 
 }
