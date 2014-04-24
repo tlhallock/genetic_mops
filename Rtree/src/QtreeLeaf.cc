@@ -114,7 +114,7 @@ void QtreeLeaf::assign(qtree_point *point)
 }
 
 
-void QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin)
+void QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin)
 {
 	for (int i = 0; i < get_size(); i++)
 	{
@@ -122,7 +122,7 @@ void QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm
 		{
 			continue;
 		}
-		double distance = norm(point, points[i]);
+		double distance = norm(point, points[i], get_dim());
 
 		if (!IS_ZERO(distance) && distance < *cmin)
 		{

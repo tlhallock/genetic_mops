@@ -14,6 +14,8 @@
 
 #include <stdlib.h>
 
+const double k_infeasible_cost = .1;
+
 class GeneticSolver : public Solver
 {
 private:
@@ -26,7 +28,6 @@ private:
 	qtree::Qtree y_pop_feas;
 	qtree::Qtree x_pop_inf;
 	qtree::Qtree y_pop_inf;
-	const double infeasible_cost = .1;
 
 	void bread();
 	void find_fittest();

@@ -28,6 +28,7 @@ double get_index(double r)
 	return r * r * r * r * r * r * r;
 }
 
+void test_nearest();
 void test_pareto_equivalence();
 static void compare_solvers();
 
@@ -39,7 +40,8 @@ int main()
 
 //	test_pareto_equivalence();
 
-	compare_solvers();
+	test_nearest();
+	//compare_solvers();
 
 	return 0;
 }

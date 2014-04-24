@@ -50,17 +50,17 @@ void test_pareto_equivalence()
 
 	VectorImageSet vimage(DIM);
 
-	qtree::qtree_point *lb = qtree::qtree_point_new0(DIM);
+	qtree::qtree_point *lb = qtree::qtree_point_new(DIM);
 	for (int i = 0; i < DIM; i++)
 	{
 		lb[i] = -10;
 	}
-	qtree::qtree_point *ub = qtree::qtree_point_new0(DIM);
+	qtree::qtree_point *ub = qtree::qtree_point_new(DIM);
 	for (int i = 0; i < DIM; i++)
 	{
 		ub[i] = 10;
 	}
-	RtreeImageSet qimage(DIM, lb, ub);
+	RtreeImageSet qimage(DIM);
 
 	BoundedMopStats vboard(DIM, DIM, lb, ub, &vimage, &objective_func, &is_feasible_function_2);
 	BoundedMopStats qboard(DIM, DIM, lb, ub, &qimage, &objective_func, &is_feasible_function_2);
@@ -68,8 +68,8 @@ void test_pareto_equivalence()
 	qtree::qtree_point_del(lb);
 	qtree::qtree_point_del(ub);
 
-	double *x_val = qtree::qtree_point_new0(DIM);
-	double *y_val = qtree::qtree_point_new0(DIM);
+	double *x_val = qtree::qtree_point_new(DIM);
+	double *y_val = qtree::qtree_point_new(DIM);
 
 	for (int i = 0; i < NUM_GUESSES; i++)
 	{
@@ -97,18 +97,6 @@ void test_pareto_equivalence()
 	qtree::qtree_point_del(y_val);
 }
 
-double norm(double *p1, double *p2)
-{
-	double ret_val  = 0;
-	for (int i = 0; i < 3; i++)
-	{
-		double diff = p1[i] - p2[i];
-		diff *= diff;
-		ret_val += diff;
-	}
-	return sqrt(ret_val);
-}
-
 void test_nearest()
 {
 	int dim = 3;
@@ -130,24 +118,24 @@ void test_nearest()
 
 	for (int i = 0; i < 100; i++)
 	{
-		qtree::qtree_point point = qtree::qtree_point_new_rand(dim);
+		qtree::qtree_point *point = qtree::qtree_point_new_rand(dim);
 
-		double nearest_q = qtree.get_nearest_point(point, nearest, &norm);
+		double nearest_q = qtree.get_nearest_point(point, nearest, &l_2);
 
 		double *other_nearest = *vec.begin();
-		double other_nearest_dist = norm(other_nearest, point);
+		double other_nearest_dist = l_2(other_nearest, point, dim);
 		for (std::vector<double *>::iterator it = vec.begin(); it != vec.end(); ++it)
 		{
-			double d = norm(*it, point);
+			double d = l_2(*it, point, dim);
 			if (d < other_nearest_dist)
 			{
 				other_nearest_dist = d;
-				qtree::qtree_point_assign(other_nearest, *it);
+				qtree::qtree_point_assign(other_nearest, *it, dim);
 			}
 		}
 
 		printf("quad tree: dist = %lf, point = \n", nearest_q);
-		qtree::qtree_point_print(stdout, nearest_q, dim, true);
+		qtree::qtree_point_print(stdout, nearest, dim, true);
 		printf("vector: dist = %lf, point = \n", other_nearest_dist);
 		qtree::qtree_point_print(stdout, other_nearest, dim, true);
 
