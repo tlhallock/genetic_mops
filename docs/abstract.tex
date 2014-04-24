@@ -215,8 +215,13 @@ components of each vector will essentially be selected randomly.
 One subtly is how to compute $d(y, y')$. I will be using $l_2$ and $l_{\infty}$, but these could produce misleading values.
 We are trying to represent a surface, and so two points may be close in the outcome space, but not when one needs to follow the surface to get between the points.
 
-For example, consider the following plot:
+For example, consider the following plot.
 
+\include{'aplot.png'}
+
+The black line is $f(x) = \sin(\pi x)$ and may be a surface to be represented.
+Simply calculating the distance between $f(0)$ and $f(1)$ yields a value of $0$, while if we chose more points between $0$ and $1$ and sum up the distances along this arch,
+we improve the approximation to the distance along the curve.
 
 Intuitively, we want a small distance in the $y$ space to mean that we don't have to go far along the curve to get between the points.
 This is what would provide the acuracy up a given limit in the y-space.
@@ -232,6 +237,8 @@ Choosing $N$ as powers of 2 would mean points could be reused, and there could b
 converge slowly.
 However, this would require many function evaluations for simply computing the distance between two points.
 I plan to cross my fingers and hope this isn't much of a problem.
+
+Also, in higher dimensions it will be more complicated to find the distance between any two points because there may be arcs shorter than the one determined by a straight line between $x_1$ and $x_2$.
 
 
 \section{First Algorithm}

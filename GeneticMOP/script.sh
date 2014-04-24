@@ -18,6 +18,7 @@ do
 	
 	echo scatter\(all_$prefix\(:,1\), all_$prefix\(:,2\)\) >> $array_file
 	echo 'drawnow' >> $array_file
+	echo 'print("'$prefix'.points.png")' >> $array_file
 	echo input\(\"that was all $prefix. press any key to continue\"\) >> $array_file
 	
 	echo pareto_$prefix = [... >> $array_file
@@ -27,6 +28,7 @@ do
 	
 	echo scatter\(pareto_$prefix\(:,1\), pareto_$prefix\(:,2\)\) >> $array_file
 	echo 'drawnow' >> $array_file
+	echo 'print("'$prefix'.pareto.png")' >> $array_file
 	echo input\(\"that was pareto $prefix. press any key to continue\"\) >> $array_file
 done
 
