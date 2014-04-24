@@ -1,25 +1,61 @@
+\documentclass{article}
+\author{Trever Hallock}
+\title{A Genetic Algorithm for finding efficient representations of Pareto Optimal Sets}
+\begin{document}
 
 
+\section{abstract}
+Random sampling can be effective to solve multi-objective problems not with standing their complete lack sophistication.
+This begs for an algorithm that can harness the advantages of random point generation while improving the generation process.
+This paper describes how to use a genetic algorithm to smartly guide how new random points are chosen.
 
 
-compare to matlab's implementation
-bounded
-
-
-\section{Background}
 \section{Introduction}
+
+The purpose of this paper is present a genetic algorithm for solving multi-objective optimization problems.
+A multi-objective optimization problem is the problem of minimizing $f(x) s.t. x \in X$ for some vector-valued function $f:R^n \Rightarrow R^p$.
+The set $X$ is called the feasible region, or decision space, while $f(X)$ is the outcome space.
+Because $f$ is vector-valued, there will not generally be a single optimal solution but several outcomes that are not clearly better than eachother.
+This is true when different components of $f$ (which can be thought of as different objectives) are competing with eachother, so that different ``good" point may represent trade-offs between the $p$ 
+different compontents.
+To describe the set of equally optimal points, we say an outcome $f(x_1)$ is said to dominate another $f(x_2)$ if $f(x_1)_i \le f(x_2)_i, i=1,2, ..., p$ and $\exists i s.t. f(x_1)_i < f(x_2)$.
+Then the optimal set of points is defined to be those outcomes $y = f(x)$ are those for which there exists no $x'$ such that $f(x')$ dominates $f(x)$.
+This set is called the pareto optimal set, and the $x$ values that produce the pareto optimal set are called efficient.
+
+A multi-objective solver is an algorithm that accepts an $f$ and some representation of a feasible region to produces a representation of the pareto optimal set.
+This paper is concerned with designing an evolutionary solver which means the representation is found by modelling evolutionary principles to evolving an initial random sample.
+The representation created is simply a set of points called a population that belong to the pareto set, and each member of the representation is called an individual.
+The evolutionary principles include a selection mechanism based on some measure of the fitness of individuals to steer the population towards a ``good" representation.
+They include a cross over function that is used to generate new individuals (called offspring) from the existing population, as well as mutation of the offspring
+to diversify the population and potentially discover new regions of the pareto set.
+
+
 \section{Motivation}
-I wanted to write a genetic algorithm
-\section{Criteria}
 
-the algorithm generates a set representing the pareto optimal set.
+Randomly sampling the feasible region and simply using the generated $f$ values works remarkably well.
+After comparing several solvers on a test set of problems in class (from problem set 1),
+the random sampler was not only consistently very fast, but usually did a good job of finding each disconnected pareto optimal regions.
+Although this was slightly dissappointing considering effort that went into the other solvers, it does motivate basing an algorithm around random point generation with
+the expectation that should be many <i>simple ways of improving random sampling.
 
-There are many ways to measure how well a multi-objective solver performs.
-We will consider the solver's performance, completeness, and applicability.
+One approach that improves uniformly sampling the feasihble region is moving the expected value of a random sample generator towards the pareto frontier as well as adapting the
+distribution's expected variation as the frontier is more densly enumerated.
+However, it seems that evolutionary computation should do even better, because the advantages random point generation should be reproducible in a genetic algorithm through the mutation process.
+Although the genetic algorithm may incur additional runtime costs from crossover or selection, the complexity involved with these operations can be limited
+base on how helpful they are in improving the sample.
 
-The applicability describes what problems the solver is able to solve.
+I was also interested in this topic because I haven't written many genetic algorithms, and I was interested in learning some concepts/terminology from the field.
+Out of the different multi-objective related projects, this application seemed like a computationally useful route.
+
+\section{Criteria for the Algorithm}
+
+Before we develop the algorithm, we must know how to evaluate the value of the algorithm itself, and
+there are many ways to measure how well a multi-objective solver performs.
+We will consider the solver's performance, completeness, and generality.
+
+The generality describes what problems the solver is able to solve.
 For example, an algorithm may only solve convex problems, connected pareto solutions, or place other assumptions on how to express the feasible set.
-Matlab's genetic algorithm <code> gamultiobj </code> assumes that the feasible region the set of $x$ satisfying $Ax = b$, $Ax \le b$, or $b_1 < x < b_2$ for some input $A, b, b_1, b_2$.
+For example, Matlab's genetic algorithm <code> gamultiobj </code> assumes that the feasible region the set of $x$ satisfying $Ax = b$, $Ax \le b$, or $b_1 < x < b_2$ for some input $A, b, b_1, b_2$.
 
 The algorithm I develop is designed to solve any multi-objective problem that is bounded in the decision space, and bounded below in the outcome space.
 An arbitrary, boolean-valued function is passed to algorithm to characterize the feasible region within the bounds (which are passed as a hyper-cube<-------).
@@ -46,12 +82,6 @@ According to the preliminary bi-criteria the optimazation problem was to design 
 We will later discuss improvements to this, for example this in no way penalizes dulplicate points and potentially only encourages only $2$ diverse points.
 (For example, on the bicriteria optimization problem with a one dimensional pareto set $y_2 = 1-y_1$ from $(1,0)$ to $(0,1)$, the set with $x$ values of $(0, 4.999, .5, .5001, 1)$ would be just as good as one that produces $x$-values of $(0, .25,  .5, .75 ,1)$.)
 
-
-
-
-comparison against depth first solver (not just the solutions along the boundary)
-epsilon/delta
-problems with measuring distance in y-space
 
 \section{Representational Quality}
 
@@ -141,16 +171,18 @@ solve ( S , metric)
 }
 
 
-This has $s^{|S|}$ time complexity so it is not computationally practical unless either $|S| < 30$ or bounds are provided for $\epsilon$ and $\delta$ to prune branches faster.
-For example, a lower bound epsilon removes the branch with mask[num_determined] = 1 for any points that are closer to to the num_determined point.
-In order to consider all possible points, the algorithm would also need to backtrack on the order of removing close points.
-Although the constraint that the number of $|R|$ be a given value could be included into this algorithm, there are many faster techniques for enumerating all nchoosek(|S|, |R|) such subsets.
+This has $s^{|S|}$ time complexity so it is not computationally practical unless either $|S| < 30$ or bounds are provided for $\epsilon$ and $\delta$ to prune branches early.
+For example, a lower bound on $\epsilon$ removes the branch with mask[num_determined] = 1 for any points that are closer to the num_determined point.
+In order to consider all possible points, the algorithm would also need to backtrack on the order of removing close points that violate the $\epsilon$ constraint.
+Although the constraint that the number $|R|$ of points in the representation be a given value could be included into this algorithm, 
+there are many faster techniques for enumerating all nchoosek(|S|, |R|) such subsets.
 
 This problem may also be quickly solvable with a genetic algorithm.
 If the best representation, or atleast a good one is computed repeatedly as a selection process for the outer algorithm, then perhaps fewer generations will have to be used.
+This is because the net affect of each step accrues at each later generation.
 The inner genetic algorithm is very similar to the outer, and could be seen as simply an extension of the evolutionary model.
-In this case, while individuals of the population are breeding and mutating, there selections of which individuals are present to breed is also evolving.
-Possibly, this is akin to having dormant genes, although <-------------.
+In this case, while individuals of the population are breeding and mutating, selections of which individuals are present in the population is also evolving.
+(Possibly, this is might model dormant genes that can be revived in later generations?)
 
 Rather than using a genetic algorithm, it may be faster to find a fast huerstic for each step of the outer genetic algorithm.
 A simple one is based on the idea that ideally we would have all equally spaced points throughout the outcome space.
@@ -183,7 +215,8 @@ components of each vector will essentially be selected randomly.
 One subtly is how to compute $d(y, y')$. I will be using $l_2$ and $l_{\infty}$, but these could produce misleading values.
 We are trying to represent a surface, and so two points may be close in the outcome space, but not when one needs to follow the surface to get between the points.
 
-For example, conider the following plot:
+For example, consider the following plot:
+
 
 Intuitively, we want a small distance in the $y$ space to mean that we don't have to go far along the curve to get between the points.
 This is what would provide the acuracy up a given limit in the y-space.
@@ -201,7 +234,7 @@ However, this would require many function evaluations for simply computing the d
 I plan to cross my fingers and hope this isn't much of a problem.
 
 
-\section{First Model}
+\section{First Algorithm}
 
 The first model had a fixed population size that was first formed from a random sample.
 Then a selection of only the pareto points were selected.
@@ -220,6 +253,8 @@ Additionally, a cost was added to non-feasible points based on their distance to
 This fitness function is somewhat costly, because it grows linearly with the population size.
 One approach to mitigate this cost <----- from book, is to conduct tournament cross over.
 This involves sampling the population for $q$ points and selecting the most fit of these.
+For the most part, individuals of the population are equally optimal for the MOP aside from the additional interests of genetic algorithm.
+Because this algorithm does not focus new points in sparse regions of the representation, I doubt it would be harmed by using a tournament selection.
 
 Also, for the first genetic algorithm I wrote, I needed to keep a reserve population, so that I could be sure the 
 distance to the closest feasible point was always well defined.
@@ -230,38 +265,64 @@ This solver samples the feasible region with a uniform distribution, and then re
 As a simple upgrade to this algorithm, I also implemented a random solver that iteratively moved the distribution towards the pareto set.
 It does this by setting a block size, and initially filling it with a random sample.
 Then only the pareto points are selected, and new points are created by adding a uniform distribution to a random point from the previous block.
-This can be seen as a simplified version of the genetic algorithm in which case the crossover size is $1$ and which selection is not done after every crossover, but after an entire generation has been produced.
+This can be seen as a simplified version of the genetic algorithm in which case the crossover size is $1$ and which selection is not done after every crossover, 
+but after an entire generation has been produced.
 I will define this to be a generational feature of a genetical algorithm.
+The generational feature could be very useful for speed improvements.
+This is especially true when the selection process is costly.
+Rather than always selecting the most fit individuals, the algorithm assess the fitness every certain number of crossovers (say every $g$ crossovers).
+Then the fitness of an individual at crossover $i$ is approximated by its fitness at crossover $i - (i mod g)$.
+This means that offspring are unable to cross until they reach a certain maturity (the maturity has mean value $\frac g 2$).
 
-In the end, I will have an improved genetic algorithm to compare against the first, niave algorithm as well as a recursive stencil. <-------
+Although this algorithm is a simplification of the genetic algorithm, it does have one unfair advantage to the genetic algorithm.
+This is that each offspring $o$ has a only single parent $p$, so that there is a natural way to project infeasible points back on to the feasible region: simply scale the offspring back to the parent.
+I did this by testing the feasibility of $o + (1 - 2^{-i})(p - o)$ with increasing $i=0,1,...$ until a feasible point is reached.
+This assumes the bounds are easily evaluated in relation to the objective function.
+If so, a similar approach would be possible for the genetic algorithm in convex problems by moving infeasible offspring towards
+the center of its parents (the first moment of each parent).
+Even in non-convex problems, this could be attempted and might work as long the algorithm is smart enough to not drive the power of $2$ too low when it doesn't produce a feasible point.
 
-Another idea for a genetic algorithm that I won't have time to implement is one treats individuals as leaves of an rtree.
-
-breed -> crossover
-
+Finally, I will compare my solver to matlab's.
+In addition to comparing runtime performance, which may be language-related, I will also compare the representaional quality of the pareto set.
 
 
+\subsection{Limitations and Future work}
+The first genetic algorithm had several drawbacks.
+By the time that random sampling has enough points to cover a pareto set, it has also likely created several points that are very near each other.
+Because I also had no way of promoting diversification, the $y_N - y_I$ point generated had a high variance for values of $|S|$ that are otherwise reasonable.
+As discussed <-------
+controlled fitness 
+
+This could be solved by using controlled elitism.
+The first algorithm uses uncontrolled elitism in that it simply selects the most fit individuals to breed without considering there role in the population.
+However, controlled elitism means that individuals are also selected based on how they contribute to the rest of the population.
+Kalyanmoy and Tushar explain how this can be done to improve either exploitation, or exploration.
+
+On initial simple problem sets the first algorithm seems to work best with a crossover size of 2, a very high cost to infeasible points, and a highly preferrential fitness function
+(highly preferrential means a distribution for selecting individuals by (-fitness / -max(fitness))^5  ).
+Under these conditions, we see that the most useful evolutionary instrument is the mutation, as opposed to crossover.
+I conjecture that this is because crossing pareto optimal points from distant x-points does likely produce another optimal point.
+With a small crossover size, and a very selective fitness function, sometimes a point is crossed with itself (The selection distribution does not contain replacement.)
+
+This suggests that introducing <i>incest</i> may improve the crossover process.
+Incest is a measure of how close individuals who are crossed are to eachother.
+For example, with a crossover size of $2$, we could define the incest used by a genetic algorithm to be 
+the average of all distances between crossed individuals throughout the algorithm.
+This will improve the algorithms exploitation of individuals, but not help its exploration.
+
+Rather than using an initial random sample, I could try to only use a small population in the begginning and simply applying the same evolutionary princples from the start.
+This would mean that less function evaluations are used at the beginning in order to get the algorithm started.
+Also, it may be efficient to treat individuals as leaves of the $n$-dimensional Qaudtree used to represent the outcome space (more about how the quadtrees can improve the efficiency later).
+This may encourage the points to be more equally spaced from the start, because new points are not just randomly mutated, but are randomly 
+selected at a certain depth (or distance) from their parents based on how dense the representation is in that area.
+This would make implementing a multi-stage algorithm easier.
+This would work by first exploring the outcome space until exploration doesn't seem to be finding more unrelated points.
+Then the algorithm would begin to exploit the pareto solutions it has already found in order to find the best representation.
 
 
-	
-\subsection{Limitations}
-many missing points
-tightly clustered (many points near each other)
-best solutions in terms of first metrics were mainly created by mutation
 
-incest
-include nearest neighbor in fitness
-	(could include n nearest)
+\end{document}
 
-excited to compare the next with this one.
+%breed -> crossover
 
-\subsection{Continuations}
-should include in fitness
-include phases of exploration -> decrease mutation
-boot strapping.
 
-\section{speed improvements}
-original sorting may not be as efficient as a q-tournament
-selection of best representation may be the most costly operation, so that the genetic algorithm may be the best as it improves on itself time after time
-only apply selection after several breeds
-Quad tree implementation
