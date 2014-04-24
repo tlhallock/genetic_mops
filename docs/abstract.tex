@@ -1,0 +1,267 @@
+
+
+
+
+compare to matlab's implementation
+bounded
+
+
+\section{Background}
+\section{Introduction}
+\section{Motivation}
+I wanted to write a genetic algorithm
+\section{Criteria}
+
+the algorithm generates a set representing the pareto optimal set.
+
+There are many ways to measure how well a multi-objective solver performs.
+We will consider the solver's performance, completeness, and applicability.
+
+The applicability describes what problems the solver is able to solve.
+For example, an algorithm may only solve convex problems, connected pareto solutions, or place other assumptions on how to express the feasible set.
+Matlab's genetic algorithm <code> gamultiobj </code> assumes that the feasible region the set of $x$ satisfying $Ax = b$, $Ax \le b$, or $b_1 < x < b_2$ for some input $A, b, b_1, b_2$.
+
+The algorithm I develop is designed to solve any multi-objective problem that is bounded in the decision space, and bounded below in the outcome space.
+An arbitrary, boolean-valued function is passed to algorithm to characterize the feasible region within the bounds (which are passed as a hyper-cube<-------).
+These constraints are currently in place to help in random point generation, although it may be possible to generalize this by providing a generator that maps to more general feasible regions.
+(Although continuity is not strictly required, because the algorithm works by assuming breeding optimal points with those other fit points there is some assumption of optimal points being close to other optimal points)
+
+Defining the completeness of the algorithm will be an important concern of this project.
+The measures how well the outcome set represents the entire pareto-optimal set.
+To motivate the later discussion, the output set should be <i>efficient</i> in that each point contributes information about the optimal set without duplicating another point.
+It should also be <i>complete</i> in that it should ideally contain points in most if not all disconnected feasible regions when possible, and it should somehow spread out over these regions.
+It should also be meaningful, which means it can't be too big or too small.
+When a set is complete, we would expect that by minimizing/maximizing each component of all optimal points will accurately describe both the ideal point and the nadir point.
+
+
+The performance of the algorithm should describe how long the algorithm takes to run.
+In many cases this is described by the order of the assimptotic runtime.
+However, one of the inputs to the algorithm is the function that needs to be optimized, which can be arbitrarily complicated.
+This means that the pereferred measure of runtime is in the number of objective-function evaluations.
+Of course, we can still consider the overall runtime of the algorithm itself as inoridinate longly long $$$ runtime $$ will limit the algorithm's applicability to simple problems.
+
+
+Although we will explain these in more detail, these considerations inspired my first, primitive metric.
+According to the preliminary bi-criteria the optimazation problem was to design select the algorithm that maximized the pair $(y_N - y_I, |S|)$ where $y_{Ni} = \max y_i $ and $y_{Ii} = \min y_i$ for all $y \in S$.
+We will later discuss improvements to this, for example this in no way penalizes dulplicate points and potentially only encourages only $2$ diverse points.
+(For example, on the bicriteria optimization problem with a one dimensional pareto set $y_2 = 1-y_1$ from $(1,0)$ to $(0,1)$, the set with $x$ values of $(0, 4.999, .5, .5001, 1)$ would be just as good as one that produces $x$-values of $(0, .25,  .5, .75 ,1)$.)
+
+
+
+
+comparison against depth first solver (not just the solutions along the boundary)
+epsilon/delta
+problems with measuring distance in y-space
+
+\section{Representational Quality}
+
+With these criteria, one significant subproblem is as follows.
+Either at completion of the algorithm, or potentially to guide it as it is still running, the algorithm 
+will have a set of vector-pairs $S \subset {(x,y) | y = f(x)}$ for which the objective values have already been computed and will need to find a subset $R$ of $Y(S) = {y | (x,y) \in S)$ that best represents the true pareto set.
+Of course, the pareto set will not be available to the algorithm, so that it will need to approximate the final set with the points it already knows.
+
+To solve this problem, we have to be able to compare how well different subsets represent the pareto set, as well as be able to efficiently find those representations that are best.
+In small dimensional cases, the best representation should agree with what we visually (or intuitively) feel is the best representation.
+It should also be reasonably efficient to compute.
+I will consider a couple different metrics, and decide which works the best.
+In the <<< some paper >>>>>> this problem is presented as a tRI-criteira optimization problem.
+
+One dimension is $\delta = max_{y} min_{y'\} d(y, y')$ for each $y, y' \in Y(S) s.t. y \ne y'$.
+We will discuss which metric $d$ to use later.
+This dimension should be minimized, because a large value means that some points are very isolated.
+This quantity is the farthest distance from any point to its closest neighbor.
+This is an attempt at approximating how far any possible point in the outcome space is from a point in the representation.
+Because this only looks at the closest point to any given point, it does have significant draw backs.
+For example, if the $y$'s are the following set $(0, .01, .98, .99, 1)$ which are supposed to represent the interval from $[0,1]$.
+Each point has a neighbor that is within $.01$ of itself while there still seems to be a large gap in the set.
+Spreading out these points more evenly would even hurt metric.
+This brings out that this measure suffers when the $Y(S)$ only poorly represents the entire space before we even start taking subsets.
+
+It also makes it clear that as it is more meaningful when $|R| << |S|$ and with constraints that $y' \in R$.
+We would hope this means that several points within the gap would introduce penalties around $.97$ for this representation.
+%This brings out that this measure fails when $Y(S)$ is a bad representation of the pareto set before we even start taking subsets.
+In this example, another improvement may be to average the $k$ closest points.
+If we took $k = 2$, then each point but $1$ would be penalized by the the second closest point.
+One might could use weights to account for the bias this would induce when several points are clustered.
+For example, consider a $Y(S)$ with many points tightly clustered around $0$ with few equally spaced point out to $1$.
+Then as $k$ grows large (say close to $|Y(S)|$), the cluster will pull the representation towards its center as these points will have the least summed distance to all other points.
+The resulting measure would look something like this:
+
+sum_y sum_i=0^k y * closest(y, i) * w_{closest(y, i)}
+
+with closest(y,i) being the ith closest point to y, and w_y being a weight assigned to each point.
+Likely the w_i will not need to vary from 1 unless k is large and $S$ is skewed.
+In this case they should be smaller for points in a dense area of $S$.
+
+
+Another dimension is $\epsilon = \min_{y,y'} d(y,y')$.
+This component is to be maximized, because when it is small, the representation contains duplication.
+Of course, this could also include the distance from any given point to multiple other points to improve its robustness.
+For example, a set that is nearly perfect except two points that happen to be very close will suffer under this metric.
+If this were instead the average of all $d(y, closest(y))$ for all $y \in R$, it may coincide with our expectations better.
+
+Finally, the paper considers $|R|$ which is to be minimized.
+In general, this is expected to be a ``reasonable" number for the size of the pareto set.
+For several purposes, it will be useful to simply specify a $|R|$.
+That is, the problem statement will be to find the best representation in term of the diversity/duplication for a given number of points.
+
+
+While comparing different measures of how good the representation is, the algorithm will also need to find them efficiently.
+The first implementation I wrote is a simple backtracking algorithm described by the following pseudo code.
+It enumerates all subsets of $Y(S)$ by recursing on the number of points that are determined to be in the set or out.
+It creates a mask representing the subset, so that the different measures (passed as ``metric" to the algorithm) will simply take in the original set and a mask of which points to include.
+
+
+
+backtrack (int num_determined, boolean[] mask, metric, S)
+{
+	if num_determined = |S|
+	{
+		candidate := metric ( S , mask )
+		if candidate is not pareto optimal
+		{
+		  return
+		}
+		
+		add candiate to set of pareto subsets
+		remove any subsets dominated by candidate
+		return
+	}
+	
+	mask[num_determined] = 0
+	backtrack(point + 1, mask, metric, S)
+	
+	mask[num_determined] = 1
+	backtrack(point + 1, mask, metric, S)
+}
+
+solve ( S , metric)
+{
+      backtrack( 0 , new mask[], metric, S)
+}
+
+
+This has $s^{|S|}$ time complexity so it is not computationally practical unless either $|S| < 30$ or bounds are provided for $\epsilon$ and $\delta$ to prune branches faster.
+For example, a lower bound epsilon removes the branch with mask[num_determined] = 1 for any points that are closer to to the num_determined point.
+In order to consider all possible points, the algorithm would also need to backtrack on the order of removing close points.
+Although the constraint that the number of $|R|$ be a given value could be included into this algorithm, there are many faster techniques for enumerating all nchoosek(|S|, |R|) such subsets.
+
+This problem may also be quickly solvable with a genetic algorithm.
+If the best representation, or atleast a good one is computed repeatedly as a selection process for the outer algorithm, then perhaps fewer generations will have to be used.
+The inner genetic algorithm is very similar to the outer, and could be seen as simply an extension of the evolutionary model.
+In this case, while individuals of the population are breeding and mutating, there selections of which individuals are present to breed is also evolving.
+Possibly, this is akin to having dormant genes, although <-------------.
+
+Rather than using a genetic algorithm, it may be faster to find a fast huerstic for each step of the outer genetic algorithm.
+A simple one is based on the idea that ideally we would have all equally spaced points throughout the outcome space.
+One could calculate equally spaced points within the bounds for the pareto set and then project these onto the pareto set or find the pareto solutions close to the equally spaced lattice.
+Although this might work well on some pareto frontiers, others will may cause many of the equally spaced points to collide on the pareto frontier causing an unequal distribution.
+Although there are likely more complicated ways of forming a map from a $R^{n-1}$ cube to an $R^n$ hypersurface that could help mitigate this problem, I will implement the following hueristic.
+
+Rather than filling the bounded region with equally spaced points, it is possible to simply subdivide this region until further subdivisions would require more points that what are permited.
+If all subdivions are usedd, this would leave $|R| - floor(log_{2^n}(|R|))$ points to fill into the largest gaps of the representation.
+For example, in a two dimensional problem when one is allowed $50$ points to describe a pareto set bounded by $(0,0)$ and $(1,1)$ a single subdivision in each demension leaves four regions.
+The closest points to the centers of these regions could be added to the representation.
+If we subdivide each of these regions again, we find that there are $8 = (2^n)^2$.
+In general we will use a power of $2^n$ to equally divide an n-dimensional space.
+The nearest power of $2^2$ to $50$ that does not exceed it is $16$ and we would add the remaining $50 - 16$ points to the largest gaps of the pareto region.
+
+Ideally, one could also prune out subdivions that do not have any pareto points and still descend into the subdivision tree to the same depth in all subdivisions left.
+For example, the algorithm could work as a bread first search through the subdivisions containing pareto points until there are the only the desired number $|R|$ of subdivisions containing points.
+Then some point within those subdivions could be used.
+For example, in two dimensions, after one subdivision if the upper left quadrant contained contained no pareto solutions, it could be dropped from the search.
+Then one could subdivide the other three, and remove the divisions that don't have points.
+The number of remaining subdivisions can only grow, because as the divisions become finner they will distinguish more points.
+During the last subdivision that makes the number of partitions grow past the desired number, there may be many more partitions than needed.
+If possible, it would be desired to choose the most equally spaced partitions.
+
+A final hueristic could be to sort the pareto set according to each dimension, and add $|S| / n$ equally spaced points from each dimension.
+This would be very fast as it would run in $O(n * |S| log |S|)$ time, but adding points based off there value in a single dimension may mean that roughly $\frac {n-1}n$ of the 
+components of each vector will essentially be selected randomly.
+
+
+One subtly is how to compute $d(y, y')$. I will be using $l_2$ and $l_{\infty}$, but these could produce misleading values.
+We are trying to represent a surface, and so two points may be close in the outcome space, but not when one needs to follow the surface to get between the points.
+
+For example, conider the following plot:
+
+Intuitively, we want a small distance in the $y$ space to mean that we don't have to go far along the curve to get between the points.
+This is what would provide the acuracy up a given limit in the y-space.
+
+Thus, a more complete approach of finding the distance between $f(x_1)$ and $f(x_2)$ would be use points between $x_1$ and $x_2$ and sum up all the distances along the way.
+It is not completely clear how to select the points to fill in between $x_1$ and $x_2$ unless they happen to be of the form $x_1 + \alpha (x_2 - x_1)$.
+I am guessing an accurate way to calculate the distance would be to compute 
+
+sum ^N, i=1   |f(x_1 + i/N (x_2 - x_1)) - f(x_1 + (i-1) /N (x_2 - x_1))| 
+
+for several values until it seems to be converging (which it will if $f$ is continuous.
+Choosing $N$ as powers of 2 would mean points could be reused, and there could be fancier ways of only increasing the precision (decreasing the distance between points) on intervals that
+converge slowly.
+However, this would require many function evaluations for simply computing the distance between two points.
+I plan to cross my fingers and hope this isn't much of a problem.
+
+
+\section{First Model}
+
+The first model had a fixed population size that was first formed from a random sample.
+Then a selection of only the pareto points were selected.
+Points were then added with evolutionary means.
+
+type of selection
+
+The original mutation was to add a delta to each component of the offspring from a uniform distribution.
+Ideally the amount of mutation could decrease as points begin to converge (annealing).
+
+
+cross over size
+
+The fitness function for the initial model was to count the number of individuals that dominate any given point.
+Additionally, a cost was added to non-feasible points based on their distance to the closest feasible point.
+This fitness function is somewhat costly, because it grows linearly with the population size.
+One approach to mitigate this cost <----- from book, is to conduct tournament cross over.
+This involves sampling the population for $q$ points and selecting the most fit of these.
+
+Also, for the first genetic algorithm I wrote, I needed to keep a reserve population, so that I could be sure the 
+distance to the closest feasible point was always well defined.
+
+I will be comparing my algorithm with several other solvers, to see how well it performs.
+The first and most simple solver to compare it against, is a simple random solver.
+This solver samples the feasible region with a uniform distribution, and then returns those points of the resulting set that are nondominated.
+As a simple upgrade to this algorithm, I also implemented a random solver that iteratively moved the distribution towards the pareto set.
+It does this by setting a block size, and initially filling it with a random sample.
+Then only the pareto points are selected, and new points are created by adding a uniform distribution to a random point from the previous block.
+This can be seen as a simplified version of the genetic algorithm in which case the crossover size is $1$ and which selection is not done after every crossover, but after an entire generation has been produced.
+I will define this to be a generational feature of a genetical algorithm.
+
+In the end, I will have an improved genetic algorithm to compare against the first, niave algorithm as well as a recursive stencil. <-------
+
+Another idea for a genetic algorithm that I won't have time to implement is one treats individuals as leaves of an rtree.
+
+breed -> crossover
+
+
+
+
+
+	
+\subsection{Limitations}
+many missing points
+tightly clustered (many points near each other)
+best solutions in terms of first metrics were mainly created by mutation
+
+incest
+include nearest neighbor in fitness
+	(could include n nearest)
+
+excited to compare the next with this one.
+
+\subsection{Continuations}
+should include in fitness
+include phases of exploration -> decrease mutation
+boot strapping.
+
+\section{speed improvements}
+original sorting may not be as efficient as a q-tournament
+selection of best representation may be the most costly operation, so that the genetic algorithm may be the best as it improves on itself time after time
+only apply selection after several breeds
+Quad tree implementation
