@@ -103,7 +103,7 @@ void test_nearest()
 
 	int num_points = 100;
 
-	qtree::Qtree qtree;
+	qtree::Qtree qtree(dim);
 	std::vector<double *> vec;
 
 	double *nearest = qtree::qtree_point_new(dim);
@@ -112,7 +112,7 @@ void test_nearest()
 	{
 		qtree::qtree_point *point = qtree::qtree_point_new_rand(dim);
 
-		qtree.add(point);
+		qtree.add(point, NULL);
 		vec.push_back(point);
 	}
 

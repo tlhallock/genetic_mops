@@ -96,11 +96,11 @@ void GeneticSolver::find_fittest()
 
 	for (int i = 0; i < breed_size; i++)
 	{
-		int index = (int) (get_index(rand() / (double) INT_MAX) * x_pop_feas.size());
-		current_fit[i] = x_pop_feas[index];
+//		int index = (int) (get_index(rand() / (double) INT_MAX) * x_pop_feas.size());
+//		current_fit[i] = x_pop_feas[index];
 
-		fprintf(debug_file, "\n\t%d\t", index);
-		print_point(debug_file, current_fit[i], xdim, false);
+//		fprintf(debug_file, "\n\t%d\t", index);
+//		print_point(debug_file, current_fit[i], xdim, false);
 	}
 
 	fputc('\n', debug_file);
@@ -115,7 +115,7 @@ void GeneticSolver::mutate()
 
 	for (int i = 0; i < xdim; i++)
 	{
-		offspring[i] += offspring[i] * mutation_factor * (2 * (rand() / (double) INT_MAX) - 1);
+//		offspring[i] += offspring[i] * mutation_factor * (2 * (rand() / (double) INT_MAX) - 1);
 	}
 
 	fprintf(debug_file, " to ");
@@ -138,8 +138,8 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		mop->sample_feasible(x);
 		mop->make_guess(x, y);
 
-		x_pop_feas.add(x);
-		y_pop_feas.add(y);
+//		x_pop_feas.add(x);
+//		y_pop_feas.add(y);
 	}
 
 	while ((time(0) - start_time) < timeout
@@ -152,16 +152,16 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		mop->make_guess(offspring, y);
 		if (mop->is_feasible(offspring))
 		{
-			x_pop_feas.add(offspring);
-			y_pop_feas.add(y);
+//			x_pop_feas.add(offspring);
+//			y_pop_feas.add(y);
 		}
 		else
 		{
-			x_pop_inf.add(offspring);
-			y_pop_inf.add(y);
+//			x_pop_inf.add(offspring);
+//			y_pop_inf.add(y);
 		}
 
-		select();
+//		select();
 
 		FILE *debug_file = fopen("ga_debug.txt", "a");
 		fprintf(debug_file, "new population: ");

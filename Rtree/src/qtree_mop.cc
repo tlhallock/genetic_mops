@@ -7,6 +7,7 @@
 
 
 #include "Qtree.h"
+#include <stdlib.h>
 
 
 namespace qtree
@@ -57,6 +58,18 @@ bool QtreeBranch::is_pareto(qtree_point *point)
 	}
 
 	return true;
+}
+
+
+bool Qtree::is_pareto(qtree_point *point)
+{
+	if (!in_current_bounds(point))
+	{
+		printf("Not implemented 1057254720");
+		exit(1);
+	}
+
+	return root->is_pareto(point);
 }
 
 int QtreeLeaf::count_dominating(qtree_point *point)

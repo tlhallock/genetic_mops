@@ -17,7 +17,7 @@ typedef struct
 	std::vector<double *> *vector;
 } acc_arg;
 
-void accumulate(double *point, void *arg)
+void accumulate(double *point, void *ref, void *arg)
 {
 	acc_arg *acc = (acc_arg *) arg;
 	if (acc->tree->is_pareto(point))
@@ -98,7 +98,7 @@ void RtreeImageSet::add_point(double *y)
 		pareto_set = NULL;
 	}
 
-	image.add(y);
+	image.add(y, NULL);
 }
 
 double RtreeImageSet::get_epsilon(double (*norm)(double *, double *, int dim))

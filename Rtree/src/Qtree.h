@@ -27,6 +27,8 @@ typedef enum qtree_type_
 
 bool qtree_regions_are_adjacent(qtree_point *lb1, qtree_point *ub1, qtree_point *lb2, qtree_point *ub2, int dim);
 bool qtree_region_contains(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim);
+int qtree_get_quadrant(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim);
+void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim);
 
 
 class QtreeLeaf;
@@ -161,10 +163,6 @@ public:
 
 	void print(FILE *out);
 };
-
-
-int qtree_get_quadrant(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim);
-void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim);
 
 }
 
