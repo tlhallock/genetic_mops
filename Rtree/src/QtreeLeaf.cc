@@ -16,6 +16,8 @@ namespace qtree
 
 QtreeLeaf::QtreeLeaf(QtreeBranch* _parent, int _dim, int _two_2_dim) :
 		size(0),
+		lb(qtree_point_new(_dim)),
+		ub(qtree_point_new(_dim)),
 		parent(_parent),
 		dim(_dim),
 		two_2_dim(_two_2_dim)
@@ -23,15 +25,34 @@ QtreeLeaf::QtreeLeaf(QtreeBranch* _parent, int _dim, int _two_2_dim) :
 	for (int i = 0; i < BRANCH_FACTOR; i++)
 	{
 		points[i] = qtree_point_new(dim);
+		refs[i] = NULL;
+	}
+
+	int q = get_parents_quad();
+	for (int i = 0; i < _two_2_dim; i++)
+	{
+		double mid = (_parent->lb[i] + _parent->ub[i]) / 2;
+		if (q & (1 << i))
+		{
+			lb[i] = _parent->lb[i];
+			ub[i] = mid;
+		}
+		else
+		{
+			lb[i] = mid;
+			ub[i] = _parent->ub[i];
+		}
 	}
 }
 
 QtreeLeaf::~QtreeLeaf()
 {
-	for (int i=0;i<BRANCH_FACTOR;i++)
+	for (int i = 0; i < BRANCH_FACTOR; i++)
 	{
 		qtree_point_del(points[i]);
 	}
+	qtree_point_del(lb);
+	qtree_point_del(ub);
 }
 
 void QtreeLeaf::get_min(double* y_out, int dim_of_interest)
@@ -48,12 +69,12 @@ void QtreeLeaf::get_min(double* y_out, int dim_of_interest)
 	}
 }
 
-void QtreeLeaf::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
+void QtreeLeaf::apply(void (*fctn)(qtree_point* pnt, void *ref, void* arg), void* arg)
 {
 	int i;
-	for(i=0;i<size;i++)
+	for (i = 0; i < size; i++)
 	{
-		fctn(points[i], arg);
+		fctn(points[i], refs[i], arg);
 	}
 
 }
@@ -69,6 +90,11 @@ int QtreeLeaf::index_of(qtree_point* point)
 	}
 
 	return -19571938;
+}
+
+void *QtreeLeaf::get_ref(int index)
+{
+	return refs[index];
 }
 
 int QtreeLeaf::get_parents_quad()
@@ -104,32 +130,54 @@ void QtreeLeaf::print(FILE* out, int depth)
 	}
 }
 
-void QtreeLeaf::assign(qtree_point *point)
+void QtreeLeaf::assign(qtree_point *point, void *ref)
 {
 	int osize = size++;
 	for (int i = 0; i < get_dim(); i++)
 	{
 		points[osize][i] = point[i];
 	}
+	refs[osize] = ref;
 }
 
 
-void QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin)
+bool QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int),
+		double *cmin, qtree_point *clb, qtree_point *cub)
 {
+	if (!qtree_region_contains(lb, ub, point, get_dim()))
+	{
+		return false;
+	}
+	if (!qtree_regions_are_adjacent(lb, ub, clb, cub, get_dim()))
+	{
+		return false;
+	}
+
+	bool ret_val = false;
 	for (int i = 0; i < get_size(); i++)
 	{
 		if (qtree_point_equals(point, points[i], get_dim()))
 		{
 			continue;
 		}
+
 		double distance = norm(point, points[i], get_dim());
 
-		if (!IS_ZERO(distance) && distance < *cmin)
+		if (IS_ZERO(distance))
+		{
+			continue;
+		}
+
+		ret_val = true;
+
+		if (distance < *cmin)
 		{
 			*cmin = distance;
 			qtree_point_assign(out, points[i], get_dim());
 		}
 	}
+
+	return ret_val;
 }
 
 }

@@ -141,7 +141,7 @@ void QtreeBranch::get_min(double* y_out, int dim_of_interest)
 
 }
 
-void QtreeBranch::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
+void QtreeBranch::apply(void (*fctn)(qtree_point* pnt, void *, void* arg), void* arg)
 {
 	for (int i = 0; i < get_two_2_dim(); i++)
 	{
@@ -273,40 +273,20 @@ bool QtreeBranch::is_empty()
 	return true;
 }
 
-bool QtreeBranch::could_improve(qtree_point *point, double (*norm)(qtree_point *, qtree_point *, int), double cmin)
+bool QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin,
+		qtree_point *clb, qtree_point *cub)
 {
-	double dim_dist = 0;
-	qtree_point *bound = qtree_point_new(get_dim());
-
-	for (int i = 0; i < get_dim(); i++)
+	if (!qtree_region_contains(lb, ub, point, get_dim()))
 	{
-		double d = ub[i] - lb[i];
-		if (d > dim_dist)
-		{
-			dim_dist = d;
-		}
-
-		if (point[i] > (ub[i] + lb[i]) / 2)
-		{
-			bound[i] = ub[i];
-		}
-		else
-		{
-			bound[i] = lb[i];
-		}
+		return false;
+	}
+	if (!qtree_regions_are_adjacent(lb, ub, clb, cub, get_dim()))
+	{
+		return false;
 	}
 
-	bool ret_val = norm(bound, point, get_dim()) < SQRT_TWO * dim_dist;
-	qtree_point_del(bound);
-	return ret_val;
-}
+	bool ret_val = false;
 
-void QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin)
-{
-	if (!could_improve(point, norm, *cmin))
-	{
-		return;
-	}
 	for (int i = 0; i < get_two_2_dim(); i++)
 	{
 		switch(types[i])
@@ -314,26 +294,15 @@ void QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*no
 		case QTREE_TYPE_NULL:
 			break;
 		case QTREE_TYPE_LEAF:
-			((QtreeLeaf *) branches[i])->find_nearest(point, out, norm, cmin);
+			ret_val |= ((QtreeLeaf *) branches[i])->find_nearest(point, out, norm, cmin, clb, cub);
 			break;
 		case QTREE_TYPE_BRANCH:
-			((QtreeBranch *) branches[i])->find_nearest(point, out, norm, cmin);
+			ret_val |= ((QtreeBranch *) branches[i])->find_nearest(point, out, norm, cmin, clb, cub);
 			break;
 		}
 	}
-}
 
-
-
-double QtreeBranch::get_nearest_in_dim(qtree_point *point, qtree_point *out, int dim)
-{
-	QtreeBranch *branch = this;
-	while(branch != NULL)
-	{
-		int quad = branch->get_parents_quad();
-
-		branch = branch->get_parent();
-	}
+	return ret_val;
 }
 
 }

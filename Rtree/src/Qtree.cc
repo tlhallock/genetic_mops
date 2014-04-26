@@ -18,6 +18,46 @@
 namespace qtree
 {
 
+bool qtree_region_contains(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim)
+{
+	for (int i = 0; i < dim; i++)
+	{
+		if (point[i] < lb[i])
+		{
+			return false;
+		}
+		if (point[i] > ub[i])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool qtree_regions_are_adjacent(qtree_point *lb1, qtree_point *ub1, qtree_point *lb2, qtree_point *ub2, int dim)
+{
+	for (int i = 0; i < dim; i++)
+	{
+		if (lb1[i] == lb2[i])
+		{
+			return true;
+		}
+		if (lb1[i] == ub2[i])
+		{
+			return true;
+		}
+		if (ub1[i] == lb2[i])
+		{
+			return true;
+		}
+		if (ub1[i] == ub2[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 QtreeBranch* Qtree::grow_root(QtreeBranch* branch, qtree_point* direction)
 {
 	int old_quad = 0;
@@ -56,18 +96,7 @@ QtreeBranch* Qtree::grow_root(QtreeBranch* branch, qtree_point* direction)
 
 bool Qtree::in_current_bounds(qtree_point* point)
 {
-	for (int i = 0; i < dim; i++)
-	{
-		if (point[i] < lb[i])
-		{
-			return false;
-		}
-		if (point[i] > ub[i])
-		{
-			return false;
-		}
-	}
-	return true;
+	return qtree_region_contains(lb, ub, point, dim);
 }
 
 QtreeLeaf* Qtree::find(qtree_point* point)
@@ -137,7 +166,7 @@ bool Qtree::add(qtree_point* point, void *ref)
 		{
 			quad = qtree_get_quadrant(new_branch->lb, new_branch->ub, leaf->points[i], dim);
 			QtreeLeaf *new_leaf = new_branch->get_leaf(quad);
-			new_leaf->assign(leaf->points[i]);
+			new_leaf->assign(leaf->points[i], leaf->refs[i]);
 		}
 
 		delete leaf;
@@ -146,7 +175,7 @@ bool Qtree::add(qtree_point* point, void *ref)
 		leaf = (QtreeLeaf *) new_branch->get_leaf(quad);
 	}
 
-	leaf->assign(point);
+	leaf->assign(point, ref);
 	return true;
 }
 
@@ -229,7 +258,7 @@ void Qtree::get_min(double* y_out, int dim)
 	root->get_min(y_out, dim);
 }
 
-void Qtree::apply(void (*fctn)(qtree_point* pnt, void* arg), void* arg)
+void Qtree::apply(void (*fctn)(qtree_point* pnt, void *ref, void* arg), void* arg)
 {
 	root->apply(fctn, arg);
 }
@@ -306,59 +335,48 @@ void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim)
 
 double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int))
 {
-	double cmin = DBL_MAX;
-	// find a reasonable distance to start with...
-	QtreeLeaf *leaf = find(point);
-	if (leaf->is_empty())
+	if (!in_current_bounds(point))
 	{
-		QtreeBranch *branch = leaf->get_parent();
-		while (branch->is_empty())
-		{
-			branch = branch->get_parent();
-			if (branch == NULL)
-			{
-				return -DBL_MAX;
-			}
-		}
-		branch->find_nearest(point, out, norm, &cmin);
-	}
-	else
-	{
-		leaf->find_nearest(point, out, norm, &cmin);
+		return false;
 	}
 
-	root->find_nearest(point, out, norm, &cmin);
+	// find containing leaf.
+	QtreeLeaf *leaf = find(point);
+
+	qtree_point *clb = qtree_point_dup(get_dim(), leaf->lb);
+	qtree_point *cub = qtree_point_dup(get_dim(), leaf->ub);
+
+	double cmin = DBL_MAX;
+	while (!root->find_nearest(point, out, norm, &cmin, clb, cub))
+	{
+		bool grew = false;
+		for (int i = 0; i < get_dim(); i++)
+		{
+			double diff = cub[i] - clb[i];
+
+			double tmp = clb[i] - diff;
+			if (tmp >= lb[i])
+			{
+				grew = true;
+				clb[i] = tmp;
+			}
+			tmp = cub[i] + diff;
+			if (tmp <= ub[i])
+			{
+				grew = true;
+				cub[i] = tmp;
+			}
+		}
+		if (!grew)
+		{
+			puts("probably not enough points...");
+			return false;
+		}
+	}
 
 	return cmin;
 }
 
 
-double Qtree::get_nearest_in_dim(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), int dim)
-{
-	double cmin = DBL_MAX;
-	// find a reasonable distance to start with...
-	QtreeLeaf *leaf = find(point);
-	if (leaf->is_empty())
-	{
-		QtreeBranch *branch = leaf->get_parent();
-		while (branch->is_empty())
-		{
-			branch = branch->get_parent();
-			if (branch == NULL)
-			{
-				return -DBL_MAX;
-			}
-		}
-		branch->find_nearest(point, out, norm, &cmin);
-	}
-	else
-	{
-		leaf->find_nearest(point, out, norm, &cmin);
-	}
-
-	root->find_nearest(point, out, norm, &cmin);
-
-	return cmin;
-}
 
 }

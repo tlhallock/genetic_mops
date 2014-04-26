@@ -264,7 +264,7 @@ void test_add_remove_contains()
 				exit(1);
 			}
 
-			if (contained == tree->add(point))
+			if (contained == tree->add(point, NULL))
 			{
 				puts("Fail 407");
 				exit(1);

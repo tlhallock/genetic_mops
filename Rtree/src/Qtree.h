@@ -25,12 +25,13 @@ typedef enum qtree_type_
 	QTREE_TYPE_NULL = 165,
 } qtree_type;
 
+bool qtree_regions_are_adjacent(qtree_point *lb1, qtree_point *ub1, qtree_point *lb2, qtree_point *ub2, int dim);
+bool qtree_region_contains(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim);
 
 
 class QtreeLeaf;
 class QtreeBranch;
 class Qtree;
-
 
 
 class QtreeLeaf
@@ -39,6 +40,8 @@ class QtreeLeaf
 	friend class Qtree;
 private:
 	int size;
+	qtree_point *lb;
+	qtree_point *ub;
 	QtreeBranch *parent;
 	qtree_point *points[BRANCH_FACTOR];
 	void *refs[BRANCH_FACTOR];
@@ -53,20 +56,21 @@ public:
 	~QtreeLeaf();
 
 	void get_min(double *y_out, int dim_of_interest);
-	void apply(void (*fctn)(qtree_point *pnt, void *arg), void *arg);
+	void apply(void (*fctn)(qtree_point *pnt, void *ref, void *arg), void *arg);
 	int index_of(qtree_point *point);
 	int get_parents_quad();
 	void print(FILE *out, int depth);
-	void assign(qtree_point *point);
+	void assign(qtree_point *point, void *ref);
 	int get_size() { return size; }
+	void *get_ref(int index);
 	QtreeBranch *get_parent() { return parent; }
 	bool is_empty() { return size == 0; }
 
 	bool is_pareto(qtree_point *point);
 	int count_dominating(qtree_point *point);
 
-	void find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin);
-	double get_nearest_in_dim(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), int dim);
+	bool find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int),
+			double *cmin, qtree_point *clb, qtree_point *cub);
 };
 
 
@@ -88,15 +92,13 @@ private:
 
 	int get_dim() { return dim; }
 	int get_two_2_dim() { return two_2_dim; }
-
-	bool could_improve(qtree_point *point, double (*norm)(qtree_point *, qtree_point *, int), double cmin);
 public:
 	QtreeBranch(QtreeBranch *parent, qtree_point *lb, qtree_point *ub, int dim, int two_2_dim);
 	~QtreeBranch();
 
 	void print(FILE *out, int depth);
 	void get_min(double *y_out, int dim_of_interest);
-	void apply(void (*fctn)(qtree_point *pnt, void *arg), void *arg);
+	void apply(void (*fctn)(qtree_point *pnt, void *ref, void *arg), void *arg);
 	int count();
 	QtreeLeaf *get_leaf(int quadrant);
 	QtreeLeaf *find(qtree_point *point);
@@ -112,8 +114,7 @@ public:
 	bool is_pareto(qtree_point *point);
 	int count_dominating(qtree_point *point);
 
-	void find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin);
-	double get_nearest_in_dim(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), int dim);
+	bool find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin, qtree_point *lb, qtree_point *ub);
 };
 
 
@@ -146,7 +147,7 @@ public:
 	void *get(qtree_point *point);
 
 	void get_min(double *y_out, int dim);
-	void apply(void (*fctn)(qtree_point *pnt, void *arg), void *arg);
+	void apply(void (*fctn)(qtree_point *pnt, void *ref, void *arg), void *arg);
 
 	int get_dim() { return dim; }
 	int get_two_2_dim() { return two_2_dim; }
@@ -157,7 +158,6 @@ public:
 	int count_dominating(qtree_point *point);
 
 	double get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int));
-	double get_nearest_in_dim(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), int dim);
 
 	void print(FILE *out);
 };
