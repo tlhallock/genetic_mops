@@ -16,8 +16,6 @@
 namespace qtree
 {
 
-#define BRANCH_FACTOR 10
-
 typedef enum qtree_type_
 {
 	QTREE_TYPE_BRANCH = 13,
@@ -29,6 +27,7 @@ bool qtree_regions_are_adjacent(qtree_point *lb1, qtree_point *ub1, qtree_point 
 bool qtree_region_contains(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim);
 int qtree_get_quadrant(qtree_point *lb, qtree_point *ub, qtree_point *point, int dim);
 void qtree_bounds_select(qtree_point *lb, qtree_point *ub, int quad, int dim);
+void qtree_print_quadrant(FILE *out, int quadrant, int dim);
 
 
 class QtreeLeaf;
@@ -41,20 +40,20 @@ class QtreeLeaf
 	friend class QtreeBranch;
 	friend class Qtree;
 private:
+	Qtree *tree;
 	int size;
 	qtree_point *lb;
 	qtree_point *ub;
 	QtreeBranch *parent;
-	qtree_point *points[BRANCH_FACTOR];
-	void *refs[BRANCH_FACTOR];
+	qtree_point **points;
+	void **refs;
 
-	int dim;
-	int two_2_dim;
 
-	int get_dim() { return dim; }
-	int get_two_2_dim() { return two_2_dim; }
+	int get_dim();
+	int get_two_2_dim();
+	int get_branch_factor();
 public:
-	QtreeLeaf(QtreeBranch *parent, int dim, int two_2_dim);
+	QtreeLeaf(QtreeBranch *parent, qtree_point *lb, qtree_point *ub);
 	~QtreeLeaf();
 
 	void get_min(double *y_out, int dim_of_interest);
@@ -72,7 +71,11 @@ public:
 	int count_dominating(qtree_point *point);
 
 	bool find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int),
-			double *cmin, qtree_point *clb, qtree_point *cub);
+			double *cmin, qtree_point *clb, qtree_point *cub, bool can_prune);
+
+	void verify();
+
+	bool get_random(qtree_point *out);
 };
 
 
@@ -81,9 +84,7 @@ class QtreeBranch
 	friend class QtreeLeaf;
 	friend class Qtree;
 private:
-
-	int dim;
-	int two_2_dim;
+	Qtree *tree;
 
 	qtree_point *lb;
 	qtree_point *ub;
@@ -92,16 +93,23 @@ private:
 	qtree_type *types;
 	void **branches;
 
-	int get_dim() { return dim; }
-	int get_two_2_dim() { return two_2_dim; }
+	int count;
+
+	int get_dim();
+	int get_two_2_dim();
+	int get_branch_factor();
+	Qtree *get_tree() { return tree; }
+
+	int recount();
+	void add_to_size(int inc);
+	int get_depth();
 public:
-	QtreeBranch(QtreeBranch *parent, qtree_point *lb, qtree_point *ub, int dim, int two_2_dim);
+	QtreeBranch(Qtree *tree, QtreeBranch *parent, qtree_point *lb, qtree_point *ub);
 	~QtreeBranch();
 
 	void print(FILE *out, int depth);
 	void get_min(double *y_out, int dim_of_interest);
 	void apply(void (*fctn)(qtree_point *pnt, void *ref, void *arg), void *arg);
-	int count();
 	QtreeLeaf *get_leaf(int quadrant);
 	QtreeLeaf *find(qtree_point *point);
 	int get_parents_quad();
@@ -113,10 +121,18 @@ public:
 	}
 	QtreeBranch *get_parent() { return parent; }
 
+	int size() { return count; }
+
 	bool is_pareto(qtree_point *point);
 	int count_dominating(qtree_point *point);
 
-	bool find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin, qtree_point *lb, qtree_point *ub);
+	/** This method detached the branch from the tree. **/
+	bool combine();
+
+	void verify();
+
+	bool find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin, qtree_point *lb, qtree_point *ub, int max_depth);
+	bool get_random(qtree_point *out);
 };
 
 
@@ -129,16 +145,17 @@ class Qtree
 private:
 	int dim;
 	int two_2_dim;
+	int branch_factor;
 	qtree_point *lb;
 	qtree_point *ub;
 	QtreeBranch *root;
-	QtreeBranch *grow_root(QtreeBranch *branch, qtree_point *direction);
+	void grow_root(qtree_point *direction);
 	QtreeLeaf *find(qtree_point *point);
 	bool in_current_bounds(qtree_point *point);
 public:
-	Qtree(qtree_point *lb, qtree_point *ub, int dim);
-	Qtree(double _lb, double _ub, int _dim);
-	Qtree(int dim);
+	Qtree(qtree_point *lb, qtree_point *ub, int dim, int branch_factor);
+	Qtree(double _lb, double _ub, int _dim, int branch_factor);
+	Qtree(int dim, int branch_factor);
 	~Qtree();
 
 	bool add(qtree_point *point, void *ref);
@@ -160,6 +177,11 @@ public:
 	int count_dominating(qtree_point *point);
 
 	double get_nearest_point(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int));
+	bool get_random(qtree_point *out);
+
+	int get_branch_factor() { return branch_factor; }
+
+	void verify() { root->verify(); }
 
 	void print(FILE *out);
 };
