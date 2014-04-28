@@ -114,6 +114,9 @@ void test_nearest()
 
 		qtree.add(point, NULL);
 		vec.push_back(point);
+
+		qtree.print(stdout);
+		fflush(stdout);
 	}
 
 	for (int i = 0; i < 100; i++)

@@ -9,55 +9,48 @@
 #include "Qtree.h"
 
 #include <float.h>
+#include <stdlib.h>
 
 
 namespace qtree
 {
 
-QtreeLeaf::QtreeLeaf(QtreeBranch* _parent, int _dim, int _two_2_dim) :
+QtreeLeaf::QtreeLeaf(QtreeBranch* _parent, qtree_point *_lb, qtree_point *_ub) :
+		tree(_parent->get_tree()),
 		size(0),
-		lb(qtree_point_new(_dim)),
-		ub(qtree_point_new(_dim)),
+		lb(_lb),
+		ub(_ub),
 		parent(_parent),
-		dim(_dim),
-		two_2_dim(_two_2_dim)
+		points((qtree_point **) malloc(sizeof(*points) * _parent->get_tree()->get_branch_factor())),
+		refs((void **) malloc(sizeof(*points) * _parent->get_tree()->get_branch_factor()))
 {
-	for (int i = 0; i < BRANCH_FACTOR; i++)
+	for (int i = 0; i < get_branch_factor(); i++)
 	{
-		points[i] = qtree_point_new(dim);
+		points[i] = qtree_point_new(get_dim());
 		refs[i] = NULL;
-	}
-
-	int q = get_parents_quad();
-	for (int i = 0; i < _two_2_dim; i++)
-	{
-		double mid = (_parent->lb[i] + _parent->ub[i]) / 2;
-		if (q & (1 << i))
-		{
-			lb[i] = _parent->lb[i];
-			ub[i] = mid;
-		}
-		else
-		{
-			lb[i] = mid;
-			ub[i] = _parent->ub[i];
-		}
 	}
 }
 
 QtreeLeaf::~QtreeLeaf()
 {
-	for (int i = 0; i < BRANCH_FACTOR; i++)
+	for (int i = 0; i < get_branch_factor(); i++)
 	{
 		qtree_point_del(points[i]);
 	}
 	qtree_point_del(lb);
 	qtree_point_del(ub);
+	free(points);
+	free(refs);
 }
+
+
+int QtreeLeaf::get_dim() { return tree->get_dim(); }
+int QtreeLeaf::get_two_2_dim() { return tree->get_two_2_dim(); }
+int QtreeLeaf::get_branch_factor() { return tree->get_branch_factor(); }
 
 void QtreeLeaf::get_min(double* y_out, int dim_of_interest)
 {
-	for (int i = 0; i < BRANCH_FACTOR; i++)
+	for (int i = 0; i < get_branch_factor(); i++)
 	{
 		if (y_out[dim_of_interest] < points[i][dim_of_interest])
 		{
@@ -65,6 +58,18 @@ void QtreeLeaf::get_min(double* y_out, int dim_of_interest)
 			{
 				y_out[j] = points[i][j];
 			}
+		}
+	}
+}
+
+void QtreeLeaf::verify()
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (!qtree_region_contains(lb, ub, points[i], get_dim()))
+		{
+			puts("Error 54432198760");
+			exit(1);
 		}
 	}
 }
@@ -118,7 +123,10 @@ void QtreeLeaf::print(FILE* out, int depth)
 	{
 		fputc('\t', out);
 	}
-	fprintf(out, "leaf d=%d s=%d:\n", depth, size);
+	fprintf(out, "leaf: %p d=%d s=%d lb=", this, depth, size);
+	qtree_point_print(out, lb, get_dim(), false);
+	fprintf(out, "; ub=");
+	qtree_point_print(out, ub, get_dim(), true);
 
 	for (i = 0; i < size; i++)
 	{
@@ -142,13 +150,10 @@ void QtreeLeaf::assign(qtree_point *point, void *ref)
 
 
 bool QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int),
-		double *cmin, qtree_point *clb, qtree_point *cub)
+		double *cmin, qtree_point *clb, qtree_point *cub, bool can_prune)
 {
-	if (!qtree_region_contains(lb, ub, point, get_dim()))
-	{
-		return false;
-	}
-	if (!qtree_regions_are_adjacent(lb, ub, clb, cub, get_dim()))
+	if (can_prune && !qtree_region_contains(lb, ub, point, get_dim()) &&
+			!qtree_regions_are_adjacent(lb, ub, clb, cub, get_dim()))
 	{
 		return false;
 	}
@@ -178,6 +183,18 @@ bool QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm
 	}
 
 	return ret_val;
+}
+
+bool QtreeLeaf::get_random(qtree_point *out)
+{
+	if (size == 0)
+	{
+		return false;
+	}
+
+	qtree_point_assign(out, points[rand() % size], get_dim());
+
+	return true;
 }
 
 }

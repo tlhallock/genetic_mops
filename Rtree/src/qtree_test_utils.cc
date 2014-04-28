@@ -13,11 +13,27 @@
 #include <limits.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <math.h>
+#include <float.h>
 
-#define NPOINTS 1000
+#define NPOINTS 10000
+#define NLOOPS  100000
 
 namespace qtree
 {
+
+static double dist(qtree_point *p1, qtree_point *p2, int dim)
+{
+	double sum = 0;
+	for (int i = 0; i < dim; i++)
+	{
+		double diff = p1[i] - p2[i];
+		sum += diff * diff;
+	}
+
+	return sqrt(sum);
+}
+
 //
 //static bool qtree_leaf_verify_bounds(qtree_leaf *leaf, double llx, double lly, double urx, double ury, int depth, bool verbose)
 //{
@@ -192,12 +208,14 @@ namespace qtree
 //	return true;
 //}
 
+
+
+
 void test_add_remove_contains()
 {
-
 	srand(500000);
 
-	int dim = 3;
+	int dim = 4;
 
 	qtree_point *lb = qtree_point_new(dim);
 	for (int i = 0; i < dim; i++)
@@ -209,7 +227,7 @@ void test_add_remove_contains()
 	{
 		ub[i] = 1;
 	}
-	Qtree *tree = new Qtree(lb, ub, dim);
+	Qtree *tree = new Qtree(dim, 10);
 
 	qtree_point_del(lb);
 	qtree_point_del(ub);
@@ -247,10 +265,40 @@ void test_add_remove_contains()
 		added[i] = false;
 	}
 
-	for (int i = 0; i < 100000; i++)
+	for (int i = 0; i < NLOOPS; i++)
 	{
-		int index = rand() % NPOINTS;
-		qtree_point *point = random_points[index];
+		int index;
+
+		qtree_point *point;
+		if (rand() % 3 || tree->count() == 0)
+		{
+			index = rand() % NPOINTS;
+			point = random_points[index];
+		} else
+		{
+			point = qtree_point_new(dim);
+			index = -17593267;
+			if (!tree->get_random(point))
+			{
+				puts("Error 1076184761986799643222876");
+				exit(1);
+			}
+			for (int j = 0; j < NPOINTS; j++)
+			{
+				if (qtree_point_equals(point, random_points[j], dim))
+				{
+					index = j;
+					break;
+				}
+			}
+			if (index < 0)
+			{
+				puts("Error 157320720985");
+				exit(1);
+			}
+			qtree_point_del(point);
+			point = random_points[index];
+		}
 
 		if (rand() < (INT_MAX / 2))
 		{
@@ -260,7 +308,7 @@ void test_add_remove_contains()
 			bool contained = tree->contains(point);
 			if (added[index] != contained)
 			{
-				puts("Fail 420802");
+				puts("Fail 725728262682");
 				exit(1);
 			}
 
@@ -302,13 +350,65 @@ void test_add_remove_contains()
 			}
 		}
 
+		if (!(rand() % 50))
+		{
+			tree->clear();
+
+			for (int i = 0; i < NPOINTS; i++)
+			{
+				added[i] = false;
+			}
+
+			puts("cleared...");
+		}
+
 //		tree->print(stdout);
-//		if (!qtree_verify_bounds(tree, false))
-//		{
-//			puts("fail");
-//			qtree_verify_bounds(tree, true);
-//			break;
-//		}
+		tree->verify();
+
+		qtree_point *random_point = qtree_point_new_rand(dim);
+		for (int j = 0; j < dim; j++)
+		{
+			random_point[j] *= 100;
+		}
+
+		printf("Getting nearest point to ");
+		qtree_point_print(stdout, random_point, dim, true);
+
+		double d = DBL_MAX;
+		int closest_index = -1;
+		for (int j = 0; j < NPOINTS; j++)
+		{
+			if (!added[j])
+			{
+				continue;
+			}
+			double di = dist(random_point, random_points[j], dim);
+			if (di < d)
+			{
+				closest_index = j;
+				d = di;
+			}
+		}
+
+		qtree_point *tmp = qtree_point_new(dim);
+		double nearest = tree->get_nearest_point(random_point, tmp, &dist);
+
+		if (!IS_ZERO(d - nearest))
+		{
+			printf("actual closest = ");
+			qtree_point_print(stdout, random_points[closest_index], dim, false);
+			printf(" with distance %lf\n", d);
+			printf("found closest = ");
+			qtree_point_print(stdout, tmp, dim, false);
+			printf(" with distance %lf\n", nearest);
+			puts("Error 11111235781235812635");
+			tree->print(stdout);
+
+			tree->get_nearest_point(random_point, tmp, &dist);
+			exit(1);
+		}
+		qtree_point_del(tmp);
+		qtree_point_del(random_point);
 	}
 
 	for (int i = 0; i < NPOINTS; i++)
@@ -319,36 +419,6 @@ void test_add_remove_contains()
 	delete tree;
 }
 
+
+
 }
-
-
-
-
-
-//	printf("quradrant of %lf %lf in %lf %lf %lf %lf is ", point->x, point->y,
-//			lower_left->x, lower_left->y, lower_left->x + width,
-//			lower_left->y + width);
-
-//static bool qtree_is_point_contained_in(qtree_point *point, double llx, double lly, double urx, double ury)
-//{
-//	if (llx > point->x)
-//	{
-//		return false;
-//	}
-//	if (lly > point->y)
-//	{
-//		return false;
-//	}
-//
-//	if (urx < point->x)
-//	{
-//		return false;
-//	}
-//
-//	if (ury < point->y)
-//	{
-//		return false;
-//	}
-//
-//	return true;
-//}

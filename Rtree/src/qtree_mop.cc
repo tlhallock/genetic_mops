@@ -17,7 +17,7 @@ bool QtreeLeaf::is_pareto(qtree_point *point)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (qtree_point_dominates(points[i], point, dim))
+		if (qtree_point_dominates(points[i], point, get_dim()))
 		{
 			return false;
 		}
@@ -27,12 +27,12 @@ bool QtreeLeaf::is_pareto(qtree_point *point)
 
 bool QtreeBranch::is_pareto(qtree_point *point)
 {
-	if (qtree_point_dominates(ub, point, dim))
+	if (qtree_point_dominates(ub, point, get_dim()))
 	{
 		return is_empty();
 	}
 
-	if (qtree_point_dominates(point, lb, dim))
+	if (qtree_point_dominates(point, lb, get_dim()))
 	{
 		return true;
 	}
@@ -87,12 +87,12 @@ int QtreeLeaf::count_dominating(qtree_point *point)
 
 int QtreeBranch::count_dominating(qtree_point *point)
 {
-	if (qtree_point_dominates(ub, point, dim))
+	if (qtree_point_dominates(ub, point, get_dim()))
 	{
-		return count();
+		return recount();
 	}
 
-	if (qtree_point_dominates(point, lb, dim))
+	if (qtree_point_dominates(point, lb, get_dim()))
 	{
 		return 0;
 	}
