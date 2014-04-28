@@ -172,14 +172,11 @@ bool Qtree::add(qtree_point* point, void *ref)
 	}
 
 	QtreeLeaf *leaf = root->find(point);
-	printf("found leaf %p\n", leaf);
 
 	if (leaf->index_of(point) >= 0)
 	{
 		return false;
 	}
-
-	this->print(stdout);
 
 	while (leaf->get_size() == get_branch_factor())
 	{
@@ -251,11 +248,13 @@ bool Qtree::remove(qtree_point* point)
 
 	// clean up
 	QtreeBranch *parent = leaf->get_parent();
-	int quad = leaf->get_parents_quad();
 
-	parent->set_branch(quad, QTREE_TYPE_NULL, NULL);
-
-	delete leaf;
+	if (leaf->is_empty())
+	{
+		int quad = leaf->get_parents_quad();
+		parent->set_branch(quad, QTREE_TYPE_NULL, NULL);
+		delete leaf;
+	}
 
 	QtreeBranch *node = parent;
 	parent = node->get_parent();
@@ -375,7 +374,6 @@ double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*n
 {
 	if (root->size() < 1)
 	{
-		puts("Can't get closest point, because there aren't any");
 		return DBL_MAX;
 	}
 
@@ -386,12 +384,20 @@ double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*n
 
 	// find containing leaf.
 	QtreeLeaf *leaf = find(point);
-	printf("closest leaf = %p\n", leaf);
+
+	qtree_point *clb;
+	qtree_point *cub;
+	if (leaf->is_empty())
+	{
+		clb = qtree_point_dup(get_dim(), leaf->get_parent()->lb);
+		cub = qtree_point_dup(get_dim(), leaf->get_parent()->ub);
+	} else
+	{
+		clb = qtree_point_dup(get_dim(), leaf->lb);
+		cub = qtree_point_dup(get_dim(), leaf->ub);
+	}
 
 	int leaf_depth = 1 + leaf->parent->get_depth();
-
-	qtree_point *clb = qtree_point_dup(get_dim(), leaf->lb);
-	qtree_point *cub = qtree_point_dup(get_dim(), leaf->ub);
 
 	double cmin = DBL_MAX;
 	while (!root->find_nearest(point, out, norm, &cmin, clb, cub, leaf_depth))
@@ -415,18 +421,15 @@ double Qtree::get_nearest_point(qtree_point *point, qtree_point *out, double (*n
 			}
 		}
 
-		printf("Now considering ");
-		qtree_point_print(stdout, clb, dim, true);
-		qtree_point_print(stdout, cub, dim, true);
-		puts("");
-
 		if (!grew)
 		{
-			puts("probably not enough points...");
 			exit(1);
 			return false;
 		}
 	}
+
+	qtree_point_del(clb);
+	qtree_point_del(cub);
 
 	return cmin;
 }

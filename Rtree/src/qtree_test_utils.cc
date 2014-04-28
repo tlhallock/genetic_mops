@@ -16,7 +16,8 @@
 #include <math.h>
 #include <float.h>
 
-#define NPOINTS 1000
+#define NPOINTS 10000
+#define NLOOPS  100000
 
 namespace qtree
 {
@@ -214,7 +215,7 @@ void test_add_remove_contains()
 {
 	srand(500000);
 
-	int dim = 3;
+	int dim = 4;
 
 	qtree_point *lb = qtree_point_new(dim);
 	for (int i = 0; i < dim; i++)
@@ -226,7 +227,7 @@ void test_add_remove_contains()
 	{
 		ub[i] = 1;
 	}
-	Qtree *tree = new Qtree(dim, 1);
+	Qtree *tree = new Qtree(dim, 10);
 
 	qtree_point_del(lb);
 	qtree_point_del(ub);
@@ -264,7 +265,7 @@ void test_add_remove_contains()
 		added[i] = false;
 	}
 
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < NLOOPS; i++)
 	{
 		int index;
 
@@ -307,7 +308,6 @@ void test_add_remove_contains()
 			bool contained = tree->contains(point);
 			if (added[index] != contained)
 			{
-				fflush(stdout);
 				puts("Fail 725728262682");
 				exit(1);
 			}
@@ -354,7 +354,7 @@ void test_add_remove_contains()
 		{
 			tree->clear();
 
-			for (int i=0;i<NPOINTS;i++)
+			for (int i = 0; i < NPOINTS; i++)
 			{
 				added[i] = false;
 			}
@@ -362,7 +362,7 @@ void test_add_remove_contains()
 			puts("cleared...");
 		}
 
-		tree->print(stdout);
+//		tree->print(stdout);
 		tree->verify();
 
 		qtree_point *random_point = qtree_point_new_rand(dim);
@@ -402,11 +402,13 @@ void test_add_remove_contains()
 			qtree_point_print(stdout, tmp, dim, false);
 			printf(" with distance %lf\n", nearest);
 			puts("Error 11111235781235812635");
+			tree->print(stdout);
 
 			tree->get_nearest_point(random_point, tmp, &dist);
 			exit(1);
 		}
 		qtree_point_del(tmp);
+		qtree_point_del(random_point);
 	}
 
 	for (int i = 0; i < NPOINTS; i++)

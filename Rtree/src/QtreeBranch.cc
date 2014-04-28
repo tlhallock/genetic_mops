@@ -349,7 +349,6 @@ bool QtreeBranch::find_nearest(qtree_point *point, qtree_point *out, double (*no
 	if (depth < leaf_depth && !qtree_region_contains(lb, ub, point, get_dim()) &&
 			!qtree_regions_are_adjacent(lb, ub, clb, cub, get_dim()))
 	{
-		printf("pruning %p\n", this);
 		return false;
 	}
 

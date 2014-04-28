@@ -155,7 +155,6 @@ bool QtreeLeaf::find_nearest(qtree_point *point, qtree_point *out, double (*norm
 	if (can_prune && !qtree_region_contains(lb, ub, point, get_dim()) &&
 			!qtree_regions_are_adjacent(lb, ub, clb, cub, get_dim()))
 	{
-		printf("Pruning %p\n", this);
 		return false;
 	}
 
