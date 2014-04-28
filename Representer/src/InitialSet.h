@@ -20,7 +20,9 @@ class InitialSet
 	double **distances;
 public:
 	InitialSet(int _size, int _dim, double (*norm)(double *, double *, int)) :
-			dim(_dim), points(), distances((double **) malloc(sizeof(*distances) * _size))
+			dim(_dim),
+			points(),
+			distances((double **) malloc(sizeof(*distances) * _size))
 	{
 		for (int i = 0; i < _size; i++)
 		{
@@ -55,6 +57,7 @@ public:
 
 	double get_distance(int i, int j);
 	int size() { return points.size(); }
+	int get_dim() { return dim; }
 };
 
 #endif /* INITIALSET_H_ */

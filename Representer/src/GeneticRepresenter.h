@@ -16,7 +16,6 @@
 class GeneticRepresenter
 {
 private:
-	int size;
 	int capacity;
 
 	int pop_size;
@@ -27,6 +26,8 @@ private:
 //	double *weights;
 
 	InitialSet *iset;
+
+	void print(int index);
 
 	double get_weight(int i);
 	void cross_over(int parent1, int parent2, int num_to_use);

@@ -30,7 +30,7 @@ double represent_metric(InitialSet *set, char *mask)
 	return 1.0;
 }
 
-int main( int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int dim = 3;
 

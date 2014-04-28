@@ -123,7 +123,6 @@ double GeneticRepresenter::get_weight(int i)
 }
 
 GeneticRepresenter::GeneticRepresenter(int cap, int _pop_size) :
-			size(0),
 			capacity(cap),
 			pop_size(_pop_size),
 			pop((char **) malloc (sizeof(*pop) * (_pop_size + 1))),
@@ -159,7 +158,9 @@ GeneticRepresenter::~GeneticRepresenter()
 
 void GeneticRepresenter::represent(InitialSet* set, int num_points, double (*represent_metric)(InitialSet *set, char *mask), char *mask_out)
 {
-	for(;;)
+	this->iset = set;
+
+	for (int i = 0; i < 50; i++)
 	{
 		int p1 = rand() % pop_size;
 		int p2;
@@ -168,11 +169,17 @@ void GeneticRepresenter::represent(InitialSet* set, int num_points, double (*rep
 			p2 = rand() % pop_size;
 		} while (p1 == p2);
 
+		printf("selecting %d and %d\n", p1, p2);
+
+		print(0);
+
 		cross_over(p1, p2, num_points);
 		mutate(2, num_points);
 		fitness[0] = evaluate(represent_metric, 0);
 		select();
 	}
+
+	this->iset = NULL;
 }
 
 
@@ -205,4 +212,27 @@ void GeneticRepresenter::select()
 		pop[0] = pop[least_fit_index];
 		pop[least_fit_index] = tmp;
 	}
+}
+
+
+void GeneticRepresenter::print(int index)
+{
+	for (int i = 0; i < pop_size; i++)
+	{
+		printf("%d: ", i);
+		for (int j = 0; j < iset->size(); j++)
+		{
+			if(pop[i][j])
+			{
+				fputc('1', stdout);
+			}
+			else
+			{
+				fputc('0', stdout);
+			}
+		}
+		fputc('\n', stdout);
+	}
+
+	fflush(stdout);
 }
