@@ -29,15 +29,17 @@ public:
 		}
 		for (int i = 0; i < _size; i++)
 		{
+			double *p1 = get(i);
 			for (int j = 0; j < _size; j++)
 			{
-				distances[i][j] = norm(get(i), get(j));
+				double *p2 = get(j);
+				distances[i][j] = norm(p1, p2, dim);
 			}
 		}
 	}
 	virtual ~InitialSet()
 	{
-		for (int i = 0; i < points.size(); i++)
+		for (unsigned int i = 0; i < points.size(); i++)
 		{
 			qtree::qtree_point_del(points.at(i));
 			free(distances[i]);
@@ -45,7 +47,7 @@ public:
 		free(distances);
 	}
 
-	double get_n_nearest(int index, int n, int *nearest, double *dists);
+	void get_n_nearest(int index, int n, int *nearest, double *dists);
 	double *get(int index)
 	{
 		return points.at(index);
