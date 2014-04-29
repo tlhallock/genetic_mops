@@ -43,50 +43,85 @@ void GeneticRepresenter::ensure_uses(int index, unsigned int num_to_use)
 	}
 }
 
+//void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
+//{
+//	int idx1 = rand() % iset->size();
+//	int idx2;
+//	do
+//	{
+//		idx2 = rand() % iset->size();
+//	} while (idx1 == idx2);
+//
+//	printf("mutating from %d to %d\n", idx1, idx2);
+//
+//	if (idx2 < idx1)
+//	{
+//		int tmp = idx1;
+//		idx1 = idx2;
+//		idx2 = tmp;
+//	}
+//
+//	indices[0]->clear();
+//
+//	for (int i = 0; i < iset->size(); i++)
+//	{
+//		char on;
+//		if (i < idx1 || i >= idx2)
+//		{
+//			on = pop[parent1][i];
+//		}
+//		else
+//		{
+//			on = pop[parent2][i];
+//		}
+//
+//		if (!on)
+//		{
+//			pop[0][i] = 0;
+//			continue;
+//		}
+//
+//		indices[0]->push_back(i);
+//		pop[0][i] = 1;
+//	}
+//
+//	ensure_uses(0, num_to_use);
+//}
+
+
 void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
 {
-	int idx1 = rand() % iset->size();
-	int idx2;
-	do
-	{
-		idx2 = rand() % iset->size();
-	} while (idx1 == idx2);
-
-	printf("mutating from %d to %d\n", idx1, idx2);
-
-	if (idx2 < idx1)
-	{
-		int tmp = idx1;
-		idx1 = idx2;
-		idx2 = tmp;
-	}
-
 	indices[0]->clear();
-
 	for (int i = 0; i < iset->size(); i++)
 	{
-		char on;
-		if (i < idx1 || i >= idx2)
+		pop[0][i] = 0;
+	}
+
+	for (int i = 0; i < num_to_use; i++)
+	{
+		int index;
+		bool first = rand() % 2;
+		if (first)
 		{
-			on = pop[parent1][i];
+			index = indices[parent1]->at(i);
 		}
 		else
 		{
-			on = pop[parent2][i];
+			index = indices[parent2]->at(i);
 		}
 
-		if (!on)
+		if (vec_contains(indices[0], index))
 		{
-			pop[0][i] = 0;
 			continue;
 		}
 
-		indices[0]->push_back(i);
-		pop[0][i] = 1;
+		indices[0]->push_back(index);
+		pop[0][index] = 1;
 	}
 
 	ensure_uses(0, num_to_use);
 }
+
 
 void GeneticRepresenter::mutate(int num_to_flip, int num_to_use)
 {
