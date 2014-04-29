@@ -49,7 +49,7 @@ public:
 		free(distances);
 	}
 
-	void get_n_nearest(int index, int n, int *nearest, double *dists);
+	void get_n_nearest(int index, int n, int *nearest, double *dists, char *mask);
 	double *get(int index)
 	{
 		return points.at(index);

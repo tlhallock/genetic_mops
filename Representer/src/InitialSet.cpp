@@ -9,7 +9,7 @@
 
 #include <float.h>
 
-void InitialSet::get_n_nearest(int index, int n, int *nearest, double *dists)
+void InitialSet::get_n_nearest(int index, int n, int *nearest, double *dists, char *mask)
 {
 	for (int j = 0; j < n; j++)
 	{
@@ -17,9 +17,13 @@ void InitialSet::get_n_nearest(int index, int n, int *nearest, double *dists)
 		nearest[j] = index;
 	}
 
-
 	for (int i = 0; i < points.size(); i++)
 	{
+		if (!mask[i])
+		{
+			continue;
+		}
+
 		if (i == index)
 		{
 			continue;
