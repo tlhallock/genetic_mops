@@ -15,6 +15,7 @@
 #include <limits.h>
 
 
+
 static bool vec_contains(std::vector<int> *vec, int i)
 {
 	return std::find(vec->begin(), vec->end(), i) != vec->end();
@@ -43,84 +44,84 @@ void GeneticRepresenter::ensure_uses(int index, unsigned int num_to_use)
 	}
 }
 
-//void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
-//{
-//	int idx1 = rand() % iset->size();
-//	int idx2;
-//	do
-//	{
-//		idx2 = rand() % iset->size();
-//	} while (idx1 == idx2);
-//
-//	printf("mutating from %d to %d\n", idx1, idx2);
-//
-//	if (idx2 < idx1)
-//	{
-//		int tmp = idx1;
-//		idx1 = idx2;
-//		idx2 = tmp;
-//	}
-//
-//	indices[0]->clear();
-//
-//	for (int i = 0; i < iset->size(); i++)
-//	{
-//		char on;
-//		if (i < idx1 || i >= idx2)
-//		{
-//			on = pop[parent1][i];
-//		}
-//		else
-//		{
-//			on = pop[parent2][i];
-//		}
-//
-//		if (!on)
-//		{
-//			pop[0][i] = 0;
-//			continue;
-//		}
-//
-//		indices[0]->push_back(i);
-//		pop[0][i] = 1;
-//	}
-//
-//	ensure_uses(0, num_to_use);
-//}
-
-
 void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
 {
-	indices[0]->clear();
-	for (int i = 0; i < iset->size(); i++)
+	int idx1 = rand() % iset->size();
+	int idx2;
+	do
 	{
-		pop[0][i] = 0;
+		idx2 = rand() % iset->size();
+	} while (idx1 == idx2);
+
+	printf("mutating from %d to %d\n", idx1, idx2);
+
+	if (idx2 < idx1)
+	{
+		int tmp = idx1;
+		idx1 = idx2;
+		idx2 = tmp;
 	}
 
-	for (int i = 0; i < num_to_use; i++)
+	indices[0]->clear();
+
+	for (int i = 0; i < iset->size(); i++)
 	{
-		int index;
-		bool first = rand() % 2;
-		if (first)
+		char on;
+		if (i < idx1 || i >= idx2)
 		{
-			index = indices[parent1]->at(i);
+			on = pop[parent1][i];
 		}
 		else
 		{
-			index = indices[parent2]->at(i);
+			on = pop[parent2][i];
 		}
 
-		if (vec_contains(indices[0], index))
+		if (!on)
 		{
+			pop[0][i] = 0;
 			continue;
 		}
 
-		indices[0]->push_back(index);
-		pop[0][index] = 1;
+		indices[0]->push_back(i);
+		pop[0][i] = 1;
 	}
 
 	ensure_uses(0, num_to_use);
 }
+
+
+//void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
+//{
+//	indices[0]->clear();
+//	for (int i = 0; i < iset->size(); i++)
+//	{
+//		pop[0][i] = 0;
+//	}
+//
+//	for (int i = 0; i < num_to_use; i++)
+//	{
+//		int index;
+//		bool first = rand() % 2;
+//		if (first)
+//		{
+//			index = indices[parent1]->at(i);
+//		}
+//		else
+//		{
+//			index = indices[parent2]->at(i);
+//		}
+//
+//		if (vec_contains(indices[0], index))
+//		{
+//			continue;
+//		}
+//
+//		indices[0]->push_back(index);
+//		pop[0][index] = 1;
+//	}
+//
+//	ensure_uses(0, num_to_use);
+//}
 
 
 void GeneticRepresenter::mutate(int num_to_flip, int num_to_use)
@@ -236,7 +237,7 @@ void GeneticRepresenter::represent(InitialSet* set, int num_points,
 		fitness[0] = represent_metric(set, pop[0], msk_all);
 		select();
 
-		sleep(1);
+//		sleep(1);
 	}
 
 	int most_fit_index = INT_MIN;
@@ -280,6 +281,8 @@ void GeneticRepresenter::select()
 	{
 		return;
 	}
+
+	plot("test.m", iset, pop[0], fitness[0]);
 
 	{
 		std::vector<int> *tmp = indices[0];

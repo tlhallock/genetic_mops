@@ -13,6 +13,10 @@
 
 #include <vector>
 
+void plot(const char *filename, InitialSet *set, char *mask,
+//		double (*represent_metric)(InitialSet *set, char *to_use, char *to_represent),
+		double fitness);
+
 class GeneticRepresenter
 {
 private:
@@ -28,7 +32,6 @@ private:
 //	double *weights;
 
 	InitialSet *iset;
-
 	void print(int index);
 
 	double get_weight(int i);
