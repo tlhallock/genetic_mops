@@ -58,6 +58,7 @@ public:
 	double get_distance(int i, int j);
 	int size() { return points.size(); }
 	int get_dim() { return dim; }
+	int index_of(double *point);
 };
 
 #endif /* INITIALSET_H_ */

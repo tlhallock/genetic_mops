@@ -59,3 +59,16 @@ double InitialSet::get_distance(int i, int j)
 {
 	return distances[i][j];
 }
+
+int InitialSet::index_of(double *point)
+{
+	for (int i = 0; i < size(); i++)
+	{
+		if (qtree::qtree_point_equals(point, get(i), get_dim()))
+		{
+			continue;
+		}
+		return i;
+	}
+	return -194619;
+}

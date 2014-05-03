@@ -27,7 +27,6 @@ double get_weight(int i)
 	return 1.0;
 }
 
-
 double get_variance(InitialSet *set, char *to_use)
 {
 	int size = set->size();
@@ -243,10 +242,43 @@ void test_metric()
 	plot(filename, &set, mask, max);
 }
 
+void bread_first_represent(InitialSet *set, int num_points, char *mask_out);
+
+void test_breadth_first()
+{
+	int dim = 2;
+	int size = 50;
+	int num_to_use = 10;
+
+	char *mask = (char *) alloca(sizeof(*mask) * size);
+	char *all = (char *) alloca(sizeof(*mask) * size);
+	for (int i = 0; i < size; i++)
+	{
+		all[i] = 1;
+		if (i < num_to_use)
+		{
+			mask[i] = 1;
+		}
+		else
+		{
+			mask[i] = 0;
+		}
+	}
+
+	InitialSet set(size, dim, &l_2);
+
+	bread_first_represent(&set, num_to_use, mask);
+
+	const char *filename = "a-foo-a-foo-a-bar.m";
+	fclose(fopen(filename, "w"));
+	plot(filename, &set, mask, 0.0);
+}
+
 
 int main(int argc, char **argv)
 {
 //	represent();
-	test_metric();
+//	test_metric();
+	test_breadth_first();
 	puts("Done.");
 }

@@ -621,4 +621,28 @@ void QtreeBranch::verify()
 		}
 	}
 }
+
+qtree_type QtreeBranch::get_type(int i)
+{
+	return types[i];
+
+}
+QtreeBranch *QtreeBranch::get_branch(int i)
+{
+	if (types[i] != QTREE_TYPE_BRANCH)
+	{
+		puts("Error 1716436143187365");
+		exit(1);
+	}
+	return (QtreeBranch *) branches[i];
+}
+
+qtree_point *QtreeBranch::get_lb()
+{
+	return lb;
+}
+qtree_point *QtreeBranch::get_ub()
+{
+	return ub;
+}
 }

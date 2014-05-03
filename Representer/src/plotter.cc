@@ -14,7 +14,7 @@ void plot(const char *filename, InitialSet *set, char *mask,
 {
 		FILE *out = fopen(filename, "a");
 
-		fprintf(out, "graphics_toolkit gnuplot\n");
+//		fprintf(out, "graphics_toolkit gnuplot\n");
 		fprintf(out, "x = [\n");
 		for (int i = 0; i < set->size(); i++)
 		{
@@ -47,14 +47,14 @@ void plot(const char *filename, InitialSet *set, char *mask,
 		}
 		fprintf(out, "];\n");
 
-		fprintf(out, "scatter(x(:,1), x(:,2), 10);\n");
+		fprintf(out, "scatter(x(:,1), x(:,2), 's');\n");
 		fprintf(out, "hold on\n");
-		fprintf(out, "scatter(s(:,1), s(:,2), 30, 'r');\n");
+		fprintf(out, "scatter(s(:,1), s(:,2), 'x');\n");
 		fprintf(out, "drawnow\n");
 	//	fprintf(out, "input(\"enter something...\")\n");
 		fprintf(out, "hold off\n");
 		fprintf(out, "fitness = %lf\n", fitness);
-		fprintf(out, "pause(1)\n");
+		fprintf(out, "pause(10)\n");
 
 		fclose(out);
 }

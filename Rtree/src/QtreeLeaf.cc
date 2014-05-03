@@ -197,4 +197,13 @@ bool QtreeLeaf::get_random(qtree_point *out)
 	return true;
 }
 
+qtree_point *QtreeLeaf::get_lb()
+{
+	return lb;
+}
+qtree_point *QtreeLeaf::get_ub()
+{
+	return ub;
+}
+
 }

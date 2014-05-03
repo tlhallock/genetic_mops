@@ -76,6 +76,9 @@ public:
 	void verify();
 
 	bool get_random(qtree_point *out);
+
+	qtree_point *get_lb();
+	qtree_point *get_ub();
 };
 
 
@@ -110,6 +113,9 @@ public:
 	void print(FILE *out, int depth);
 	void get_min(double *y_out, int dim_of_interest);
 	void apply(void (*fctn)(qtree_point *pnt, void *ref, void *arg), void *arg);
+
+	qtree_type get_type(int i);
+	QtreeBranch *get_branch(int i);
 	QtreeLeaf *get_leaf(int quadrant);
 	QtreeLeaf *find(qtree_point *point);
 	int get_parents_quad();
@@ -133,6 +139,10 @@ public:
 
 	bool find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *, int), double *cmin, qtree_point *lb, qtree_point *ub, int max_depth);
 	bool get_random(qtree_point *out);
+
+	qtree_point *get_lb();
+	qtree_point *get_ub();
+
 };
 
 
@@ -182,6 +192,7 @@ public:
 	int get_branch_factor() { return branch_factor; }
 
 	void verify() { root->verify(); }
+	QtreeBranch *get_root() { return root; }
 
 	void print(FILE *out);
 };
