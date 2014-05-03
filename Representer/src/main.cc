@@ -27,100 +27,6 @@ double get_weight(int i)
 	return 1.0;
 }
 
-double get_variance(InitialSet *set, char *to_use)
-{
-	int size = set->size();
-	int index = 0;
-	double *dists = (double *) alloca(sizeof(*dists) * size);
-
-	double sum = 0;
-	for (int i = 0; i < size; i++)
-	{
-		if (!to_use[i])
-		{
-			continue;
-		}
-		double min = DBL_MAX;
-		for (int j = 0; j < size; j++)
-		{
-			if (!to_use[j] || i == j)
-			{
-				continue;
-			}
-			double d = set->get_distance(i, j);
-			if (d < min)
-			{
-				min = d;
-			}
-		}
-		dists[index++] = min;
-		sum += min;
-	}
-
-	double avg = sum / index;
-
-	double sum2 = 0;
-	for (int i = 0; i < index; i++)
-	{
-		double d = dists[i] - avg;
-		sum2 += d * d;
-	}
-	double std = sqrt(sum2);
-
-	return sum2;
-}
-
-static int count(int size, char *set)
-{
-	int count = 0;
-	for (int i = 0; i < size; i++)
-	{
-		if (set[i] == 0)
-		{
-			continue;
-		}
-		count++;
-	}
-	return count;
-}
-
-double get_deviance_cost(InitialSet *set, char *to_use, char *to_represent)
-{
-	int size = set->size();
-	int index = 0;
-
-	double variance = get_variance(set, to_represent);
-
-	double expected_distance = count(set->size(), to_represent) * sqrt(variance) / count(set->size(), to_use);
-
-	double sum = 0;
-	for (int i = 0; i < size; i++)
-	{
-		if (!to_use[i])
-		{
-			continue;
-		}
-		double min = DBL_MAX;
-		for (int j = 0; j < size; j++)
-		{
-			if (!to_use[j] || i == j)
-			{
-				continue;
-			}
-			double d = set->get_distance(i, j);
-			if (d < min)
-			{
-				min = d;
-			}
-		}
-
-		double c = abs(expected_distance - min);
-		sum += c;
-	}
-
-	double avg = sum / index;
-	return avg;
-}
 
 double represent_metric(InitialSet *set, char *to_use, char *to_represent)
 {
@@ -247,8 +153,8 @@ void bread_first_represent(InitialSet *set, int num_points, char *mask_out);
 void test_breadth_first()
 {
 	int dim = 2;
-	int size = 50;
-	int num_to_use = 10;
+	int size = 100;
+	int num_to_use = 20;
 
 	char *mask = (char *) alloca(sizeof(*mask) * size);
 	char *all = (char *) alloca(sizeof(*mask) * size);

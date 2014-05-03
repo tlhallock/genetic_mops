@@ -26,6 +26,11 @@ static void print_list(list_node *list, int dim, int depth)
 		return;
 	}
 
+	for (int i=0;i<depth;i++)
+	{
+		fputc('\t', stdout);
+	}
+
 	if (list->branch == NULL)
 	{
 		printf("[%d lower bound = ", depth);
@@ -41,13 +46,9 @@ static void print_list(list_node *list, int dim, int depth)
 		qtree::qtree_point_print(stdout, list->branch->get_ub(), dim, false);
 		fputc(']', stdout);
 	}
+	fputc('\n', stdout);
 
 	print_list(list->next, dim, depth + 1);
-
-	if (depth == 0)
-	{
-		fputc('\n', stdout);
-	}
 }
 
 void bread_first_represent(InitialSet *set, int num_points, char *mask_out)
