@@ -13,7 +13,7 @@
 class Variation : public RepresentationMetric
 {
 public:
-	Variation() {}
+	Variation(InitialSet *set) : RepresentationMetric(set) {}
 	virtual ~Variation() {}
 
 	double get_fitness(char *mask, char *to_represent, double *costs);

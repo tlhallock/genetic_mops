@@ -10,5 +10,5 @@
 
 double Variation::get_fitness(char *mask, char *to_represent, double *costs)
 {
-
+	return 0.0;
 }

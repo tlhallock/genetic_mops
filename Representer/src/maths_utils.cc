@@ -11,6 +11,18 @@
 #include <limits.h>
 #include <math.h>
 
+
+double l_2(double *p1, double *p2, int dim)
+{
+	double sum = 0;
+	for (int i = 0; i < dim; i++)
+	{
+		double diff = p1[i] - p2[i];
+		sum += diff * diff;
+	}
+	return sqrt(sum);
+}
+
 double get_variance(InitialSet *set, char *to_use)
 {
 	int size = set->size();

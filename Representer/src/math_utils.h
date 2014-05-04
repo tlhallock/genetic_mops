@@ -8,6 +8,6 @@
 #ifndef MATH_UTILS_H_
 #define MATH_UTILS_H_
 
-
+double l_2(double *, double *, int);
 
 #endif /* MATH_UTILS_H_ */

@@ -13,9 +13,11 @@
 class Epsilon : public RepresentationMetric
 {
 	int num_closest;
+	double *dists;
+	int *indices;
 public:
 	Epsilon(InitialSet *set, int n_);
-	virtual ~Epsilon() {}
+	virtual ~Epsilon();
 
 	double get_fitness(char *mask, char *to_represent, double *costs);
 };

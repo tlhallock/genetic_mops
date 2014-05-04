@@ -14,10 +14,11 @@ class Delta: public RepresentationMetric
 {
 private:
 	int num_closest; // number of closest to average over...
+	double *dists;
+	int *indices;
 public:
 	Delta(InitialSet *set_, int num_closest_);
-
-	virtual ~Delta() {}
+	virtual ~Delta();
 
 	double get_fitness(char *mask, char *to_represent, double *costs);
 };

@@ -13,10 +13,10 @@
 class Scalarization : public RepresentationMetric
 {
 	int length;
-	RepresentationMetric *metrics;
+	RepresentationMetric **metrics;
 	double *weights;
 public:
-	Scalarization(int num, RepresentationMetric *ms, double *weights);
+	Scalarization(int num, RepresentationMetric **ms, double *weights);
 	virtual ~Scalarization() {}
 
 	double get_fitness(char *mask, char *to_represent, double *costs);

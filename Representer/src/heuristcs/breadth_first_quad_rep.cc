@@ -6,8 +6,8 @@
  */
 
 #include <stdlib.h>
-#include "../../Rtree/src/Qtree.h"
-#include "GeneticRepresenter.h"
+#include "../../../Rtree/src/Qtree.h"
+#include "../GeneticRepresenter.h"
 
 double l_2(double *p1, double *p2, int dim);
 

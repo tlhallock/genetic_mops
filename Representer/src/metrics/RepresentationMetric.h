@@ -12,6 +12,7 @@
 
 class RepresentationMetric
 {
+protected:
 	InitialSet *set;
 public:
 	RepresentationMetric(InitialSet *set_) :
@@ -19,6 +20,8 @@ public:
 	virtual ~RepresentationMetric() {}
 
 	virtual double get_fitness(char *mask, char *to_represent, double *costs) = 0;
+
+	InitialSet *get_set() { return set; }
 };
 
 #endif /* REPRESENTATIONMETRIC_H_ */

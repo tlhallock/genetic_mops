@@ -14,8 +14,6 @@
 #include <float.h>
 #include <limits.h>
 
-
-
 static bool vec_contains(std::vector<int> *vec, int i)
 {
 	return std::find(vec->begin(), vec->end(), i) != vec->end();
@@ -123,8 +121,29 @@ void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
 //	ensure_uses(0, num_to_use);
 //}
 
+//
+//void GeneticRepresenter::mutate(int num_to_flip, int num_to_use, double *costs)
+//{
+//	for (int i = 0; i < num_to_flip; i++)
+//	{
+//		int idx = rand() % indices[0]->size();
+//		int turn_off = indices[0]->at(idx);
+//		int turn_on;
+//		do
+//		{
+//			turn_on = rand() % iset->size();
+//		} while (vec_contains(indices[0], turn_on));
+//
+//		printf("flipping %d to %d\n", turn_off, turn_on);
+//
+//		indices[0]->at(idx) = turn_on;
+//		pop[0][turn_off] = 0;
+//		pop[0][turn_on] = 1;
+//	}
+//}
 
-void GeneticRepresenter::mutate(int num_to_flip, int num_to_use)
+
+void GeneticRepresenter::mutate(int num_to_flip, int num_to_use, double *costs)
 {
 	for (int i = 0; i < num_to_flip; i++)
 	{
@@ -203,17 +222,17 @@ GeneticRepresenter::~GeneticRepresenter()
 	free(fitness);
 }
 
-void GeneticRepresenter::represent(InitialSet* set, int num_points,
-		double (*represent_metric)(InitialSet *set, char *to_use, char *to_represent),
-		char *mask_out)
+void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric, char *mask_out)
 {
-	this->iset = set;
+	this->iset = metric->get_set();
+
+	double *costs = (double *) malloc (sizeof (*costs) * num_points);
 
 	// select initial population
 	for (int i = 1; i <= pop_size; i++)
 	{
 		ensure_uses(i, num_points);
-		fitness[i] = represent_metric(set, pop[i], msk_all);
+		fitness[i] = metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
 	}
 
 	for (int i = 0; /*i < 10*/; i++)
@@ -232,9 +251,14 @@ void GeneticRepresenter::represent(InitialSet* set, int num_points,
 		print(0);
 
 		cross_over(p1, p2, num_points);
-		mutate(2, num_points);
 
-		fitness[0] = represent_metric(set, pop[0], msk_all);
+
+		for (int i = 0; i < 3; i++)
+		{
+			fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
+			mutate(2, num_points, costs);
+		}
+
 		select();
 
 //		sleep(1);
@@ -252,11 +276,12 @@ void GeneticRepresenter::represent(InitialSet* set, int num_points,
 		}
 	}
 
-	for (int i=0;i<set->size();i++)
+	for (int i = 0; i < iset->size(); i++)
 	{
 		mask_out[i] = pop[most_fit_index][i];
 	}
 
+	free(costs);
 	this->iset = NULL;
 }
 
