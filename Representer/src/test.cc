@@ -5,8 +5,7 @@
  *      Author: rever
  */
 
-
-void bread_first_represent(InitialSet *set, int num_points, char *mask_out);
+#include "common.h"
 
 void test_breadth_first()
 {
@@ -37,10 +36,6 @@ void test_breadth_first()
 	fclose(fopen(filename, "w"));
 	plot(filename, &set, mask, 0.0);
 }
-
-
-
-
 
 void test_metric()
 {
@@ -83,7 +78,7 @@ void test_metric()
 			mask[i2] = tmp;
 		}
 
-		double fitness = represent_metric(&set, mask, all);
+		double fitness = -13;//represent_metric(&set, mask, all);
 		if (fitness < max)
 		{
 			continue;
@@ -97,7 +92,7 @@ void test_metric()
 
 
 
-static void represent()
+void represent()
 {
 	srand(5000);
 
@@ -106,14 +101,16 @@ static void represent()
 	InitialSet set(50, 3, &l_2);
 
 	GeneticRepresenter rep(50, 5);
+	RepresentationMetric *m = new DistToClosest(&set, 2);
+	std::auto_ptr<RepresentationMetric> metric(m);
 
-	char *opt_mask = (char *) malloc (sizeof(*opt_mask) * set.size());
+	char *out_mask = (char *) malloc (sizeof(*out_mask) * set.size());
 
-	rep.represent(&set, 10, &represent_metric, opt_mask);
+	rep.represent(10, metric.get(), out_mask);
 
 	for (int i = 0; i < set.size(); i++)
 	{
-		if (opt_mask[i])
+		if (out_mask[i])
 		{
 			printf("++ ");
 		} else
@@ -128,5 +125,74 @@ static void represent()
 		fputc('\n', stdout);
 	}
 
-	free(opt_mask);
+	free(out_mask);
+}
+
+static void summarize_metric(RepresentationMetric *metric)
+{
+
+}
+
+void test_initial_sets()
+{
+	int dim = 2;
+	int num_points = 100;
+	double spacing = .1;
+
+	int num_initial_sets = 6;
+	InitialSet **sets = (InitialSet **) malloc (sizeof(*sets) * num_initial_sets);
+
+	{
+		int index = 0;
+		sets[index++] = get_equidistant_initial_set(spacing, dim);
+		plot_initial_set("plots/equidistant_initial_set.m", sets[index-1]);
+		sets[index++] = get_simple_pareto_initial_set(num_points, dim, false);
+		plot_initial_set("plots/simple_sample_initial_set.m", sets[index-1]);
+		sets[index++] = get_simple_pareto_initial_set(num_points, dim, true);
+		plot_initial_set("plots/simple_equi_initial_set.m", sets[index-1]);
+		sets[index++] = get_uniform_random_initial_set(num_points, dim);
+		plot_initial_set("plots/uniform_random_initial_set.m", sets[index-1]);
+		sets[index++] = get_wavy_initial_set(num_points, dim);
+		plot_initial_set("plots/wavy_initial_set.m", sets[index-1]);
+		sets[index++] = get_bias_initial_set(num_points, dim);
+		plot_initial_set("plots/bias_initial_set.m", sets[index-1]);
+	}
+
+	for (int i = 0; i < num_initial_sets; i++)
+	{
+		InitialSet *set = sets[i];
+
+		{
+			DistToClosest metric(set, 1);
+			summarize_metric(&metric);
+		}
+
+		{
+			DistToClosest metric(set, 10);
+			summarize_metric(&metric);
+		}
+
+		{
+			std::vector<RepresentationMetric *> scalar1;
+			Epsilon epsilon(set, 1);
+			Delta delta(set, 1);
+
+			double *weights1 = (double *) malloc(sizeof(*weights1) * 2);
+			weights1[0] = 1;
+			weights1[1] = 2;
+
+			scalar1.push_back(&epsilon);
+			scalar1.push_back(&delta);
+
+			Scalarization metric(&scalar1, weights1);
+			summarize_metric(&metric);
+			free(weights1);
+		}
+	}
+
+	for (int i = 0; i < num_initial_sets; i++)
+	{
+		delete sets[i];
+	}
+	free(sets);
 }

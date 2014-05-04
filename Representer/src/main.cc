@@ -5,16 +5,13 @@
  *      Author: rever
  */
 
-#include <math.h>
-#include <float.h>
-#include <alloca.h>
-
-#include "GeneticRepresenter.h"
+#include "common.h"
 
 int main(int argc, char **argv)
 {
 //	represent();
 //	test_metric();
-	test_breadth_first();
+//	test_breadth_first();
+	test_initial_sets();
 	puts("Done.");
 }

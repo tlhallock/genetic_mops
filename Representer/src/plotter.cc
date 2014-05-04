@@ -5,7 +5,6 @@
  *      Author: rever
  */
 
-
 #include "InitialSet.h"
 
 void plot(const char *filename, InitialSet *set, char *mask,
@@ -57,4 +56,31 @@ void plot(const char *filename, InitialSet *set, char *mask,
 		fprintf(out, "pause(10)\n");
 
 		fclose(out);
+}
+
+void plot_initial_set(const char *filename, InitialSet *set)
+{
+	FILE *file = fopen(filename, "w");
+
+	fprintf(file, "xs = [...\n");
+
+	int length = set->size();
+	int dim = set->get_dim();
+
+	for (int i = 0; i < length; i++)
+	{
+		fprintf(file, "\t");
+		for (int j = 0; j < dim; j++)
+		{
+			fprintf(file, "%lf ", set->get(i)[j]);
+		}
+		fprintf(file, "; ...\n");
+	}
+
+	fprintf(file, "];\n");
+	fprintf(file, "scatter(xs(:, 1), xs(:, 2));\n");
+	fprintf(file, "drawnow;\n");
+	fprintf(file, "input(\"Press any key to continue\");\n");
+
+	fclose(file);
 }
