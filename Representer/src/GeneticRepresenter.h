@@ -34,10 +34,10 @@ private:
 	void cross_over(int parent1, int parent2, int num_to_use);
 	void mutate(int num_to_flip, int num_to_use, double *costs);
 
-	void select();
+	void select(int generation);
 
-	bool idk_what_to_call_this(RepresentationMetric *metric, int index_index, int index);
-	void idk_what_to_call_this(RepresentationMetric *metric, int index_index);
+	bool benefitial_mutate(RepresentationMetric *metric, int index_index, int index);
+	void benefitial_mutate(RepresentationMetric *metric, int index_index);
 
 	void ensure_uses(int index, unsigned int num_to_use);
 public:

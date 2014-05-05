@@ -14,7 +14,7 @@
 #include <float.h>
 #include <limits.h>
 
-#define GA_VERBOSE 0
+#define GA_VERBOSE 1
 
 static bool vec_contains(std::vector<int> *vec, int i)
 {
@@ -237,11 +237,11 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 			pop[i][j] = 0.0;
 		}
 		ensure_uses(i, num_points);
-		idk_what_to_call_this(metric, i);
+		benefitial_mutate(metric, i);
 		fitness[i] = metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
 	}
 
-	int nloops = 100;
+	int nloops = 1000;
 
 	for (int i = 0; i < nloops; i++)
 	{
@@ -269,11 +269,11 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 
 		cross_over(p1, p2, num_points);
 		mutate(2, num_points, costs);
-		idk_what_to_call_this(metric, 0);
+		benefitial_mutate(metric, 0);
 
 		fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
 
-		select();
+		select(i);
 
 		if (GA_VERBOSE)
 		{
@@ -293,6 +293,9 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		}
 	}
 
+	benefitial_mutate(metric, most_fit_index);
+	benefitial_mutate(metric, most_fit_index);
+
 	char * most_fit_mask = pop[most_fit_index];
 	for (int i = 0; i < iset->size(); i++)
 	{
@@ -304,7 +307,7 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 }
 
 
-void GeneticRepresenter::select()
+void GeneticRepresenter::select(int generation)
 {
 	int least_fit_index = INT_MIN;
 	double least_fitness = DBL_MAX;
@@ -328,6 +331,10 @@ void GeneticRepresenter::select()
 		return;
 	}
 
+	if (GA_VERBOSE)
+	{
+		printf("\tNew leat fit: gen=\t%d\t%lf\n", generation, fitness[least_fit_index]);
+	}
 //	plot("test.m", iset, pop[0], fitness[0]);
 
 	{
@@ -370,7 +377,7 @@ void GeneticRepresenter::print(int index)
 
 
 #define NUM_CLOSE_TO_USE 5
-bool GeneticRepresenter::idk_what_to_call_this(RepresentationMetric *metric, int index_index, int index)
+bool GeneticRepresenter::benefitial_mutate(RepresentationMetric *metric, int index_index, int index)
 {
 	int point = indices[index_index]->at(index);
 
@@ -438,7 +445,8 @@ bool GeneticRepresenter::idk_what_to_call_this(RepresentationMetric *metric, int
 	free(costs);
 	return ret_val;
 }
-void GeneticRepresenter::idk_what_to_call_this(RepresentationMetric *metric, int index_index)
+
+void GeneticRepresenter::benefitial_mutate(RepresentationMetric *metric, int index_index)
 {
 	int length = indices[index_index]->size();
 	int start_index = rand() % length;
@@ -450,7 +458,7 @@ void GeneticRepresenter::idk_what_to_call_this(RepresentationMetric *metric, int
 	{
 		for (int j = 0; j < length; j++, index = (index + 1) % length)
 		{
-			changed |= idk_what_to_call_this(metric, index_index, index);
+			changed |= benefitial_mutate(metric, index_index, index);
 		}
 
 		if (!changed)
