@@ -13,14 +13,7 @@
 Scalarization::Scalarization(std::vector<RepresentationMetric *> *metrics_, double *weights_) :
 	RepresentationMetric(metrics_->at(0)->get_set()),
 	metrics(*metrics_),
-	weights(weights_) {
-
-	for (unsigned int i = 0; i < metrics_->size(); i++)
-	{
-		fprintf(stdout, "metric %d = %p\n", i, metrics.at(i));
-	}
-
-}
+	weights(weights_) {}
 
 
 double Scalarization::get_fitness(char *mask, char *to_represent, double *costs)
@@ -28,7 +21,16 @@ double Scalarization::get_fitness(char *mask, char *to_represent, double *costs)
 	double fitness = 0.0;
 	int length = metrics.size();
 
-	for (int i = 0; i < get_set()->size(); i++)
+	int count_size = 0;
+	for (int i=0;i<get_set()->size();i++)
+	{
+		if (mask[i])
+		{
+			count_size++;
+		}
+	}
+
+	for (int i = 0; i < count_size; i++)
 	{
 		costs[i] = 0.0;
 	}

@@ -35,6 +35,14 @@ double generateGaussianNoise(const double &variance)
 	return sqrt(variance * rand1) * cos(rand2);
 }
 
+static double *scale_pnt(int dim, double *pnt)
+{
+	for (int i = 0; i < dim; i++)
+	{
+		pnt[i] *= 100;
+	}
+	return pnt;
+}
 
 InitialSet *get_equidistant_initial_set(double spacing, int dim)
 {
@@ -53,7 +61,7 @@ InitialSet *get_equidistant_initial_set(double spacing, int dim)
 			double *pnt = (double *) malloc (sizeof(*pnt) * dim);
 			pnt[0] = d1;
 			pnt[1] = d2;
-			pnts.push_back(pnt);
+			pnts.push_back(scale_pnt(dim, pnt));
 		}
 	}
 
@@ -84,7 +92,7 @@ InitialSet *get_simple_pareto_initial_set(int num_points, int dim, bool uniform)
 		double *pnt = (double *) malloc (sizeof(*pnt) * dim);
 		pnt[0] = xval;
 		pnt[1] = yval;
-		pnts.push_back(pnt);
+		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
 	return new InitialSet(&pnts, dim, &l_2);
@@ -97,7 +105,7 @@ InitialSet *get_uniform_random_initial_set(int num_points, int dim)
 
 	for (int i = 0; i < num_points; i++)
 	{
-		pnts.push_back(qtree::qtree_point_new_rand(dim));
+		pnts.push_back(scale_pnt(dim, qtree::qtree_point_new_rand(dim)));
 	}
 
 	return new InitialSet(&pnts, dim, &l_2);
@@ -120,7 +128,7 @@ InitialSet *get_wavy_initial_set(int num_points, int dim)
 			pnt[j] = sin(TWO_PI * x) + rand() / (double) RAND_MAX;
 		}
 
-		pnts.push_back(pnt);
+		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
 	return new InitialSet(&pnts, dim, &l_2);
@@ -146,7 +154,7 @@ InitialSet *get_bias_initial_set(int num_points, int dim)
 			pnt[j] = r;
 		}
 
-		pnts.push_back(pnt);
+		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
 	return new InitialSet(&pnts, dim, &l_2);

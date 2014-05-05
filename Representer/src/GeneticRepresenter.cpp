@@ -14,6 +14,8 @@
 #include <float.h>
 #include <limits.h>
 
+#define GA_VERBOSE 0
+
 static bool vec_contains(std::vector<int> *vec, int i)
 {
 	return std::find(vec->begin(), vec->end(), i) != vec->end();
@@ -26,8 +28,8 @@ void GeneticRepresenter::ensure_uses(int index, unsigned int num_to_use)
 		int to_del = rand() % indices[index]->size();
 		pop[index][indices[index]->at(to_del)] = 0;
 		// this line should be easier...
-		indices[index]->erase(indices[index]->begin() + to_del);
 //		indices[index]->erase(std::find(indices[index]->begin(), indices[index]->end(), indices[index]->at(to_del)));
+		indices[index]->erase(indices[index]->begin() + to_del);
 	}
 
 	while (indices[index]->size() < num_to_use)
@@ -51,7 +53,10 @@ void GeneticRepresenter::cross_over(int parent1, int parent2, int num_to_use)
 		idx2 = rand() % iset->size();
 	} while (idx1 == idx2);
 
-	printf("mutating from %d to %d\n", idx1, idx2);
+	if (GA_VERBOSE)
+	{
+		printf("mutating from %d to %d\n", idx2, idx1);
+	}
 
 	if (idx2 < idx1)
 	{
@@ -155,7 +160,10 @@ void GeneticRepresenter::mutate(int num_to_flip, int num_to_use, double *costs)
 			turn_on = rand() % iset->size();
 		} while (vec_contains(indices[0], turn_on));
 
-		printf("flipping %d to %d\n", turn_off, turn_on);
+		if (GA_VERBOSE)
+		{
+			printf("flipping %d to %d\n", turn_off, turn_on);
+		}
 
 		indices[0]->at(idx) = turn_on;
 		pop[0][turn_off] = 0;
@@ -187,7 +195,6 @@ GeneticRepresenter::GeneticRepresenter(int cap, int _pop_size) :
 			indices((std::vector<int> **) malloc (sizeof(*indices) * (_pop_size + 1))),
 			fitness((double *) malloc (sizeof(*fitness) * (_pop_size + 1))),
 			msk_all((char *) malloc (sizeof(*msk_all) * cap)),
-//			weights((double *) malloc (sizeof(*weights) * cap)),
 			iset(NULL)
 {
 	for (int i = 0; i < pop_size + 1; i++)
@@ -200,11 +207,6 @@ GeneticRepresenter::GeneticRepresenter(int cap, int _pop_size) :
 	{
 		msk_all[i] = 1;
 	}
-
-//	for (int i = 0; i < pop_size; i++)
-//	{
-//		weights[i] = get_weight(i);
-//	}
 }
 
 GeneticRepresenter::~GeneticRepresenter()
@@ -217,7 +219,6 @@ GeneticRepresenter::~GeneticRepresenter()
 	free(pop);
 	free(indices);
 	free(msk_all);
-//	free(weights);
 	free(fitness);
 }
 
@@ -227,18 +228,31 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 
 	double *costs = (double *) malloc (sizeof (*costs) * num_points);
 
-	char *f = pop[0];
-
 	// select initial population
 	for (int i = 1; i <= pop_size; i++)
 	{
+		for (int j = 0; j < iset->size(); j++)
+		{
+			// no uninitialized variables....
+			pop[i][j] = 0.0;
+		}
 		ensure_uses(i, num_points);
+		idk_what_to_call_this(metric, i);
 		fitness[i] = metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
 	}
 
-	for (int i = 0; i < 1000; i++)
+	int nloops = 100;
+
+	for (int i = 0; i < nloops; i++)
 	{
-		printf("generation %d\n", i);
+		if (GA_VERBOSE)
+		{
+			printf("generation %d\n", i);
+		}
+		else if ((i % 100) == 0)
+		{
+			printf("%d/%d\n", i, nloops);
+		}
 
 		int p1 = 1 + rand() % pop_size;
 		int p2;
@@ -247,22 +261,24 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 			p2 = 1 + rand() % pop_size;
 		} while (p1 == p2);
 
-		printf("selecting %d and %d\n", p1, p2);
-
-		print(0);
+		if (GA_VERBOSE)
+		{
+			printf("selecting %d and %d\n", p1, p2);
+			print(0);
+		}
 
 		cross_over(p1, p2, num_points);
-			mutate(2, num_points, costs);
+		mutate(2, num_points, costs);
+		idk_what_to_call_this(metric, 0);
 
-
-//		for (int i = 0; i < 3; i++)
-		{
-			fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
-		}
+		fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
 
 		select();
 
-//		sleep(1);
+		if (GA_VERBOSE)
+		{
+			sleep(1);
+		}
 	}
 
 	int most_fit_index = INT_MIN;
@@ -277,16 +293,10 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		}
 	}
 
-	if (pop[0] != f)
-	{
-		fprintf(stdout, "first pointer is %p\n", f);
-		fprintf(stdout, "now it is %p\n", pop[0]);
-	}
 	char * most_fit_mask = pop[most_fit_index];
 	for (int i = 0; i < iset->size(); i++)
 	{
-		char on = most_fit_mask[i];
-		mask_out[i] = on;
+		mask_out[i] = most_fit_mask[i];
 	}
 
 	free(costs);
@@ -308,7 +318,10 @@ void GeneticRepresenter::select()
 		}
 	}
 
-	printf("Least fit = %d\n", least_fit_index);
+	if (GA_VERBOSE)
+	{
+		printf("Least fit = %d\n", least_fit_index);
+	}
 
 	if (least_fit_index == 0)
 	{
@@ -353,4 +366,100 @@ void GeneticRepresenter::print(int index)
 	}
 
 	fflush(stdout);
+}
+
+
+#define NUM_CLOSE_TO_USE 5
+bool GeneticRepresenter::idk_what_to_call_this(RepresentationMetric *metric, int index_index, int index)
+{
+	int point = indices[index_index]->at(index);
+
+	int nearest[NUM_CLOSE_TO_USE];
+	double dists[NUM_CLOSE_TO_USE];
+	double *costs = (double *) malloc(sizeof(*costs) * iset->size());
+
+	iset->get_n_nearest(point, NUM_CLOSE_TO_USE, nearest, dists, iset->get_all_pnts());
+
+	double cval = metric->get_fitness(pop[index_index], iset->get_all_pnts(), costs);
+
+	if (GA_VERBOSE && false)
+	{
+		printf("fitness for %d is %lf\n", index, cval);
+	}
+
+	pop[index_index][point] = false;
+
+	int min = -1;
+	double maxVal = cval;
+	for (int i = 0; i < NUM_CLOSE_TO_USE; i++)
+	{
+		if (pop[index_index][nearest[i]])
+		{
+			if (GA_VERBOSE && false)
+			{
+				printf("index %d is already used\n", nearest[i]);
+			}
+			continue;
+		}
+
+		pop[index_index][nearest[i]] = true;
+		double val = metric->get_fitness(pop[index_index], iset->get_all_pnts(), costs);
+
+		if (GA_VERBOSE && false)
+		{
+			printf("Alternate fitness: %lf\n", val);
+		}
+		if (val > maxVal)
+		{
+			min = i;
+			maxVal = val;
+		}
+		pop[index_index][nearest[i]] = false;
+	}
+
+	bool ret_val;
+	if (min < 0)
+	{
+		pop[index_index][point] = true;
+		ret_val = false;
+	}
+	else
+	{
+		pop[index_index][nearest[min]] = true;
+		indices[index_index]->at(index) = nearest[min];
+		ret_val = true;
+
+		if (GA_VERBOSE)
+		{
+			printf("increased %d(%lf) -> %d(%lf)\n", point, cval, nearest[min], maxVal);
+		}
+	}
+
+	free(costs);
+	return ret_val;
+}
+void GeneticRepresenter::idk_what_to_call_this(RepresentationMetric *metric, int index_index)
+{
+	int length = indices[index_index]->size();
+	int start_index = rand() % length;
+
+	int index = start_index;
+	bool changed = false;
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < length; j++, index = (index + 1) % length)
+		{
+			changed |= idk_what_to_call_this(metric, index_index, index);
+		}
+
+		if (!changed)
+		{
+			break;
+		}
+		else
+		{
+			changed = false;
+		}
+	}
 }

@@ -58,7 +58,7 @@ clean:
 
 pre-build:
 	-@echo 'create the r-tree library'
-	-"/home/rever/Documents/Source/github/genetic_mops/Rtree/create_library.sh" "/home/rever/Documents/Source/github/genetic_mops/Rtree"
+	-"/school/genetic_mops/Rtree/create_library.sh" "/school/genetic_mops/Rtree"
 	-@echo ' '
 
 .PHONY: all clean dependents

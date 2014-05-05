@@ -130,6 +130,8 @@ void represent()
 
 static void summarize_metric(const char *filename, RepresentationMetric *metric)
 {
+	printf("Summarizing %s\n", filename);
+
 	int size = metric->get_set()->size();
 	GeneticRepresenter rep(size, 10);
 
@@ -152,37 +154,58 @@ void test_initial_sets()
 	int num_points = 100;
 	double spacing = .1;
 
+	char filename[256];
+
+	const char *initial_names[6] =
+	{
+		"equidistant",
+		"simple_sample",
+		"simple_equi",
+		"uniform_random",
+		"wavy",
+		"bias",
+	};
+
 	int num_initial_sets = 6;
 	InitialSet **sets = (InitialSet **) malloc (sizeof(*sets) * num_initial_sets);
 
 	{
 		int index = 0;
 		sets[index++] = get_equidistant_initial_set(spacing, dim);
-		plot_initial_set("plots/equidistant_initial_set.m", sets[index-1]);
+		sprintf(filename, "plots/0_%s_initial_set.m", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_simple_pareto_initial_set(num_points, dim, false);
-		plot_initial_set("plots/simple_sample_initial_set.m", sets[index-1]);
+		sprintf(filename, "plots/0_%s_initial_set.m", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_simple_pareto_initial_set(num_points, dim, true);
-		plot_initial_set("plots/simple_equi_initial_set.m", sets[index-1]);
+		sprintf(filename, "plots/0_%s_initial_set.m", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_uniform_random_initial_set(num_points, dim);
-		plot_initial_set("plots/uniform_random_initial_set.m", sets[index-1]);
+		sprintf(filename, "plots/0_%s_initial_set.m", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_wavy_initial_set(num_points, dim);
-		plot_initial_set("plots/wavy_initial_set.m", sets[index-1]);
+		sprintf(filename, "plots/0_%s_initial_set.m", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_bias_initial_set(num_points, dim);
-		plot_initial_set("plots/bias_initial_set.m", sets[index-1]);
+		sprintf(filename, "plots/0_%s_initial_set.m", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
 	}
 
 	for (int i = 0; i < num_initial_sets; i++)
 	{
 		InitialSet *set = sets[i];
+		printf("With initial set %s\n", initial_names[i]);
 
 		{
+			sprintf(filename, "plots/1_dist_to_closest_1_%s.m", initial_names[i]);
 			DistToClosest metric(set, 1);
-			summarize_metric("dist_to_closest_1.m", &metric);
+			summarize_metric(filename, &metric);
 		}
 
 		{
+			sprintf(filename, "plots/2_dist_to_closest_10_%s.m", initial_names[i]);
 			DistToClosest metric(set, 10);
-			summarize_metric("dist_to_closest_10.m", &metric);
+			summarize_metric(filename, &metric);
 		}
 
 		{
@@ -198,7 +221,9 @@ void test_initial_sets()
 			scalar1.push_back(&delta);
 
 			Scalarization metric(&scalar1, weights1);
-			summarize_metric("epsilon_delta_scalar.m", &metric);
+			sprintf(filename, "plots/3_epsilon_delta_scalar_%s.m", initial_names[i]);
+			summarize_metric(filename, &metric);
+
 			free(weights1);
 		}
 	}

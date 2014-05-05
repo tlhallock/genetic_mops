@@ -13,9 +13,11 @@
 class DistToClosest : public RepresentationMetric
 {
 	int num_closest;
+	int *nearest;
+	double *dists;
 public:
 	DistToClosest(InitialSet *set, int n_);
-	virtual ~DistToClosest() {}
+	virtual ~DistToClosest();
 
 	double get_fitness(char *mask, char *to_represent, double *costs);
 };

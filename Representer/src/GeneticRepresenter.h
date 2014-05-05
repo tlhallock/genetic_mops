@@ -36,6 +36,8 @@ private:
 
 	void select();
 
+	bool idk_what_to_call_this(RepresentationMetric *metric, int index_index, int index);
+	void idk_what_to_call_this(RepresentationMetric *metric, int index_index);
 
 	void ensure_uses(int index, unsigned int num_to_use);
 public:
