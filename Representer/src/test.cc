@@ -128,9 +128,22 @@ void represent()
 	free(out_mask);
 }
 
-static void summarize_metric(RepresentationMetric *metric)
+static void summarize_metric(const char *filename, RepresentationMetric *metric)
 {
+	int size = metric->get_set()->size();
+	GeneticRepresenter rep(size, 10);
 
+	char *mask = (char *) malloc (sizeof(*mask) * size);
+	double *costs = (double *) malloc (sizeof (*costs) * size);
+
+	rep.represent(10, metric, mask);
+
+	double fitness = metric->get_fitness(mask, metric->get_set()->get_all_pnts(), costs);
+
+	plot(filename, metric->get_set(), mask, fitness);
+
+	free(mask);
+	free(costs);
 }
 
 void test_initial_sets()
@@ -164,12 +177,12 @@ void test_initial_sets()
 
 		{
 			DistToClosest metric(set, 1);
-			summarize_metric(&metric);
+			summarize_metric("dist_to_closest_1.m", &metric);
 		}
 
 		{
 			DistToClosest metric(set, 10);
-			summarize_metric(&metric);
+			summarize_metric("dist_to_closest_10.m", &metric);
 		}
 
 		{
@@ -185,7 +198,7 @@ void test_initial_sets()
 			scalar1.push_back(&delta);
 
 			Scalarization metric(&scalar1, weights1);
-			summarize_metric(&metric);
+			summarize_metric("epsilon_delta_scalar.m", &metric);
 			free(weights1);
 		}
 	}

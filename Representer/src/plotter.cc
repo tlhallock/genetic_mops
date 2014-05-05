@@ -11,9 +11,9 @@ void plot(const char *filename, InitialSet *set, char *mask,
 //		double (*represent_metric)(InitialSet *set, char *to_use, char *to_represent),
 		double fitness)
 {
-		FILE *out = fopen(filename, "a");
+		FILE *out = fopen(filename, "w");
 
-//		fprintf(out, "graphics_toolkit gnuplot\n");
+		fprintf(out, "graphics_toolkit gnuplot\n");
 		fprintf(out, "x = [\n");
 		for (int i = 0; i < set->size(); i++)
 		{
@@ -46,14 +46,14 @@ void plot(const char *filename, InitialSet *set, char *mask,
 		}
 		fprintf(out, "];\n");
 
-		fprintf(out, "scatter(x(:,1), x(:,2), 's');\n");
+		fprintf(out, "scatter(x(:,1), x(:,2)%s);\n", true ? ", 10" : ", 's'");
 		fprintf(out, "hold on\n");
-		fprintf(out, "scatter(s(:,1), s(:,2), 'x');\n");
+		fprintf(out, "scatter(s(:,1), s(:,2)%s);\n", true ? ", 30" : ", 'x'");
 		fprintf(out, "drawnow\n");
 	//	fprintf(out, "input(\"enter something...\")\n");
 		fprintf(out, "hold off\n");
 		fprintf(out, "fitness = %lf\n", fitness);
-		fprintf(out, "pause(10)\n");
+		fprintf(out, "input('enter something to continue');\n");
 
 		fclose(out);
 }
@@ -62,6 +62,7 @@ void plot_initial_set(const char *filename, InitialSet *set)
 {
 	FILE *file = fopen(filename, "w");
 
+	fprintf(file, "graphics_toolkit gnuplot\n");
 	fprintf(file, "xs = [...\n");
 
 	int length = set->size();

@@ -20,8 +20,6 @@ void plot(const char *filename, InitialSet *set, char *mask, double fitness);
 class GeneticRepresenter
 {
 private:
-	int capacity;
-
 	int pop_size;
 	char **pop;
 	std::vector<int> **indices;

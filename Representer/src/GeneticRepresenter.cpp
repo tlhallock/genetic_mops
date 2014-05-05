@@ -182,7 +182,6 @@ double GeneticRepresenter::get_weight(int i)
 }
 
 GeneticRepresenter::GeneticRepresenter(int cap, int _pop_size) :
-			capacity(cap),
 			pop_size(_pop_size),
 			pop((char **) malloc (sizeof(*pop) * (_pop_size + 1))),
 			indices((std::vector<int> **) malloc (sizeof(*indices) * (_pop_size + 1))),
@@ -228,6 +227,8 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 
 	double *costs = (double *) malloc (sizeof (*costs) * num_points);
 
+	char *f = pop[0];
+
 	// select initial population
 	for (int i = 1; i <= pop_size; i++)
 	{
@@ -235,7 +236,7 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		fitness[i] = metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
 	}
 
-	for (int i = 0; /*i < 10*/; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		printf("generation %d\n", i);
 
@@ -251,12 +252,12 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		print(0);
 
 		cross_over(p1, p2, num_points);
+			mutate(2, num_points, costs);
 
 
-		for (int i = 0; i < 3; i++)
+//		for (int i = 0; i < 3; i++)
 		{
 			fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
-			mutate(2, num_points, costs);
 		}
 
 		select();
@@ -276,13 +277,20 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		}
 	}
 
+	if (pop[0] != f)
+	{
+		fprintf(stdout, "first pointer is %p\n", f);
+		fprintf(stdout, "now it is %p\n", pop[0]);
+	}
+	char * most_fit_mask = pop[most_fit_index];
 	for (int i = 0; i < iset->size(); i++)
 	{
-		mask_out[i] = pop[most_fit_index][i];
+		char on = most_fit_mask[i];
+		mask_out[i] = on;
 	}
 
 	free(costs);
-	this->iset = NULL;
+	iset = NULL;
 }
 
 
@@ -307,7 +315,7 @@ void GeneticRepresenter::select()
 		return;
 	}
 
-	plot("test.m", iset, pop[0], fitness[0]);
+//	plot("test.m", iset, pop[0], fitness[0]);
 
 	{
 		std::vector<int> *tmp = indices[0];
