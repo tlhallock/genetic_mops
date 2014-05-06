@@ -25,11 +25,11 @@ Epsilon::~Epsilon()
 
 double Epsilon::get_fitness(char *mask, char *to_represent, double *costs)
 {
-	double min = DBL_MAX;
+	double max = -DBL_MAX;
 
 	for (int i = 0; i < set->size(); i++)
 	{
-		set->get_n_nearest(i, num_closest, indices, dists, set->get_all_pnts());
+		set->get_n_nearest(i, num_closest, indices, dists, mask);
 
 		double sum = 0.0;
 		for (int j = 0; j < num_closest; j++)
@@ -40,11 +40,11 @@ double Epsilon::get_fitness(char *mask, char *to_represent, double *costs)
 		double avg = sum / num_closest;
 		costs[i] = avg;
 
-		if (avg < min)
+		if (avg > max)
 		{
-			min = avg;
+			max = avg;
 		}
 	}
 
-	return min;
+	return -max;
 }

@@ -22,7 +22,7 @@ double Scalarization::get_fitness(char *mask, char *to_represent, double *costs)
 	int length = metrics.size();
 
 	int count_size = 0;
-	for (int i=0;i<get_set()->size();i++)
+	for (int i = 0; i < get_set()->size(); i++)
 	{
 		if (mask[i])
 		{
@@ -40,8 +40,8 @@ double Scalarization::get_fitness(char *mask, char *to_represent, double *costs)
 	for (int i = 0; i < length; i++)
 	{
 		RepresentationMetric *m = metrics.at(i);
-		double fitness = m->get_fitness(mask, to_represent, mycosts);
-		fitness += weights[i] * fitness;
+		double cfitness = m->get_fitness(mask, to_represent, mycosts);
+		fitness += weights[i] * cfitness;
 		for (int j = 0; j < length; j++)
 		{
 			costs[j] += mycosts[j];

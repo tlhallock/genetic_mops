@@ -85,6 +85,11 @@ void bread_first_represent(InitialSet *set, int num_points, char *mask_out)
 
 	while(list_size < num_points)
 	{
+		if (set->get_dim() == 1)
+		{
+			puts("break point me!!!");
+		}
+
 		print_list(first, set->get_dim(), 0);
 		if (first->leaf == NULL)
 		{

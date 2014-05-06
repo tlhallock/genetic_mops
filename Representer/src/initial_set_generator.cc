@@ -48,21 +48,30 @@ InitialSet *get_equidistant_initial_set(double spacing, int dim)
 {
 	std::vector<double *> pnts;
 
-	if (dim != 2)
+	if (dim == 1)
+	{
+		for (double d1 = 0.0; d1 < 1.0; d1 += spacing)
+		{
+			double *pnt = (double *) malloc(sizeof(*pnt) * dim);
+			pnt[0] = d1;
+			pnts.push_back(scale_pnt(dim, pnt));
+		}
+	} else if (dim == 2)
+	{
+		for (double d1 = 0.0; d1 < 1.0; d1 += spacing)
+		{
+			for (double d2 = 0.0; d2 < 1.0; d2 += spacing)
+			{
+				double *pnt = (double *) malloc(sizeof(*pnt) * dim);
+				pnt[0] = d1;
+				pnt[1] = d2;
+				pnts.push_back(scale_pnt(dim, pnt));
+			}
+		}
+	} else
 	{
 		puts("Implement me!!! 258609287602");
 		exit(1);
-	}
-
-	for (double d1 = 0.0; d1 < 1.0; d1 += spacing)
-	{
-		for (double d2 = 0.0; d2 < 1.0; d2 += spacing)
-		{
-			double *pnt = (double *) malloc (sizeof(*pnt) * dim);
-			pnt[0] = d1;
-			pnt[1] = d2;
-			pnts.push_back(scale_pnt(dim, pnt));
-		}
 	}
 
 	return new InitialSet(&pnts, dim, &l_2);
@@ -159,5 +168,4 @@ InitialSet *get_bias_initial_set(int num_points, int dim)
 
 	return new InitialSet(&pnts, dim, &l_2);
 }
-
 

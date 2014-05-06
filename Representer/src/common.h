@@ -29,7 +29,10 @@
 
 void plot(const char *filename, InitialSet *set, char *mask, double fitness);
 void plot_initial_set(const char *filename, InitialSet *set);
+
 void bread_first_represent(InitialSet *set, int num_points, char *mask_out);
+void sort_represent(InitialSet *set, int num_points, char *mask_out);
+void random_sample(RepresentationMetric *metric, int num_points, char *mask_out, int num_samples);
 
 InitialSet *get_equidistant_initial_set(double spacing, int dim);
 InitialSet *get_simple_pareto_initial_set(int num_points, int dim, bool equidistant);

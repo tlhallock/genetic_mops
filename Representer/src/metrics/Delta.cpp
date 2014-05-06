@@ -26,11 +26,11 @@ Delta::~Delta()
 
 double Delta::get_fitness(char *mask, char *to_represent, double *costs)
 {
-	double max = -DBL_MAX;
+	double min = DBL_MAX;
 
 	for (int i = 0; i < set->size(); i++)
 	{
-		set->get_n_nearest(i, num_closest, indices, dists, set->get_all_pnts());
+		set->get_n_nearest(i, num_closest, indices, dists, mask);
 
 		double sum = 0.0;
 		for (int j = 0; j < num_closest; j++)
@@ -41,11 +41,11 @@ double Delta::get_fitness(char *mask, char *to_represent, double *costs)
 		double avg = sum / num_closest;
 		costs[i] = avg;
 
-		if (avg > max)
+		if (avg < min)
 		{
-			max = avg;
+			min = avg;
 		}
 	}
 
-	return max;
+	return min;
 }

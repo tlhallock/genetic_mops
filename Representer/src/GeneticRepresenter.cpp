@@ -14,7 +14,7 @@
 #include <float.h>
 #include <limits.h>
 
-#define GA_VERBOSE 1
+#define GA_VERBOSE 0
 
 static bool vec_contains(std::vector<int> *vec, int i)
 {
@@ -241,7 +241,7 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		fitness[i] = metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
 	}
 
-	int nloops = 1000;
+	int nloops = 100;
 
 	for (int i = 0; i < nloops; i++)
 	{
@@ -277,7 +277,7 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 
 		if (GA_VERBOSE)
 		{
-			sleep(1);
+//			sleep(1);
 		}
 	}
 
@@ -323,7 +323,7 @@ void GeneticRepresenter::select(int generation)
 
 	if (GA_VERBOSE)
 	{
-		printf("Least fit = %d\n", least_fit_index);
+		printf("Least fit = %d, f=%lf\n", least_fit_index, fitness[least_fit_index]);
 	}
 
 	if (least_fit_index == 0)
@@ -333,7 +333,7 @@ void GeneticRepresenter::select(int generation)
 
 	if (GA_VERBOSE)
 	{
-		printf("\tNew leat fit: gen=\t%d\t%lf\n", generation, fitness[least_fit_index]);
+		printf("\tNew least fit: gen=\t%d\t%lf\n", generation, fitness[least_fit_index]);
 	}
 //	plot("test.m", iset, pop[0], fitness[0]);
 
