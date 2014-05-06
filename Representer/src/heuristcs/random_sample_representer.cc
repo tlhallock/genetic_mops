@@ -7,8 +7,10 @@
 
 #include "../common.h"
 
-static void randomly_select(char *mask, int length, int num_to_use)
+static void randomly_select(char *mask, int length, int num_to_use, std::vector<int> *vec)
 {
+	vec->clear();
+
 	for (int i = 0; i < length; i++)
 	{
 		mask[i] = 0;
@@ -21,13 +23,17 @@ static void randomly_select(char *mask, int length, int num_to_use)
 		{
 			index = rand() % length;
 		} while (mask[index]);
+
 		mask[index] = 1;
+		vec->push_back(index);
 	}
 }
 
-void random_sample(RepresentationMetric *metric, int num_points, char *mask_out, int num_samples)
+void random_sample(RepresentationMetric *metric, int num_points, char *mask_out, int num_samples, bool greedy)
 {
 	double fit_max = -DBL_MAX;
+
+	std::vector<int> vec;
 
 	InitialSet *set = metric->get_set();
 	int length = set->size();
@@ -37,8 +43,15 @@ void random_sample(RepresentationMetric *metric, int num_points, char *mask_out,
 
 	for (int i = 0; i < num_samples; i++)
 	{
-		randomly_select(tmp_mask, length, num_points);
+		randomly_select(tmp_mask, length, num_points, &vec);
+
+		if (greedy)
+		{
+			greedy_improve(metric, &vec, tmp_mask);
+		}
+
 		double fitness = metric->get_fitness(tmp_mask, set->get_all_pnts(), costs);
+
 		if (fitness > fit_max)
 		{
 			fit_max = fitness;

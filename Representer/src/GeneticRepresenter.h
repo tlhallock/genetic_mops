@@ -35,10 +35,6 @@ private:
 	void mutate(int num_to_flip, int num_to_use, double *costs);
 
 	void select(int generation);
-
-	bool benefitial_mutate(RepresentationMetric *metric, int index_index, int index);
-	void benefitial_mutate(RepresentationMetric *metric, int index_index);
-
 	void ensure_uses(int index, unsigned int num_to_use);
 public:
 	GeneticRepresenter(int cap, int pop_size);

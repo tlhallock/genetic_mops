@@ -6,13 +6,7 @@
  */
 
 #include "GeneticRepresenter.h"
-
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
-#include <algorithm>
-#include <float.h>
-#include <limits.h>
+#include "common.h"
 
 #define GA_VERBOSE 0
 
@@ -237,7 +231,8 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 			pop[i][j] = 0.0;
 		}
 		ensure_uses(i, num_points);
-		benefitial_mutate(metric, i);
+		greedy_improve(metric, indices[i], pop[i]);
+
 		fitness[i] = metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
 	}
 
@@ -269,7 +264,8 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 
 		cross_over(p1, p2, num_points);
 		mutate(2, num_points, costs);
-		benefitial_mutate(metric, 0);
+
+		greedy_improve(metric, indices[0], pop[0]);
 
 		fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
 
@@ -293,8 +289,7 @@ void GeneticRepresenter::represent(int num_points, RepresentationMetric *metric,
 		}
 	}
 
-	benefitial_mutate(metric, most_fit_index);
-	benefitial_mutate(metric, most_fit_index);
+	greedy_improve(metric, indices[most_fit_index], pop[most_fit_index]);
 
 	char * most_fit_mask = pop[most_fit_index];
 	for (int i = 0; i < iset->size(); i++)
@@ -335,6 +330,7 @@ void GeneticRepresenter::select(int generation)
 	{
 		printf("\tNew least fit: gen=\t%d\t%lf\n", generation, fitness[least_fit_index]);
 	}
+
 //	plot("test.m", iset, pop[0], fitness[0]);
 
 	{
@@ -375,99 +371,3 @@ void GeneticRepresenter::print(int index)
 	fflush(stdout);
 }
 
-
-#define NUM_CLOSE_TO_USE 5
-bool GeneticRepresenter::benefitial_mutate(RepresentationMetric *metric, int index_index, int index)
-{
-	int point = indices[index_index]->at(index);
-
-	int nearest[NUM_CLOSE_TO_USE];
-	double dists[NUM_CLOSE_TO_USE];
-	double *costs = (double *) malloc(sizeof(*costs) * iset->size());
-
-	iset->get_n_nearest(point, NUM_CLOSE_TO_USE, nearest, dists, iset->get_all_pnts());
-
-	double cval = metric->get_fitness(pop[index_index], iset->get_all_pnts(), costs);
-
-	if (GA_VERBOSE && false)
-	{
-		printf("fitness for %d is %lf\n", index, cval);
-	}
-
-	pop[index_index][point] = false;
-
-	int min = -1;
-	double maxVal = cval;
-	for (int i = 0; i < NUM_CLOSE_TO_USE; i++)
-	{
-		if (pop[index_index][nearest[i]])
-		{
-			if (GA_VERBOSE && false)
-			{
-				printf("index %d is already used\n", nearest[i]);
-			}
-			continue;
-		}
-
-		pop[index_index][nearest[i]] = true;
-		double val = metric->get_fitness(pop[index_index], iset->get_all_pnts(), costs);
-
-		if (GA_VERBOSE && false)
-		{
-			printf("Alternate fitness: %lf\n", val);
-		}
-		if (val > maxVal)
-		{
-			min = i;
-			maxVal = val;
-		}
-		pop[index_index][nearest[i]] = false;
-	}
-
-	bool ret_val;
-	if (min < 0)
-	{
-		pop[index_index][point] = true;
-		ret_val = false;
-	}
-	else
-	{
-		pop[index_index][nearest[min]] = true;
-		indices[index_index]->at(index) = nearest[min];
-		ret_val = true;
-
-		if (GA_VERBOSE)
-		{
-			printf("increased %d(%lf) -> %d(%lf)\n", point, cval, nearest[min], maxVal);
-		}
-	}
-
-	free(costs);
-	return ret_val;
-}
-
-void GeneticRepresenter::benefitial_mutate(RepresentationMetric *metric, int index_index)
-{
-	int length = indices[index_index]->size();
-	int start_index = rand() % length;
-
-	int index = start_index;
-	bool changed = false;
-
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < length; j++, index = (index + 1) % length)
-		{
-			changed |= benefitial_mutate(metric, index_index, index);
-		}
-
-		if (!changed)
-		{
-			break;
-		}
-		else
-		{
-			changed = false;
-		}
-	}
-}

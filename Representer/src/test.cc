@@ -147,7 +147,13 @@ static void summarize_metric(const char *filename, RepresentationMetric *metric,
 
 	// Random algorithm...
 	sprintf(file_buff, "plots/%s_random", filename);
-	random_sample(metric, num_to_use, mask, 100);
+	random_sample(metric, num_to_use, mask, 100, false);
+	fitness = metric->get_fitness(mask, metric->get_set()->get_all_pnts(), costs);
+	plot(file_buff, metric->get_set(), mask, fitness);
+
+	// greedy random algorithm...
+	sprintf(file_buff, "plots/%s_random_greedy", filename);
+	random_sample(metric, num_to_use, mask, 100, true);
 	fitness = metric->get_fitness(mask, metric->get_set()->get_all_pnts(), costs);
 	plot(file_buff, metric->get_set(), mask, fitness);
 
