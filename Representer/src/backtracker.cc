@@ -97,17 +97,17 @@ void backtrack(BacktrackObject *bt)
 
 }
 
-void back_track_to_find_optimal(InitialSet *set, RepresentationMetric *metric, char *out_mask, int to_use)
+void back_track_to_find_optimal(RepresentationMetric *metric, char *out_mask, int to_use)
 {
 	backtrack::BacktrackObject bt(metric, out_mask, to_use);
 	backtrack::backtrack(&bt);
-	for (int i = 0; i < set->size(); i++)
+	for (int i = 0; i < metric->get_set()->size(); i++)
 	{
 		out_mask[i] = bt.out_mask[i];
 	}
 }
 
-void back_track_to_find_optimal(InitialSet *set, RepresentationMetric *metric, char *out_mask)
+void back_track_to_find_optimal(RepresentationMetric *metric, char *out_mask)
 {
-	back_track_to_find_optimal(set, metric, out_mask, BACKTRACKER_NUM_TO_USE_ANY);
+	back_track_to_find_optimal(metric, out_mask, BACKTRACKER_NUM_TO_USE_ANY);
 }

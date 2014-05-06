@@ -20,6 +20,8 @@
 #include "metrics/Scalarization.h"
 #include "metrics/Variation.h"
 
+#include "backtracker.h"
+
 #include <limits.h>
 #include <float.h>
 #include <alloca.h>

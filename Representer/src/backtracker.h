@@ -12,8 +12,8 @@
 
 #define BACKTRACKER_NUM_TO_USE_ANY (-1)
 
-void back_track_to_find_optimal(InitialSet *set, RepresentationMetric *metric, char *out_mask, int to_use);
-void back_track_to_find_optimal(InitialSet *set, RepresentationMetric *metric, char *out_mask);
+void back_track_to_find_optimal(RepresentationMetric *metric, char *out_mask, int to_use);
+void back_track_to_find_optimal(RepresentationMetric *metric, char *out_mask);
 
 
 #endif /* BACKTRACKER_H_ */

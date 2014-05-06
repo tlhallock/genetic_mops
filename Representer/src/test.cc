@@ -151,6 +151,20 @@ static void summarize_metric(const char *filename, RepresentationMetric *metric,
 	fitness = metric->get_fitness(mask, metric->get_set()->get_all_pnts(), costs);
 	plot(file_buff, metric->get_set(), mask, fitness);
 
+	if (metric->get_set()->size() < 25)
+	{
+		printf("backtracking...\n");
+		sprintf(file_buff, "plots/%s_backtrack", filename);
+		back_track_to_find_optimal(metric, mask, num_to_use);
+		fitness = metric->get_fitness(mask, metric->get_set()->get_all_pnts(), costs);
+		plot(file_buff, metric->get_set(), mask, fitness);
+
+//		sprintf(file_buff, "plots/%s_backtrack_any", filename);
+//		back_track_to_find_optimal(metric, mask);
+//		fitness = metric->get_fitness(mask, metric->get_set()->get_all_pnts(), costs);
+//		plot(file_buff, metric->get_set(), mask, fitness);
+	}
+
 	free(mask);
 	free(costs);
 }
@@ -207,6 +221,13 @@ void test_initial_sets()
 	{
 		InitialSet *set = sets[i];
 		printf("With initial set %s\n", initial_names[i]);
+
+		{
+			sprintf(filename, "plots/1_optimal_%s", initial_names[i]);
+			char *mask = (char *) malloc (sizeof (*mask) * set->size());
+
+
+		}
 
 		{
 			sprintf(filename, "plots/1_sort_%s", initial_names[i]);
@@ -310,6 +331,26 @@ void test_initial_sets()
 
 			Scalarization metric(&scalar1, weights);
 			sprintf(filename, "9_epsilon_delta_scalar_11_2_%s", initial_names[i]);
+			summarize_metric(filename, &metric, num_to_use);
+
+
+			free(weights);
+		}
+
+		{
+			double *weights = (double *) malloc(sizeof(*weights) * 2);
+			weights[0] = 1;
+			weights[1] = .01;
+
+			std::vector<RepresentationMetric *> scalar1;
+			DistToClosest dist(set, 1);
+			Variation var(set);
+
+			scalar1.push_back(&dist);
+			scalar1.push_back(&var);
+
+			Scalarization metric(&scalar1, weights);
+			sprintf(filename, "9_dist_variation_scalar_%s", initial_names[i]);
 			summarize_metric(filename, &metric, num_to_use);
 
 
