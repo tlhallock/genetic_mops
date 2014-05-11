@@ -1,0 +1,39 @@
+called: /usr/bin/g++
+	/school/genetic_mops/GeneticMOP/build
+	/usr/bin/g++
+	-g3
+	-gdwarf-2
+	-Wall
+	-march=native
+	-I/school/genetic_mops/GeneticMOP/build/../../out/lib
+	-o
+	CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/DepthFirstRecursiveStencil.cpp.o
+	-c
+	/school/genetic_mops/GeneticMOP/src/DepthFirstRecursiveStencil.cpp
+
+called: /usr/bin/g++
+	/school/genetic_mops/GeneticMOP/build
+	/usr/bin/g++
+	-g3
+	-gdwarf-2
+	-Wall
+	-march=native
+	-I/school/genetic_mops/GeneticMOP/build/../../out/lib
+	-o
+	CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/math_functions.cpp.o
+	-c
+	/school/genetic_mops/GeneticMOP/src/math_functions.cpp
+
+called: /usr/bin/g++
+	/school/genetic_mops/GeneticMOP/build
+	/usr/bin/g++
+	-g3
+	-gdwarf-2
+	-Wall
+	-march=native
+	-I/school/genetic_mops/GeneticMOP/build/../../out/lib
+	-o
+	CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/GeneticMOP.cpp.o
+	-c
+	/school/genetic_mops/GeneticMOP/src/GeneticMOP.cpp
+

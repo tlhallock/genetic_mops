@@ -1,0 +1,11 @@
+[  9%] Building CXX object CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/DepthFirstRecursiveStencil.cpp.o
+[ 18%] Building CXX object CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/math_functions.cpp.o
+[ 27%] Building CXX object CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/GeneticMOP.cpp.o
+In file included from /school/genetic_mops/GeneticMOP/src/GeneticMOP.cpp:19:0:
+/school/genetic_mops/GeneticMOP/src/GeneticSolver.h:13:19: fatal error: Qtree.h: No such file or directory
+ #include "Qtree.h"
+                   ^
+compilation terminated.
+make[2]: *** [CMakeFiles/Mops.dir/school/genetic_mops/GeneticMOP/src/GeneticMOP.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Mops.dir/all] Error 2
+make: *** [all] Error 2

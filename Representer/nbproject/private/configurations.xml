@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="94">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="build">
+        <df name="CMakeFiles">
+          <df name="2.8.12.2">
+            <df name="CompilerIdC">
+              <in>CMakeCCompilerId.c</in>
+            </df>
+            <df name="CompilerIdCXX">
+              <in>CMakeCXXCompilerId.cpp</in>
+            </df>
+          </df>
+          <df name="CMakeTmp">
+          </df>
+          <df name="Progress">
+          </df>
+          <df name="Representer.dir">
+            <df name="school">
+              <df name="genetic_mops">
+                <df name="Representer">
+                  <df name="src">
+                    <df name="heuristcs">
+                    </df>
+                    <df name="metrics">
+                    </df>
+                  </df>
+                </df>
+              </df>
+            </df>
+          </df>
+          <df name="TestRepresenter.dir">
+            <df name="school">
+              <df name="genetic_mops">
+                <df name="Representer">
+                  <df name="src">
+                  </df>
+                </df>
+              </df>
+            </df>
+          </df>
+        </df>
+        <df name="Debug">
+          <df name="CMakeFiles">
+            <df name="2.8.12.2">
+              <df name="CompilerIdC">
+                <in>CMakeCCompilerId.c</in>
+              </df>
+              <df name="CompilerIdCXX">
+                <in>CMakeCXXCompilerId.cpp</in>
+              </df>
+            </df>
+            <df name="CMakeTmp">
+            </df>
+            <df name="Representer.dir">
+              <df name="school">
+                <df name="genetic_mops">
+                  <df name="Representer">
+                    <df name="src">
+                      <df name="heuristcs">
+                      </df>
+                      <df name="metrics">
+                      </df>
+                    </df>
+                  </df>
+                </df>
+              </df>
+            </df>
+            <df name="TestRepresenter.dir">
+              <df name="school">
+                <df name="genetic_mops">
+                  <df name="Representer">
+                    <df name="src">
+                    </df>
+                  </df>
+                </df>
+              </df>
+            </df>
+          </df>
+        </df>
+        <df name="Release">
+          <df name="CMakeFiles">
+            <df name="2.8.12.2">
+              <df name="CompilerIdC">
+                <in>CMakeCCompilerId.c</in>
+              </df>
+              <df name="CompilerIdCXX">
+                <in>CMakeCXXCompilerId.cpp</in>
+              </df>
+            </df>
+            <df name="CMakeTmp">
+            </df>
+            <df name="Representer.dir">
+              <df name="school">
+                <df name="genetic_mops">
+                  <df name="Representer">
+                    <df name="src">
+                      <df name="heuristcs">
+                      </df>
+                      <df name="metrics">
+                      </df>
+                    </df>
+                  </df>
+                </df>
+              </df>
+            </df>
+            <df name="TestRepresenter.dir">
+              <df name="school">
+                <df name="genetic_mops">
+                  <df name="Representer">
+                    <df name="src">
+                    </df>
+                  </df>
+                </df>
+              </df>
+            </df>
+          </df>
+        </df>
+      </df>
+      <df name="plots">
+        <df name="plot_plots">
+        </df>
+        <in>0_bias_initial_set.m</in>
+        <in>0_equidistant_initial_set.m</in>
+        <in>0_simple_equi_initial_set.m</in>
+        <in>0_simple_equidistant_initial_set.m</in>
+        <in>0_simple_sample_initial_set.m</in>
+        <in>0_uniform_random_initial_set.m</in>
+        <in>0_wavy_initial_set.m</in>
+        <in>1_sort_bias.m</in>
+        <in>1_sort_equidistant.m</in>
+        <in>1_sort_simple_equi.m</in>
+        <in>1_sort_simple_equidistant.m</in>
+        <in>1_sort_simple_sample.m</in>
+        <in>1_sort_uniform_random.m</in>
+        <in>1_sort_wavy.m</in>
+        <in>2_rtree_bias.m</in>
+        <in>2_rtree_equidistant.m</in>
+        <in>2_rtree_simple_equi.m</in>
+        <in>2_rtree_simple_equidistant.m</in>
+        <in>2_rtree_simple_sample.m</in>
+        <in>2_rtree_uniform_random.m</in>
+        <in>2_rtree_wavy.m</in>
+        <in>3_dist_to_closest_1_bias_ga.m</in>
+        <in>3_dist_to_closest_1_bias_random.m</in>
+        <in>3_dist_to_closest_1_bias_random_greedy.m</in>
+        <in>3_dist_to_closest_1_equidistant_ga.m</in>
+        <in>3_dist_to_closest_1_equidistant_random.m</in>
+        <in>3_dist_to_closest_1_equidistant_random_greedy.m</in>
+        <in>3_dist_to_closest_1_simple_equi_ga.m</in>
+        <in>3_dist_to_closest_1_simple_equi_random.m</in>
+        <in>3_dist_to_closest_1_simple_equi_random_greedy.m</in>
+        <in>3_dist_to_closest_1_simple_equidistant_backtrack.m</in>
+        <in>3_dist_to_closest_1_simple_equidistant_ga.m</in>
+        <in>3_dist_to_closest_1_simple_equidistant_random.m</in>
+        <in>3_dist_to_closest_1_simple_equidistant_random_greedy.m</in>
+        <in>3_dist_to_closest_1_simple_sample_ga.m</in>
+        <in>3_dist_to_closest_1_simple_sample_random.m</in>
+        <in>3_dist_to_closest_1_simple_sample_random_greedy.m</in>
+        <in>3_dist_to_closest_1_uniform_random_ga.m</in>
+        <in>3_dist_to_closest_1_uniform_random_random.m</in>
+        <in>3_dist_to_closest_1_uniform_random_random_greedy.m</in>
+        <in>3_dist_to_closest_1_wavy_ga.m</in>
+        <in>3_dist_to_closest_1_wavy_random.m</in>
+        <in>3_dist_to_closest_1_wavy_random_greedy.m</in>
+        <in>4_dist_to_closest_10_bias_ga.m</in>
+        <in>4_dist_to_closest_10_bias_random.m</in>
+        <in>4_dist_to_closest_10_bias_random_greedy.m</in>
+        <in>4_dist_to_closest_10_equidistant_ga.m</in>
+        <in>4_dist_to_closest_10_equidistant_random.m</in>
+        <in>4_dist_to_closest_10_equidistant_random_greedy.m</in>
+        <in>4_dist_to_closest_10_simple_equi_ga.m</in>
+        <in>4_dist_to_closest_10_simple_equi_random.m</in>
+        <in>4_dist_to_closest_10_simple_equi_random_greedy.m</in>
+        <in>4_dist_to_closest_10_simple_equidistant_backtrack.m</in>
+        <in>4_dist_to_closest_10_simple_equidistant_ga.m</in>
+        <in>4_dist_to_closest_10_simple_equidistant_random.m</in>
+        <in>4_dist_to_closest_10_simple_equidistant_random_greedy.m</in>
+        <in>4_dist_to_closest_10_simple_sample_ga.m</in>
+        <in>4_dist_to_closest_10_simple_sample_random.m</in>
+        <in>4_dist_to_closest_10_simple_sample_random_greedy.m</in>
+        <in>4_dist_to_closest_10_uniform_random_ga.m</in>
+        <in>4_dist_to_closest_10_uniform_random_random.m</in>
+        <in>4_dist_to_closest_10_uniform_random_random_greedy.m</in>
+        <in>4_dist_to_closest_10_wavy_ga.m</in>
+        <in>4_dist_to_closest_10_wavy_random.m</in>
+        <in>4_dist_to_closest_10_wavy_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_bias_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_bias_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_bias_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_equidistant_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_equidistant_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_equidistant_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equi_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equi_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equi_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equidistant_backtrack.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equidistant_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equidistant_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_equidistant_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_sample_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_sample_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_simple_sample_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_uniform_random_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_uniform_random_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_uniform_random_random_greedy.m</in>
+        <in>6_epsilon_delta_scalar_01_1_wavy_ga.m</in>
+        <in>6_epsilon_delta_scalar_01_1_wavy_random.m</in>
+        <in>6_epsilon_delta_scalar_01_1_wavy_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_bias_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_bias_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_bias_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_equidistant_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_equidistant_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_equidistant_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equi_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equi_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equi_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equidistant_backtrack.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equidistant_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equidistant_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_equidistant_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_sample_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_sample_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_simple_sample_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_uniform_random_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_uniform_random_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_uniform_random_random_greedy.m</in>
+        <in>7_epsilon_delta_scalar_10_1_wavy_ga.m</in>
+        <in>7_epsilon_delta_scalar_10_1_wavy_random.m</in>
+        <in>7_epsilon_delta_scalar_10_1_wavy_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_bias_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_bias_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_bias_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_equidistant_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_equidistant_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_equidistant_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equi_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equi_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equi_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equidistant_backtrack.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equidistant_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equidistant_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_equidistant_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_sample_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_sample_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_simple_sample_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_uniform_random_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_uniform_random_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_uniform_random_random_greedy.m</in>
+        <in>8_epsilon_delta_scalar_11_1_wavy_ga.m</in>
+        <in>8_epsilon_delta_scalar_11_1_wavy_random.m</in>
+        <in>8_epsilon_delta_scalar_11_1_wavy_random_greedy.m</in>
+        <in>9_dist_variation_scalar_bias_ga.m</in>
+        <in>9_dist_variation_scalar_bias_random.m</in>
+        <in>9_dist_variation_scalar_bias_random_greedy.m</in>
+        <in>9_dist_variation_scalar_equidistant_ga.m</in>
+        <in>9_dist_variation_scalar_equidistant_random.m</in>
+        <in>9_dist_variation_scalar_equidistant_random_greedy.m</in>
+        <in>9_dist_variation_scalar_simple_equi_ga.m</in>
+        <in>9_dist_variation_scalar_simple_equi_random.m</in>
+        <in>9_dist_variation_scalar_simple_equi_random_greedy.m</in>
+        <in>9_dist_variation_scalar_simple_equidistant_backtrack.m</in>
+        <in>9_dist_variation_scalar_simple_equidistant_ga.m</in>
+        <in>9_dist_variation_scalar_simple_equidistant_random.m</in>
+        <in>9_dist_variation_scalar_simple_equidistant_random_greedy.m</in>
+        <in>9_dist_variation_scalar_simple_sample_ga.m</in>
+        <in>9_dist_variation_scalar_simple_sample_random.m</in>
+        <in>9_dist_variation_scalar_simple_sample_random_greedy.m</in>
+        <in>9_dist_variation_scalar_uniform_random_ga.m</in>
+        <in>9_dist_variation_scalar_uniform_random_random.m</in>
+        <in>9_dist_variation_scalar_uniform_random_random_greedy.m</in>
+        <in>9_dist_variation_scalar_wavy_ga.m</in>
+        <in>9_dist_variation_scalar_wavy_random.m</in>
+        <in>9_dist_variation_scalar_wavy_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_bias_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_bias_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_bias_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_equidistant_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_equidistant_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_equidistant_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equi_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equi_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equi_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equidistant_backtrack.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equidistant_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equidistant_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_equidistant_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_sample_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_sample_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_simple_sample_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_uniform_random_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_uniform_random_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_uniform_random_random_greedy.m</in>
+        <in>9_epsilon_delta_scalar_11_2_wavy_ga.m</in>
+        <in>9_epsilon_delta_scalar_11_2_wavy_random.m</in>
+        <in>9_epsilon_delta_scalar_11_2_wavy_random_greedy.m</in>
+      </df>
+      <df name="src">
+        <df name="heuristcs">
+          <in>breadth_first_quad_rep.cc</in>
+          <in>greedy.cc</in>
+          <in>random_sample_representer.cc</in>
+          <in>sort_representer.cc</in>
+        </df>
+        <df name="metrics">
+          <in>Delta.cpp</in>
+          <in>Delta.h</in>
+          <in>DistToClosest.cpp</in>
+          <in>DistToClosest.h</in>
+          <in>Epsilon.cpp</in>
+          <in>Epsilon.h</in>
+          <in>MaximizeDists.cpp</in>
+          <in>MaximizeDists.h</in>
+          <in>RepresentationMetric.cpp</in>
+          <in>RepresentationMetric.h</in>
+          <in>Scalarization.cpp</in>
+          <in>Scalarization.h</in>
+          <in>Variation.cpp</in>
+          <in>Variation.h</in>
+        </df>
+        <in>GeneticRepresenter.cpp</in>
+        <in>GeneticRepresenter.h</in>
+        <in>InitialSet.cpp</in>
+        <in>InitialSet.h</in>
+        <in>backtracker.cc</in>
+        <in>backtracker.h</in>
+        <in>common.h</in>
+        <in>initial_set_generator.cc</in>
+        <in>main.cc</in>
+        <in>math_utils.h</in>
+        <in>maths_utils.cc</in>
+        <in>plotter.cc</in>
+        <in>test.cc</in>
+      </df>
+    </df>
+  </logicalFolder>
+  <projectmakefile>build/Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <platform>2</platform>
+      </toolsSet>
+      <compile>
+        <compiledirpicklist>
+          <compiledirpicklistitem>.</compiledirpicklistitem>
+          <compiledirpicklistitem>${AUTO_FOLDER}</compiledirpicklistitem>
+        </compiledirpicklist>
+        <compiledir>${AUTO_FOLDER}</compiledir>
+        <compilecommandpicklist>
+          <compilecommandpicklistitem>${MAKE} ${ITEM_NAME}.o</compilecommandpicklistitem>
+          <compilecommandpicklistitem>${AUTO_COMPILE}</compilecommandpicklistitem>
+        </compilecommandpicklist>
+        <compilecommand>${AUTO_COMPILE}</compilecommand>
+      </compile>
+      <dbx_gdbdebugger version="1">
+        <gdb_pathmaps>
+        </gdb_pathmaps>
+        <gdb_interceptlist>
+          <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
+        </gdb_interceptlist>
+        <gdb_options>
+          <DebugOptions>
+          </DebugOptions>
+        </gdb_options>
+        <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
+      </dbx_gdbdebugger>
+      <nativedebugger version="1">
+        <engine>gdb</engine>
+      </nativedebugger>
+      <runprofile version="9">
+        <runcommandpicklist>
+          <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+        </runcommandpicklist>
+        <runcommand>"${OUTPUT_PATH}"</runcommand>
+        <rundir>build</rundir>
+        <buildfirst>false</buildfirst>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+  </confs>
+</configurationDescriptor>

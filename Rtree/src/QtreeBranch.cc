@@ -435,6 +435,10 @@ bool QtreeBranch::get_random(qtree_point *out)
 	case QTREE_TYPE_NULL:
 		puts("Error 10672047248502");
 		exit(1);
+	default:
+		puts("Error 7692847026479");
+		exit(1);
+
 	}
 }
 

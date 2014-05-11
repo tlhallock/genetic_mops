@@ -1,0 +1,42 @@
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /school/genetic_mops/Representer/build
+[  5%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/InitialSet.cpp.o
+/school/genetic_mops/Representer/src/InitialSet.cpp: In member function ‘void InitialSet::get_n_nearest(int, int, int*, double*, char*)’:
+/school/genetic_mops/Representer/src/InitialSet.cpp:80:12: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+   if (i == index)
+            ^
+[ 10%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/initial_set_generator.cc.o
+[ 15%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/GeneticRepresenter.cpp.o
+[ 21%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/heuristcs/sort_representer.cc.o
+[ 26%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/heuristcs/greedy.cc.o
+[ 31%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/heuristcs/random_sample_representer.cc.o
+[ 36%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/heuristcs/breadth_first_quad_rep.cc.o
+[ 42%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/plotter.cc.o
+/school/genetic_mops/Representer/src/plotter.cc: In function ‘void plot_initial_set(const char*, InitialSet*)’:
+/school/genetic_mops/Representer/src/plotter.cc:106:6: warning: unused variable ‘len’ [-Wunused-variable]
+  int len = strlen(filename);
+      ^
+[ 47%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/backtracker.cc.o
+[ 52%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/Scalarization.cpp.o
+[ 57%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/Epsilon.cpp.o
+[ 63%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/MaximizeDists.cpp.o
+[ 68%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/DistToClosest.cpp.o
+[ 73%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/Variation.cpp.o
+[ 78%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/RepresentationMetric.cpp.o
+[ 84%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/metrics/Delta.cpp.o
+[ 89%] Building CXX object CMakeFiles/Representer.dir/school/genetic_mops/Representer/src/maths_utils.cc.o
+/school/genetic_mops/Representer/src/maths_utils.cc: In function ‘double get_variance(InitialSet*, char*)’:
+/school/genetic_mops/Representer/src/maths_utils.cc:64:9: warning: unused variable ‘std’ [-Wunused-variable]
+  double std = sqrt(sum2);
+         ^
+Linking CXX static library libRepresenter.a
+[ 89%] Built target Representer
+[ 94%] Building CXX object CMakeFiles/TestRepresenter.dir/school/genetic_mops/Representer/src/main.cc.o
+[100%] Building CXX object CMakeFiles/TestRepresenter.dir/school/genetic_mops/Representer/src/test.cc.o
+Linking CXX executable TestRepresenter
+[100%] Built target TestRepresenter
+Install the project...
+-- Install configuration: "Debug"
+-- Installing: /school/genetic_mops/Representer/build/../../out/lib/libRepresenter.a
+-- Installing: /school/genetic_mops/Representer/build/../../out/bin/TestRepresenter

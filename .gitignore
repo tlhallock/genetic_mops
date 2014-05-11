@@ -1,3 +1,4 @@
 GeneticMOP/Debug/qtree.a
 Rtree/qtree.a
 *.m
+**/nbproject/private/**

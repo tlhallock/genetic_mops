@@ -1,0 +1,18 @@
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /school/genetic_mops/Rtree/build
+[ 14%] Building CXX object CMakeFiles/QTree.dir/school/genetic_mops/Rtree/src/QtreeLeaf.cc.o
+[ 28%] Building CXX object CMakeFiles/QTree.dir/school/genetic_mops/Rtree/src/qtree_mop.cc.o
+[ 42%] Building CXX object CMakeFiles/QTree.dir/school/genetic_mops/Rtree/src/QtreeBranch.cc.o
+[ 57%] Building CXX object CMakeFiles/QTree.dir/school/genetic_mops/Rtree/src/qtree_point.cc.o
+[ 71%] Building CXX object CMakeFiles/QTree.dir/school/genetic_mops/Rtree/src/Qtree.cc.o
+Linking CXX static library libQTree.a
+[ 71%] Built target QTree
+[ 85%] Building CXX object CMakeFiles/TestQTree.dir/school/genetic_mops/Rtree/src/main.cc.o
+[100%] Building CXX object CMakeFiles/TestQTree.dir/school/genetic_mops/Rtree/src/qtree_test_utils.cc.o
+Linking CXX executable TestQTree
+[100%] Built target TestQTree
+Install the project...
+-- Install configuration: ""
+-- Installing: /school/genetic_mops/Rtree/build/../../out/lib/libQTree.a
+-- Installing: /school/genetic_mops/Rtree/build/../../out/bin/TestQTree
