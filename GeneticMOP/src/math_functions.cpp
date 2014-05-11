@@ -7,8 +7,6 @@
 
 #include "math_functions.h"
 
-#include <math.h>
-
 void objective_function_1(double *x, double *y_out)
 {
 	y_out[0] = x[0];
@@ -77,6 +75,7 @@ double l_inf(double *p1, double *p2, int dim)
 	return max_dist;
 }
 
+#if 0
 double l_2(double *p1, double *p2, int dim)
 {
 	double sum = 0;
@@ -89,3 +88,4 @@ double l_2(double *p1, double *p2, int dim)
 
 	return sqrt(sum);
 }
+#endif

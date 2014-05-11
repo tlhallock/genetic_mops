@@ -75,6 +75,14 @@ void qtree_print_quadrant(FILE *out, int quadrant, int dim)
 	}
 }
 
+Qtree::Qtree(int _dim) :
+		dim(_dim),
+		two_2_dim(1 << _dim),
+		branch_factor(3),
+		lb(qtree_point_new(_dim, 0.0)),
+		ub(qtree_point_new(_dim, 1.0)),
+		root(new QtreeBranch(this, NULL, lb, ub)) {}
+
 Qtree::Qtree(qtree_point* _lb, qtree_point* _ub, int _dim, int _branch_factor) :
 		dim(_dim),
 		two_2_dim(1 << _dim),

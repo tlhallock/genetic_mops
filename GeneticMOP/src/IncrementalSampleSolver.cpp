@@ -7,14 +7,7 @@
 
 #include "IncrementalSampleSolver.h"
 
-#include "utils.h"
-
-#include <stdlib.h>
-#include <limits.h>
-#include <time.h>
-
-#include <vector>
-#include <algorithm>
+#include "common.h"
 
 static void set_pareto_optimals_with_x(std::vector<double *> *initial_x, std::vector<double *> *next_x, std::vector<double *> *initial_y, std::vector<double *> *next_y, int dim, bool trim)
 {

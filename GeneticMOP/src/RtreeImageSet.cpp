@@ -7,9 +7,7 @@
 
 #include "RtreeImageSet.h"
 
-#include "Qtree.h"
-
-#include <float.h>
+#include "common.h"
 
 typedef struct
 {

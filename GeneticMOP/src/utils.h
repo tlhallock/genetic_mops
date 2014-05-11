@@ -8,8 +8,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#include <stdio.h>
-#include <vector>
+#include "common.h"
 
 double *copy_point(double *vec, int dim);
 void print_point(FILE *file, double *vec, int dim, bool new_line);

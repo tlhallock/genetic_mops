@@ -14,9 +14,9 @@
 #include <float.h>
 
 GeneticSolver::GeneticSolver(int _xdim, int _ydim, int _breed_size) :
+	breed_size(_breed_size),
 	xdim(_xdim),
 	ydim(_ydim),
-	breed_size(_breed_size),
 	current_fit((double **) malloc (sizeof(*current_fit) * breed_size)),
 	offspring((double *) malloc (sizeof (*offspring) * _xdim)),
 	x_pop_feas(_xdim),
@@ -71,7 +71,7 @@ double GeneticSolver::get_fitness(BoundedMopStats *board, double *x, double *y)
 //	fclose(debug_file);
 
 //	return -cost;
-
+    return 0;
 }
 
 void GeneticSolver::bread()

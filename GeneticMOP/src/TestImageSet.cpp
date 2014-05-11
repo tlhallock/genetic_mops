@@ -15,12 +15,10 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <iostream>
+
 using namespace std;
 
-#include<limits.h>
-#include <stdio.h>
-#include <float.h>
+#include "common.h"
 
 #include "math_functions.h"
 
@@ -29,7 +27,6 @@ using namespace std;
 
 #include "MOP.h"
 
-#include "Qtree.h"
 
 #define DIM 5
 #define NUM_GUESSES 100000

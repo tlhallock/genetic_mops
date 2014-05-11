@@ -10,9 +10,7 @@
 
 #include "Solver.h"
 
-#include "Qtree.h"
-
-#include <stdlib.h>
+#include "common.h"
 
 const double k_infeasible_cost = .1;
 
@@ -20,9 +18,9 @@ class GeneticSolver : public Solver
 {
 private:
 	int breed_size;
-	double **current_fit;
 	int xdim;
 	int ydim;
+	double **current_fit;
 	double *offspring;
 	qtree::Qtree x_pop_feas;
 	qtree::Qtree y_pop_feas;

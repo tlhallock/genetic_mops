@@ -61,7 +61,7 @@ double get_variance(InitialSet *set, char *to_use)
 		double d = dists[i] - avg;
 		sum2 += d * d;
 	}
-	double std = sqrt(sum2);
+//	double std = sqrt(sum2);
 
 	return sum2;
 }

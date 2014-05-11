@@ -10,9 +10,7 @@
 
 #include "ImageSet.h"
 
-#include <vector>
-
-#include <stdlib.h>
+#include "common.h"
 
 
 class VectorImageSet : public ImageSet

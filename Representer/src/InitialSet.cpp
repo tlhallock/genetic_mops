@@ -62,8 +62,9 @@ InitialSet::~InitialSet()
 	free(all_pnts);
 }
 
-void InitialSet::get_n_nearest(int index, int n, int *nearest, double *dists, char *mask)
+void InitialSet::get_n_nearest(int uindex, int n, int *nearest, double *dists, char *mask)
 {
+        unsigned int index = (unsigned int) uindex;
 	for (int j = 0; j < n; j++)
 	{
 		dists[j] = DBL_MAX;

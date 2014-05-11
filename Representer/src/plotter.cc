@@ -103,7 +103,7 @@ void plot_initial_set(const char *filename, InitialSet *set)
 	fprintf(file, "drawnow;\n");
 
 	// replace ".m" with "_m"
-	int len = strlen(filename);
+	//int len = strlen(filename);
 	fprintf(file, "print('plot_%s.png')\n", filename);
 	fprintf(file, "input(\"Press any key to continue\");\n");
 

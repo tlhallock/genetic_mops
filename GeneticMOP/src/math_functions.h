@@ -8,6 +8,7 @@
 #ifndef MATH_FUNCTIONS_H_
 #define MATH_FUNCTIONS_H_
 
+#include "common.h"
 
 void objective_function_1(double *x, double *y_out);
 void objective_function_2(double *x, double *y_out);

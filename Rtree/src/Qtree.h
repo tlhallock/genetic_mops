@@ -163,6 +163,7 @@ private:
 	QtreeLeaf *find(qtree_point *point);
 	bool in_current_bounds(qtree_point *point);
 public:
+        Qtree(int dim);
 	Qtree(qtree_point *lb, qtree_point *ub, int dim, int branch_factor);
 	Qtree(double _lb, double _ub, int _dim, int branch_factor);
 	Qtree(int dim, int branch_factor);

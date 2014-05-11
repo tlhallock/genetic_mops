@@ -8,10 +8,9 @@
 #ifndef RTREEIMAGESET_H_
 #define RTREEIMAGESET_H_
 
-#include "Qtree.h"
 #include "ImageSet.h"
 
-#include <vector>
+#include "common.h"
 
 class RtreeImageSet : public ImageSet
 {
@@ -22,7 +21,7 @@ private:
 	bool is_pareto_optimal(double *y);
 public:
 	RtreeImageSet(int _ydim) :
-		image(_ydim),
+		image(_ydim, 5),
 		pareto_set(NULL) {};
 
 	virtual ~RtreeImageSet();
