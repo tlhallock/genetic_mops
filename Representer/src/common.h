@@ -19,6 +19,7 @@
 #include "metrics/DistToClosest.h"
 #include "metrics/Scalarization.h"
 #include "metrics/Variation.h"
+#include "metrics/MaximizeDists.h"
 
 #include "backtracker.h"
 
@@ -46,6 +47,7 @@ InitialSet *get_simple_pareto_initial_set(int num_points, int dim, bool equidist
 InitialSet *get_uniform_random_initial_set(int num_points, int dim);
 InitialSet *get_wavy_initial_set(int num_points, int dim);
 InitialSet *get_bias_initial_set(int num_points, int dim);
+InitialSet *get_bias_simple_set(int num_points, int dim);
 
 void test_breadth_first();
 void test_metric();

@@ -184,7 +184,7 @@ void test_initial_sets()
 
 	char filename[256];
 
-#define num_initial_sets 7
+#define num_initial_sets 8
 	const char *initial_names[num_initial_sets] =
 	{
 		"equidistant",
@@ -194,6 +194,7 @@ void test_initial_sets()
 		"uniform_random",
 		"wavy",
 		"bias",
+		"bias_simple",
 	};
 
 	InitialSet **sets = (InitialSet **) malloc (sizeof(*sets) * num_initial_sets);
@@ -201,25 +202,28 @@ void test_initial_sets()
 	{
 		int index = 0;
 		sets[index++] = get_equidistant_initial_set(spacing, dim);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_1_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_equidistant_initial_set(.05, 1);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_2_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_simple_pareto_initial_set(num_points, dim, false);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_3_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_simple_pareto_initial_set(num_points, dim, true);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_4_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_uniform_random_initial_set(num_points, dim);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_6_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_wavy_initial_set(num_points, dim);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_7_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 		sets[index++] = get_bias_initial_set(num_points, dim);
-		sprintf(filename, "plots/0_%s_initial_set", initial_names[index-1]);
+		sprintf(filename, "plots/0_8_%s_initial_set", initial_names[index-1]);
+		plot_initial_set(filename, sets[index-1]);
+		sets[index++] = get_bias_simple_set(num_points, dim);
+		sprintf(filename, "plots/0_5_%s_initial_set", initial_names[index-1]);
 		plot_initial_set(filename, sets[index-1]);
 	}
 
@@ -228,140 +232,139 @@ void test_initial_sets()
 		InitialSet *set = sets[i];
 		printf("With initial set %s\n", initial_names[i]);
 
+//		{
+//			sprintf(filename, "plots/1_sort_%s", initial_names[i]);
+//			char *mask = (char *) malloc (sizeof (*mask) * set->size());
+//			sort_represent(set, num_to_use, mask);
+//			plot(filename, set, mask, 0);
+//			free(mask);
+//		}
+
+//		{
+//			sprintf(filename, "plots/2_rtree_%s", initial_names[i]);
+//			char *mask = (char *) malloc (sizeof (*mask) * set->size());
+//			bread_first_represent(set, num_to_use, mask);
+//			plot(filename, set, mask, 0);
+//			free(mask);
+//		}
+
+//		{
+//			sprintf(filename, "3_dist_to_closest_1_%s", initial_names[i]);
+//			DistToClosest metric(set, 1);
+//			summarize_metric(filename, &metric, num_to_use);
+//		}
+
+//		{
+//			sprintf(filename, "4_dist_to_closest_10_%s", initial_names[i]);
+//			DistToClosest metric(set, num_to_use);
+//			summarize_metric(filename, &metric, num_to_use);
+//		}
+
 		{
-			sprintf(filename, "plots/1_optimal_%s", initial_names[i]);
-			char *mask = (char *) malloc (sizeof (*mask) * set->size());
-
-
-		}
-
-		{
-			sprintf(filename, "plots/1_sort_%s", initial_names[i]);
-			char *mask = (char *) malloc (sizeof (*mask) * set->size());
-			sort_represent(set, num_to_use, mask);
-			plot(filename, set, mask, 0);
-			free(mask);
-		}
-
-		{
-			sprintf(filename, "plots/2_rtree_%s", initial_names[i]);
-			char *mask = (char *) malloc (sizeof (*mask) * set->size());
-			bread_first_represent(set, num_to_use, mask);
-			plot(filename, set, mask, 0);
-			free(mask);
-		}
-
-		{
-			sprintf(filename, "3_dist_to_closest_1_%s", initial_names[i]);
-			DistToClosest metric(set, 1);
+			sprintf(filename, "5_max_log_dist_%s", initial_names[i]);
+			MaximizeDists metric(set, 1);
 			summarize_metric(filename, &metric, num_to_use);
 		}
 
-		{
-			sprintf(filename, "4_dist_to_closest_10_%s", initial_names[i]);
-			DistToClosest metric(set, num_to_use);
-			summarize_metric(filename, &metric, num_to_use);
-		}
+//		{
+//			double *weights = (double *) malloc(sizeof(*weights) * 2);
+//			weights[0] = .01;
+//			weights[1] = 1;
+//
+//			std::vector<RepresentationMetric *> scalar1;
+//			Epsilon epsilon(set, 1);
+//			Delta delta(set, 1);
+//
+//			scalar1.push_back(&epsilon);
+//			scalar1.push_back(&delta);
+//
+//			Scalarization metric(&scalar1, weights);
+//			sprintf(filename, "6_epsilon_delta_scalar_01_1_%s", initial_names[i]);
+//			summarize_metric(filename, &metric, num_to_use);
+//
+//
+//			free(weights);
+//		}
 
-		{
-			double *weights = (double *) malloc(sizeof(*weights) * 2);
-			weights[0] = .01;
-			weights[1] = 1;
+//		{
+//			double *weights = (double *) malloc(sizeof(*weights) * 2);
+//			weights[0] = 1;
+//			weights[1] = .01;
+//
+//			std::vector<RepresentationMetric *> scalar1;
+//			Epsilon epsilon(set, 1);
+//			Delta delta(set, 1);
+//
+//			scalar1.push_back(&epsilon);
+//			scalar1.push_back(&delta);
+//
+//			Scalarization metric(&scalar1, weights);
+//			sprintf(filename, "7_epsilon_delta_scalar_10_1_%s", initial_names[i]);
+//			summarize_metric(filename, &metric, num_to_use);
+//
+//
+//			free(weights);
+//		}
 
-			std::vector<RepresentationMetric *> scalar1;
-			Epsilon epsilon(set, 1);
-			Delta delta(set, 1);
+//		{
+//			double *weights = (double *) malloc(sizeof(*weights) * 2);
+//			weights[0] = 1;
+//			weights[1] = 1;
+//
+//			std::vector<RepresentationMetric *> scalar1;
+//			Epsilon epsilon(set, 1);
+//			Delta delta(set, 1);
+//
+//			scalar1.push_back(&epsilon);
+//			scalar1.push_back(&delta);
+//
+//			Scalarization metric(&scalar1, weights);
+//			sprintf(filename, "8_epsilon_delta_scalar_11_1_%s", initial_names[i]);
+//			summarize_metric(filename, &metric, num_to_use);
+//
+//
+//			free(weights);
+//		}
 
-			scalar1.push_back(&epsilon);
-			scalar1.push_back(&delta);
+//		{
+//			double *weights = (double *) malloc(sizeof(*weights) * 2);
+//			weights[0] = 1;
+//			weights[1] = 1;
+//
+//			std::vector<RepresentationMetric *> scalar1;
+//			Epsilon epsilon(set, 3);
+//			Delta delta(set, 3);
+//
+//			scalar1.push_back(&epsilon);
+//			scalar1.push_back(&delta);
+//
+//			Scalarization metric(&scalar1, weights);
+//			sprintf(filename, "9_epsilon_delta_scalar_11_2_%s", initial_names[i]);
+//			summarize_metric(filename, &metric, num_to_use);
+//
+//
+//			free(weights);
+//		}
 
-			Scalarization metric(&scalar1, weights);
-			sprintf(filename, "6_epsilon_delta_scalar_01_1_%s", initial_names[i]);
-			summarize_metric(filename, &metric, num_to_use);
-
-
-			free(weights);
-		}
-
-		{
-			double *weights = (double *) malloc(sizeof(*weights) * 2);
-			weights[0] = 1;
-			weights[1] = .01;
-
-			std::vector<RepresentationMetric *> scalar1;
-			Epsilon epsilon(set, 1);
-			Delta delta(set, 1);
-
-			scalar1.push_back(&epsilon);
-			scalar1.push_back(&delta);
-
-			Scalarization metric(&scalar1, weights);
-			sprintf(filename, "7_epsilon_delta_scalar_10_1_%s", initial_names[i]);
-			summarize_metric(filename, &metric, num_to_use);
-
-
-			free(weights);
-		}
-
-		{
-			double *weights = (double *) malloc(sizeof(*weights) * 2);
-			weights[0] = 1;
-			weights[1] = 1;
-
-			std::vector<RepresentationMetric *> scalar1;
-			Epsilon epsilon(set, 1);
-			Delta delta(set, 1);
-
-			scalar1.push_back(&epsilon);
-			scalar1.push_back(&delta);
-
-			Scalarization metric(&scalar1, weights);
-			sprintf(filename, "8_epsilon_delta_scalar_11_1_%s", initial_names[i]);
-			summarize_metric(filename, &metric, num_to_use);
-
-
-			free(weights);
-		}
-
-		{
-			double *weights = (double *) malloc(sizeof(*weights) * 2);
-			weights[0] = 1;
-			weights[1] = 1;
-
-			std::vector<RepresentationMetric *> scalar1;
-			Epsilon epsilon(set, 3);
-			Delta delta(set, 3);
-
-			scalar1.push_back(&epsilon);
-			scalar1.push_back(&delta);
-
-			Scalarization metric(&scalar1, weights);
-			sprintf(filename, "9_epsilon_delta_scalar_11_2_%s", initial_names[i]);
-			summarize_metric(filename, &metric, num_to_use);
-
-
-			free(weights);
-		}
-
-		{
-			double *weights = (double *) malloc(sizeof(*weights) * 2);
-			weights[0] = 1;
-			weights[1] = .01;
-
-			std::vector<RepresentationMetric *> scalar1;
-			DistToClosest dist(set, 1);
-			Variation var(set);
-
-			scalar1.push_back(&dist);
-			scalar1.push_back(&var);
-
-			Scalarization metric(&scalar1, weights);
-			sprintf(filename, "9_dist_variation_scalar_%s", initial_names[i]);
-			summarize_metric(filename, &metric, num_to_use);
-
-
-			free(weights);
-		}
+//		{
+//			double *weights = (double *) malloc(sizeof(*weights) * 2);
+//			weights[0] = 1;
+//			weights[1] = .01;
+//
+//			std::vector<RepresentationMetric *> scalar1;
+//			DistToClosest dist(set, 1);
+//			Variation var(set);
+//
+//			scalar1.push_back(&dist);
+//			scalar1.push_back(&var);
+//
+//			Scalarization metric(&scalar1, weights);
+//			sprintf(filename, "9_dist_variation_scalar_%s", initial_names[i]);
+//			summarize_metric(filename, &metric, num_to_use);
+//
+//
+//			free(weights);
+//		}
 	}
 
 	for (int i = 0; i < num_initial_sets; i++)

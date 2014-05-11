@@ -169,3 +169,28 @@ InitialSet *get_bias_initial_set(int num_points, int dim)
 	return new InitialSet(&pnts, dim, &l_2);
 }
 
+
+InitialSet *get_bias_simple_set(int num_points, int dim)
+{
+	std::vector<double *> pnts;
+
+	for (int i = 0; i < num_points; i++)
+	{
+		double t;
+		do
+		{
+			t = generateGaussianNoise(0.2);
+		} while (t < 0 || t > 1);
+
+		double xval = 1 - cos(t);
+		double yval = 1 - sin(t);
+
+		double *pnt = (double *) malloc (sizeof(*pnt) * dim);
+		pnt[0] = xval;
+		pnt[1] = yval;
+		pnts.push_back(scale_pnt(dim, pnt));
+	}
+
+	return new InitialSet(&pnts, dim, &l_2);
+}
+
