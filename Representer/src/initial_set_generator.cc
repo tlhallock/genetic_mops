@@ -74,7 +74,12 @@ InitialSet *get_equidistant_initial_set(double spacing, int dim)
 		exit(1);
 	}
 
-	return new InitialSet(&pnts, dim, &l_2);
+	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
+	for (int i = 0; i < pnts.size(); i++)
+	{
+		free(pnts.at(i));
+	}
+	return ret_val;
 }
 
 
@@ -104,7 +109,12 @@ InitialSet *get_simple_pareto_initial_set(int num_points, int dim, bool uniform)
 		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
-	return new InitialSet(&pnts, dim, &l_2);
+	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
+	for (int i = 0; i < pnts.size(); i++)
+	{
+		free(pnts.at(i));
+	}
+	return ret_val;
 }
 
 
@@ -117,7 +127,12 @@ InitialSet *get_uniform_random_initial_set(int num_points, int dim)
 		pnts.push_back(scale_pnt(dim, qtree::qtree_point_new_rand(dim)));
 	}
 
-	return new InitialSet(&pnts, dim, &l_2);
+	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
+	for (int i = 0; i < pnts.size(); i++)
+	{
+		free(pnts.at(i));
+	}
+	return ret_val;
 }
 
 
@@ -140,7 +155,12 @@ InitialSet *get_wavy_initial_set(int num_points, int dim)
 		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
-	return new InitialSet(&pnts, dim, &l_2);
+	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
+	for (int i = 0; i < pnts.size(); i++)
+	{
+		free(pnts.at(i));
+	}
+	return ret_val;
 }
 
 InitialSet *get_bias_initial_set(int num_points, int dim)
@@ -166,7 +186,12 @@ InitialSet *get_bias_initial_set(int num_points, int dim)
 		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
-	return new InitialSet(&pnts, dim, &l_2);
+	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
+	for (int i = 0; i < pnts.size(); i++)
+	{
+		free(pnts.at(i));
+	}
+	return ret_val;
 }
 
 
@@ -191,6 +216,11 @@ InitialSet *get_bias_simple_set(int num_points, int dim)
 		pnts.push_back(scale_pnt(dim, pnt));
 	}
 
-	return new InitialSet(&pnts, dim, &l_2);
+	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
+	for (int i = 0; i < pnts.size(); i++)
+	{
+		free(pnts.at(i));
+	}
+	return ret_val;
 }
 

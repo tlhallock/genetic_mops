@@ -16,15 +16,20 @@
 class InitialSet
 {
 private:
+	unsigned int cap;
 	int dim;
 	std::vector<double *> points;
 	double **distances;
 	char *all_pnts;
+	double (*norm)(double *, double *, int);
+	bool accurate_dists;
 
-	void init(double (*norm)(double *, double *, int));
+	void assign_dists();
+	void update_dists();
 public:
 	InitialSet(std::vector<double *> *pnts, int dim, double (*norm)(double *, double *, int));
-	InitialSet(int size, int dim, double (*norm)(double *, double *, int));
+	InitialSet(unsigned int cap, std::vector<double *> *pnts, int dim, double (*norm)(double *, double *, int));
+	InitialSet(unsigned int cap, int dim, double (*norm)(double *, double *, int));
 
 	virtual ~InitialSet();
 
@@ -40,6 +45,9 @@ public:
 	int get_dim() { return dim; }
 	int index_of(double *point);
 	char *get_all_pnts() { return all_pnts; }
+
+	void add(double *pnt);
+	void remove(int index);
 };
 
 #endif /* INITIALSET_H_ */

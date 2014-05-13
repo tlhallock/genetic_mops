@@ -9,13 +9,8 @@
 
 #include <float.h>
 
-void InitialSet::init(double (*norm)(double *, double *, int))
+void InitialSet::update_dists()
 {
-	for (unsigned int i = 0; i < points.size(); i++)
-	{
-		distances[i] = (double *) malloc(sizeof(*distances[i]) * points.size());
-		all_pnts[i] = (char) 1;
-	}
 	for (unsigned int i = 0; i < points.size(); i++)
 	{
 		double *p1 = get(i);
@@ -25,29 +20,63 @@ void InitialSet::init(double (*norm)(double *, double *, int))
 			distances[i][j] = norm(p1, p2, dim);
 		}
 	}
+	accurate_dists = true;
 }
 
-InitialSet::InitialSet(int _size, int _dim, double (*norm)(double *, double *, int)) :
+InitialSet::InitialSet(unsigned int _cap, std::vector<double *> *pnts, int _dim, double (*norm_)(double *, double *, int)) :
+		cap(_cap),
 		dim(_dim),
 		points(),
-		distances((double **) malloc(sizeof(*distances) * _size)),
-		all_pnts((char *) malloc(sizeof(*all_pnts) * _size))
+		distances((double **) malloc(sizeof(*distances) * cap)),
+		all_pnts((char *) malloc(sizeof(*all_pnts) * cap)),
+		norm(norm_),
+		accurate_dists(false)
 {
-	for (int i = 0; i < _size; i++)
+	for (unsigned int i = 0; i < pnts->size(); i++)
 	{
-		points.push_back(qtree::qtree_point_new_rand(dim));
+		points.push_back(qtree::qtree_point_dup(dim, pnts->at(i)));
 	}
-	init(norm);
+	for (unsigned int i = 0; i < cap; i++)
+	{
+		distances[i] = (double *) malloc(sizeof(*distances[i]) * cap);
+		all_pnts[i] = (char) 1;
+	}
 }
 
-
-InitialSet::InitialSet(std::vector<double *> *pnts, int _dim, double (*norm)(double *, double *, int)) :
-		dim(_dim),
-		points(*pnts),
-		distances((double **) malloc(sizeof(*distances) * pnts->size())),
-		all_pnts((char *) malloc(sizeof(*all_pnts) * pnts->size()))
+InitialSet::InitialSet(std::vector<double *> *pnts, int _dim, double (*norm_)(double *, double *, int)) :
+	cap(pnts->size()),
+	dim(_dim),
+	points(),
+	distances((double **) malloc(sizeof(*distances) * cap)),
+	all_pnts((char *) malloc(sizeof(*all_pnts) * cap)),
+	norm(norm_),
+	accurate_dists(false)
 {
-	init(norm);
+	for (unsigned int i = 0; i < pnts->size(); i++)
+	{
+		points.push_back(qtree::qtree_point_dup(dim, pnts->at(i)));
+	}
+	for (unsigned int i = 0; i < cap; i++)
+	{
+		distances[i] = (double *) malloc(sizeof(*distances[i]) * cap);
+		all_pnts[i] = (char) 1;
+	}
+}
+
+InitialSet::InitialSet(unsigned int cap_, int dim_, double (*norm_)(double *, double *, int)) :
+	cap(cap_),
+	dim(dim_),
+	points(),
+	distances((double **) malloc(sizeof(*distances) * cap)),
+	all_pnts((char *) malloc(sizeof(*all_pnts) * cap)),
+	norm(norm_),
+	accurate_dists(false)
+{
+	for (unsigned int i = 0; i < cap; i++)
+	{
+		distances[i] = (double *) malloc(sizeof(*distances[i]) * cap);
+		all_pnts[i] = (char) 1;
+	}
 }
 
 
@@ -58,13 +87,18 @@ InitialSet::~InitialSet()
 		qtree::qtree_point_del(points.at(i));
 		free(distances[i]);
 	}
+	for (unsigned int i = 0; i < cap; i++)
+	{
+		qtree::qtree_point_del(points.at(i));
+		free(distances[i]);
+	}
 	free(distances);
 	free(all_pnts);
 }
 
 void InitialSet::get_n_nearest(int uindex, int n, int *nearest, double *dists, char *mask)
 {
-        unsigned int index = (unsigned int) uindex;
+	unsigned int index = (unsigned int) uindex;
 	for (int j = 0; j < n; j++)
 	{
 		dists[j] = DBL_MAX;
@@ -111,6 +145,10 @@ void InitialSet::get_n_nearest(int uindex, int n, int *nearest, double *dists, c
 
 double InitialSet::get_distance(int i, int j)
 {
+	if (!accurate_dists)
+	{
+		update_dists();
+	}
 	return distances[i][j];
 }
 
@@ -125,4 +163,17 @@ int InitialSet::index_of(double *point)
 		return i;
 	}
 	return -194619;
+}
+
+void InitialSet::add(double *pnt)
+{
+	points.push_back(qtree::qtree_point_dup(dim, pnt));
+	accurate_dists = false;
+}
+void InitialSet::remove(int index)
+{
+	double *pnt = get(index);
+	points.erase(points.begin() + index);
+	qtree::qtree_point_del(pnt);
+	accurate_dists = false;
 }
