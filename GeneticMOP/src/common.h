@@ -22,11 +22,25 @@
 
 #include "../../Rtree/src/Qtree.h"
 
-#include "math_functions.h"
 #include "utils.h"
+#include "math_functions.h"
+#include "MOP.h"
+#include "image/ImageSet.h"
+#include "image/RtreeImageSet.h"
+#include "image/VectorImageSet.h"
+#include "solver/IncrementalSampleSolver.h"
+#include "solver/Solver.h"
+#include "solver/GeneticSolver.h"
+#include "solver/RandomSampleSolver.h"
+#include "solver/DepthFirstRecursiveStencil.h"
 
 
+#define NUM_GUESSES 500
 
+
+void test_nearest();
+void test_pareto_equivalence();
+static void compare_solvers();
 
 
 #endif	/* COMMON_H */

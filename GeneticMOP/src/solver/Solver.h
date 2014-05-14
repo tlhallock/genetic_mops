@@ -8,7 +8,7 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-#include "MOP.h"
+#include "../MOP.h"
 
 class Solver
 {

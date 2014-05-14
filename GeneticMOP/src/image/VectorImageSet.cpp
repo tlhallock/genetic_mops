@@ -6,10 +6,12 @@
  */
 
 #include "VectorImageSet.h"
+#include "../common.h"
 
-#include "utils.h"
-#include "float.h"
-
+VectorImageSet::VectorImageSet(int _ydim) :
+		image(),
+		pareto_set(NULL),
+		ydim(_ydim) {}
 
 VectorImageSet::~VectorImageSet()
 {

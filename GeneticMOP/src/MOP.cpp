@@ -6,9 +6,21 @@
  */
 
 #include "MOP.h"
+#include "common.h"
 
-#include <stdlib.h>
-#include <limits.h>
+BoundedMopStats::BoundedMopStats(int _xdim, int _ydim, double *_xmin, double *_xmax,
+			ImageSet *_image,
+			void (*_objective_function)(double *x, double *y_out),
+			bool (*constaints)(double *x)) :
+			xdim(_xdim),
+			ydim(_ydim),
+			xbounds_min(copy_point(_xmin, _xdim)),
+			xbounds_max(copy_point(_xmax, _xdim)),
+			points(0),
+			image(_image),
+			objective_function(_objective_function),
+			is_constrained(constaints),
+			log_file(NULL) {image->clear();};
 
 void BoundedMopStats::make_guess(double *x, double *y_out)
 {

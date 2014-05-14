@@ -177,3 +177,33 @@ void InitialSet::remove(int index)
 	qtree::qtree_point_del(pnt);
 	accurate_dists = false;
 }
+
+bool InitialSet::is_pareto(int index)
+{
+	double *pnt = get(index);
+	int size = points.size();
+
+	for (int i = 0; i < size; i++)
+	{
+		if (i == index)
+		{
+			continue;
+		}
+		if (qtree::qtree_point_dominates(get(i), pnt, dim))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void InitialSet::clear_non_pareto()
+{
+	for (int i = points.size() - 1; i >= 0; i++)
+	{
+		if (!is_pareto(i))
+		{
+			remove(i);
+		}
+	}
+}

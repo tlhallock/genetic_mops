@@ -18,14 +18,12 @@
 
 using namespace std;
 
-#include "common.h"
+#include "../common.h"
 
-#include "math_functions.h"
+#include "../image/VectorImageSet.h"
+#include "../image/RtreeImageSet.h"
 
-#include "VectorImageSet.h"
-#include "RtreeImageSet.h"
-
-#include "MOP.h"
+#include "../MOP.h"
 
 
 #define DIM 5

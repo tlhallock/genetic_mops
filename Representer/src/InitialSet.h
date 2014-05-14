@@ -26,6 +26,7 @@ private:
 
 	void assign_dists();
 	void update_dists();
+	bool is_pareto(int index);
 public:
 	InitialSet(std::vector<double *> *pnts, int dim, double (*norm)(double *, double *, int));
 	InitialSet(unsigned int cap, std::vector<double *> *pnts, int dim, double (*norm)(double *, double *, int));
@@ -48,6 +49,8 @@ public:
 
 	void add(double *pnt);
 	void remove(int index);
+
+	void clear_non_pareto();
 };
 
 #endif /* INITIALSET_H_ */

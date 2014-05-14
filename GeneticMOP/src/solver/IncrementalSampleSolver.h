@@ -10,7 +10,7 @@
 
 #include "Solver.h"
 
-class IncrementalSampleSolver  : public Solver
+class IncrementalSampleSolver: public Solver
 {
 private:
 	unsigned int initial_seed;

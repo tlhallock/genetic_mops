@@ -19,10 +19,7 @@ GeneticSolver::GeneticSolver(int _xdim, int _ydim, int _breed_size) :
 	ydim(_ydim),
 	current_fit((double **) malloc (sizeof(*current_fit) * breed_size)),
 	offspring((double *) malloc (sizeof (*offspring) * _xdim)),
-	x_pop_feas(_xdim),
-	y_pop_feas(_ydim),
-	x_pop_inf(_xdim),
-	y_pop_inf(_ydim)
+	pop((xy_pair *) malloc (sizeof (*pop) * 2 * TARGET_PNTS))
 {
 	for (int i = 0; i < _breed_size; i++)
 	{
@@ -32,45 +29,13 @@ GeneticSolver::GeneticSolver(int _xdim, int _ydim, int _breed_size) :
 
 GeneticSolver::~GeneticSolver()
 {
+	free(pop);
 	free(current_fit);
 	free(offspring);
 }
 
 double GeneticSolver::get_fitness(BoundedMopStats *board, double *x, double *y)
 {
-//	double *closest_feas = qtree::qtree_point_new(xdim);
-//	x_pop_feas.find_nearest(x, closest_feas, &l)
-//	double *closest_inf  = qtree::qtree_point_new(xdim);
-//
-//	double cost = 0;
-//	if (!board->is_feasible(x))
-//	{
-//		void find_nearest(qtree_point *point, qtree_point *out, double (*norm)(qtree_point *, qtree_point *), double *cmin);
-//
-//
-//
-//
-//		double distance = x_pop_feas.find_nearest(board, &x_pop_feas, x, xdim);
-//		cost += infeasible_cost * distance;
-//	}
-//
-//	for (std::vector<double *>::iterator it = y_pop_feas.begin(); it != y_pop_feas.end(); ++it)
-//	{
-//		if (first_dominates_second((*it), y, board->get_y_dimension()))
-//		{
-//			cost++;
-//		}
-//	}
-
-//	FILE *debug_file = fopen("ga_debug.txt", "a");
-//	fprintf(debug_file, "The cost of [");
-//	print_point(debug_file, x, xdim, false);
-//	fprintf(debug_file, "] -> [");
-//	print_point(debug_file, y, board->get_y_dimension(), false);
-//	fprintf(debug_file, "] is %lf.\n", -cost);
-//	fclose(debug_file);
-
-//	return -cost;
     return 0;
 }
 
@@ -81,10 +46,6 @@ void GeneticSolver::bread()
 		int parent = rand() % breed_size;
 		offspring[i] = current_fit[parent][i];
 	}
-}
-
-void fin_fittest_acc(double *point, void *arg)
-{
 }
 
 void GeneticSolver::find_fittest()
@@ -175,11 +136,6 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		fputc('\n', debug_file);
 		fclose(debug_file);
 	}
-
-	x_pop_feas.clear();
-	y_pop_feas.clear();
-	x_pop_inf.clear();
-	x_pop_inf.clear();
 
 	free(x);
 	free(y);

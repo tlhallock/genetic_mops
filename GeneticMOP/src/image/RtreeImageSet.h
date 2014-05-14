@@ -1,32 +1,30 @@
 /*
- * VectorImageSet.h
+ * RtreeImageSet.h
  *
  *  
  *      Author: thallock
  */
 
-#ifndef VECTORIMAGESET_H_
-#define VECTORIMAGESET_H_
+#ifndef RTREEIMAGESET_H_
+#define RTREEIMAGESET_H_
 
-#include "ImageSet.h"
+#include "../../../Rtree/src/Qtree.h"
 
-#include "common.h"
+#include "../image/ImageSet.h"
 
-
-class VectorImageSet : public ImageSet
+class RtreeImageSet : public ImageSet
 {
 private:
-	std::vector<double*> image;
+	qtree::Qtree image;
 	std::vector<double*> *pareto_set;
-	int ydim;
 
 	bool is_pareto_optimal(double *y);
 public:
-	VectorImageSet(int _ydim) :
-		image(),
-		pareto_set(NULL),
-		ydim(_ydim) {}
-	virtual ~VectorImageSet();
+	RtreeImageSet(int _ydim) :
+		image(_ydim, 5),
+		pareto_set(NULL) {};
+
+	virtual ~RtreeImageSet();
 
 	std::vector<double *> *get_pareto_solutions();
 	void get_nadir_point(double *y_out);
@@ -41,4 +39,4 @@ public:
 	void clear();
 };
 
-#endif /* VECTORIMAGESET_H_ */
+#endif /* RTREEIMAGESET_H_ */

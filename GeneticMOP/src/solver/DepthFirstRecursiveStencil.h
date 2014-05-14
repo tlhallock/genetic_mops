@@ -8,7 +8,7 @@
 #ifndef DEPTHFIRSTRECURSIVESTENCIL_H_
 #define DEPTHFIRSTRECURSIVESTENCIL_H_
 
-#include "MOP.h"
+#include "../MOP.h"
 
 class DepthFirstRecursiveStencil
 {

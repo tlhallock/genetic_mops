@@ -7,7 +7,8 @@
 
 #include "DepthFirstRecursiveStencil.h"
 
-#include "common.h"
+#include "../common.h"
+
 
 #define MAX_QUAD 4
 #define Y_DIM 2

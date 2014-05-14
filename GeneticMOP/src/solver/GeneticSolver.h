@@ -8,11 +8,14 @@
 #ifndef GENETICSOLVER_H_
 #define GENETICSOLVER_H_
 
-#include "Solver.h"
+#include "../solver/Solver.h"
 
-#include "common.h"
+#define TARGET_PNTS 100
 
-const double k_infeasible_cost = .1;
+typedef struct {
+	double *x;
+	double *y;
+} xy_pair;
 
 class GeneticSolver : public Solver
 {
@@ -22,10 +25,7 @@ private:
 	int ydim;
 	double **current_fit;
 	double *offspring;
-	qtree::Qtree x_pop_feas;
-	qtree::Qtree y_pop_feas;
-	qtree::Qtree x_pop_inf;
-	qtree::Qtree y_pop_inf;
+	xy_pair *pop;
 
 	void bread();
 	void find_fittest();
