@@ -27,7 +27,7 @@ using namespace std;
 
 
 #define DIM 5
-#define NUM_GUESSES 100000
+#define TEST_NUM_GUESSES 100000
 
 
 void objective_func(double *x, double *y_out)
@@ -66,7 +66,7 @@ void test_pareto_equivalence()
 	double *x_val = qtree::qtree_point_new(DIM);
 	double *y_val = qtree::qtree_point_new(DIM);
 
-	for (int i = 0; i < NUM_GUESSES; i++)
+	for (int i = 0; i < TEST_NUM_GUESSES; i++)
 	{
 		vboard.sample_feasible(x_val);
 		vboard.make_guess(x_val, y_val);

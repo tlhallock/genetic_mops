@@ -6,29 +6,14 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <iostream>
 using namespace std;
 
-#include<limits.h>
-
-#include <stdio.h>
-
-#include "math_functions.h"
-
-#include "VectorImageSet.h"
-#include "GeneticSolver.h"
-#include "RandomSampleSolver.h"
-#include "IncrementalSampleSolver.h"
-#include "DepthFirstRecursiveStencil.h"
-
-
+#include "common.h"
 
 double get_index(double r)
 {
 	return r * r * r * r * r * r * r;
 }
-
-
 
 int main()
 {

@@ -75,7 +75,7 @@ InitialSet *get_equidistant_initial_set(double spacing, int dim)
 	}
 
 	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
-	for (int i = 0; i < pnts.size(); i++)
+	for (unsigned int i = 0; i < pnts.size(); i++)
 	{
 		free(pnts.at(i));
 	}
@@ -110,7 +110,7 @@ InitialSet *get_simple_pareto_initial_set(int num_points, int dim, bool uniform)
 	}
 
 	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
-	for (int i = 0; i < pnts.size(); i++)
+	for (unsigned int i = 0; i < pnts.size(); i++)
 	{
 		free(pnts.at(i));
 	}
@@ -128,7 +128,7 @@ InitialSet *get_uniform_random_initial_set(int num_points, int dim)
 	}
 
 	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
-	for (int i = 0; i < pnts.size(); i++)
+	for (unsigned int i = 0; i < pnts.size(); i++)
 	{
 		free(pnts.at(i));
 	}
@@ -156,7 +156,7 @@ InitialSet *get_wavy_initial_set(int num_points, int dim)
 	}
 
 	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
-	for (int i = 0; i < pnts.size(); i++)
+	for (unsigned int i = 0; i < pnts.size(); i++)
 	{
 		free(pnts.at(i));
 	}
@@ -187,7 +187,7 @@ InitialSet *get_bias_initial_set(int num_points, int dim)
 	}
 
 	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
-	for (int i = 0; i < pnts.size(); i++)
+	for (unsigned int i = 0; i < pnts.size(); i++)
 	{
 		free(pnts.at(i));
 	}
@@ -217,7 +217,7 @@ InitialSet *get_bias_simple_set(int num_points, int dim)
 	}
 
 	InitialSet *ret_val = new InitialSet(pnts.size(), &pnts, dim, &l_2);
-	for (int i = 0; i < pnts.size(); i++)
+	for (unsigned int i = 0; i < pnts.size(); i++)
 	{
 		free(pnts.at(i));
 	}

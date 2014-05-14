@@ -40,7 +40,7 @@
 
 void test_nearest();
 void test_pareto_equivalence();
-static void compare_solvers();
+void compare_solvers();
 
 
 #endif	/* COMMON_H */

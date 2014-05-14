@@ -72,7 +72,7 @@ void GeneticSolver::mutate()
 {
 	FILE *debug_file = fopen("ga_debug.txt", "a");
 	fprintf(debug_file, "mutating: ");
-	print_point(debug_file, offspring, xdim, false);
+//	print_point(debug_file, offspring, xdim, false);
 
 	for (int i = 0; i < xdim; i++)
 	{
@@ -80,7 +80,7 @@ void GeneticSolver::mutate()
 	}
 
 	fprintf(debug_file, " to ");
-	print_point(debug_file, offspring, xdim, true);
+//	print_point(debug_file, offspring, xdim, true);
 	fclose(debug_file);
 }
 
@@ -139,4 +139,61 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 
 	free(x);
 	free(y);
+}
+
+
+double foo(int index)
+{
+	std::vector<XYPair *> points;
+	int dim;
+	std::set<int> f;
+
+	double *minsL = (double *) alloca(sizeof(*minsL) * points.size());
+	double *minsU = (double *) alloca(sizeof(*minsU) * points.size());
+	for (int i=0; i<dim;i++)
+	{
+		minsL[i] = DBL_MAX;
+		minsU[i] = DBL_MAX;
+	}
+
+	double *pnt = points.at(index)->y;
+
+	double max = -DBL_MAX;
+	for (std::set<int>::iterator it = f.begin(); it != f.end(); it++)
+	{
+		double *other = points.at(*it)->y;
+		for (int i = 0; i < dim; i++)
+		{
+			if (other[i] < pnt[i])
+			{
+				double dist = pnt[i] - other[i];
+				if (dist < minsL[i])
+				{
+					minsL[i] = dist;
+				}
+			}
+			else
+			{
+				double dist = other[i] - pnt[i];
+				if (dist < minsU[i])
+				{
+					minsU[i] = dist;
+				}
+			}
+		}
+	}
+
+	double max = -DBL_MAX;
+	for (int i = 0; i < dim; i++)
+	{
+		if (minsL[i] > max)
+		{
+			max = minsL[i];
+		}
+		if (minsU[i] > max)
+		{
+			max = minsU[i];
+		}
+	}
+	return max;
 }
