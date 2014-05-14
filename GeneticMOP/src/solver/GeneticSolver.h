@@ -25,7 +25,7 @@ private:
 	int ydim;
 	double **current_fit;
 	double *offspring;
-	xy_pair *pop;
+	Representation rep;
 
 	void bread();
 	void find_fittest();

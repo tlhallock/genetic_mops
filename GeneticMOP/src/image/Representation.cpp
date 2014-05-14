@@ -197,6 +197,7 @@ void Representation::mark(int index, bool used)
 		if (it == indices.end())
 		{
 			indices.insert(index);
+			points.at(index)->improvement = 0;
 		}
 	}
 	else
@@ -208,6 +209,31 @@ void Representation::mark(int index, bool used)
 	}
 
 	accurate_dists = false;
+}
+
+void Representation::copy_out(std::vector<int> indices_, char *mask)
+{
+	int rsize = points.size();
+	for (int i = 0; i < rsize; i++)
+	{
+		mask[i] = 0;
+	}
+
+	for (std::set<int>::iterator it = indices.begin(); it != indices.end(); it++)
+	{
+		indices_.push_back(*it);
+		mask[*it] = 1;
+	}
+}
+
+void Representation::fill_from(std::vector<int> *indices_)
+{
+	indices.clear();
+	for (std::vector<int>::iterator it = indices_->begin(); it != indices_->end(); it++)
+	{
+		indices.insert(*it);
+	}
+	accurate_masks = false;
 }
 
 void Representation::add(double *x, double *y)
@@ -251,171 +277,76 @@ int Representation::get_nearest_index(int index)
 	return points.at(index)->indices[0];
 }
 
-double Representation::get_diversity_fitness(int num)
+void Representation::zero_improvements()
 {
-	ensure_masks();
-
-	double sum = 0;
-
-	double dist;
-	int nearest;
-
 	for (std::set<int>::iterator it = indices.begin(); it != indices.end(); it++)
 	{
-		get_n_nearest(*it, 1, &nearest, &dist);
-		sum += dist;
+		points.at(*it)->improvement = 0;
 	}
-
-	return sum;
 }
-
-double Representation::get_coverage_fitness(int num)
+void Representation::greedy_improve_coverage(int num_loops)
 {
-	ensure_masks();
-
-	double sum = 0;
-
-	double dist;
-	int nearest;
-
-	unsigned int size = points.size();
-	for (unsigned int i = 0; i < size; i++)
+	bool improvement;
+	for (int i = 0; i < num_loops; i++)
 	{
-		if (selected[i])
-		{
-			continue;
-		}
-
-		get_n_nearest(i, 1, &nearest, &dist);
-		sum += dist;
-	}
-
-	return sum;
-}
-
-bool Representation::dither_diversity_fitness(int index, int num, int num_alt, int *new_index, double *increase)
-{
-	ensure_masks();
-
-	if (num_alt > NUM_CLOSE_CACHE - 1)
-	{
-		puts("ERROR NOT CACHED 1324578173246591722295");
-		exit(1);
-	}
-
-	int best_index = index;
-	double improvement = 0;
-
-	for (int i = 0; i < num_alt; i++)
-	{
-		int alternate = points.at(index)->indices[i];
-		if (selected[alternate])
-		{
-			continue;
-		}
-
-		double sum = 0;
-		double increase = 0.0;
+		improvement = false;
 		for (std::set<int>::iterator it = indices.begin(); it != indices.end(); it++)
 		{
-			int nearest = get_nearest_index(*it);
-			if (nearest == index)
+			if (dither_coverage_fitness (*it, -1300, 3))
 			{
-				double new_nearest = get_distance(*it, alternate);
-				if (points.at(*it)->dists[1] < new_nearest)
-				{
-					new_nearest = points.at(*it)->dists[1];
-				}
-				// if the nearest is the old one
-				increase += new_nearest - get_distance(*it, nearest);
-			}
-			else if (get_distance(*it, nearest) > get_distance(*it, alternate))
-			{
-				// if the new one is closer than this one's closest
-				sum += get_distance(*it, alternate) - get_distance(*it, nearest);
+				improvement = true;
 			}
 		}
-
-		if (sum > improvement)
+		if (!improvement)
 		{
-			best_index = alternate;
-			improvement = sum;
+			return;
 		}
 	}
-
-	if (best_index != index)
-	{
-		return false;
-	}
-
-	mark(index, false);
-	mark(best_index, true);
-
-	return true;
 }
 
-bool Representation::dither_coverage_fitness(int index, int num, int num_alt, int *new_index, double *increase)
+void Representation::greedy_improve_diversity(int num_loops)
 {
-	ensure_masks();
-
-	if (num_alt > NUM_CLOSE_CACHE - 1)
+	bool improvement;
+	for (int i = 0; i < num_loops; i++)
 	{
-		puts("ERROR NOT CACHED 66421641641");
-		exit(1);
+		improvement = false;
+		for (std::set<int>::iterator it = indices.begin(); it != indices.end(); it++)
+		{
+			if (dither_diversity_fitness (*it, -1300, 3))
+			{
+				improvement = true;
+			}
+		}
+		if (!improvement)
+		{
+			return;
+		}
+	}
+}
+
+
+void Representation::ensure_uses(unsigned int num_to_use)
+{
+	while (indices.size() > num_to_use)
+	{
+		int to_del = rand() % indices.size();
+		indices.erase(indices.begin() + to_del);
 	}
 
-	int best_index = index;
-	double improvement = 0;
-
-	for (int i = 0; i < num_alt; i++)
+	while (indices.size() < num_to_use)
 	{
-		int alternate = points.at(index)->indices[i];
-		if (selected[alternate])
+		int to_add = rand() % points.size();
+		if (indices.find(to_add) != indices.end())
 		{
 			continue;
 		}
-
-		double sum = 0;
-		double increase = 0.0;
-		for (unsigned int j = 0; j < points.size(); j++)
-		{
-			if (selected[j])
-			{
-				continue;
-			}
-
-			int nearest = get_nearest_index(j);
-			if (nearest == index)
-			{
-				double new_nearest = get_distance(j, alternate);
-				if (points.at(j)->dists[1] < new_nearest)
-				{
-					new_nearest = points.at(j)->dists[1];
-				}
-				// if the nearest is the old one
-				increase += new_nearest - get_distance(j, nearest);
-			}
-			else if (get_distance(j, nearest) > get_distance(j, alternate))
-			{
-				// if the new one is closer than this one's closest
-				sum += get_distance(j, alternate) - get_distance(j, nearest);
-			}
-		}
-
-		if (sum < improvement)
-		{
-			best_index = alternate;
-			improvement = sum;
-		}
+		indices.insert(to_add);
 	}
-
-	if (best_index != index)
-	{
-		return false;
-	}
-
-	mark(index, false);
-	mark(best_index, true);
-
-	return true;
 }
+
+void Representation::clear()
+{
+	indices.clear();
+	accurate_masks = false;
+}
+

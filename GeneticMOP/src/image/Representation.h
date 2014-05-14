@@ -22,7 +22,7 @@
 
 class Representation;
 
-#define NUM_CLOSE_CACHE 5
+#define NUM_CLOSE_CACHE 4
 class XYPair
 {
 	friend class Representation;
@@ -33,11 +33,13 @@ class XYPair
 	double dists[NUM_CLOSE_CACHE];
 
 	bool pareto;
+	double improvement;
 public:
 	XYPair(double *x_, double *y_, int dim) :
 			x(qtree::qtree_point_dup(dim, x_)),
 			y(qtree::qtree_point_dup(dim, y_)),
-			pareto(false)
+			pareto(false),
+			improvement(false)
 	{
 		for (int i = 0; i < NUM_CLOSE_CACHE; i++) {
 			indices[i] = 0;
@@ -106,8 +108,17 @@ public:
 	double get_diversity_fitness(int num);
 	double get_coverage_fitness (int num);
 
-	bool dither_diversity_fitness(int index, int num, int num_alt, int *new_index, double *increase);
-	bool dither_coverage_fitness (int index, int num, int num_alt, int *new_index, double *increase);
+	bool dither_diversity_fitness(int index, int num, int num_alt);
+	bool dither_coverage_fitness (int index, int num, int num_alt);
+
+	void zero_improvements();
+	void greedy_improve_coverage(int num_loops);
+	void greedy_improve_diversity(int num_loops);
+
+	void fill_from(std::vector<int> *indices);
+	void copy_out(std::vector<int> indices_, char *mask);
+	void ensure_uses(unsigned int num_to_use);
+	void clear();
 };
 
 #endif /* INITIALSET_H_ */
