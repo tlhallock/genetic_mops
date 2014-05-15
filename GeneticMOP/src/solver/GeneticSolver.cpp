@@ -50,22 +50,14 @@ void GeneticSolver::bread()
 
 void GeneticSolver::find_fittest()
 {
-	FILE *debug_file = fopen("ga_debug.txt", "a");
-	fprintf(debug_file, "found fittest: ");
-
-
-
-	for (int i = 0; i < breed_size; i++)
+	if (exploring)
 	{
-//		int index = (int) (get_index(rand() / (double) INT_MAX) * x_pop_feas.size());
-//		current_fit[i] = x_pop_feas[index];
 
-//		fprintf(debug_file, "\n\t%d\t", index);
-//		print_point(debug_file, current_fit[i], xdim, false);
 	}
+	else // improving representation
+	{
 
-	fputc('\n', debug_file);
-	fclose(debug_file);
+	}
 }
 
 void GeneticSolver::mutate()
@@ -91,6 +83,8 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 	int xdim = mop->get_x_dimension();
 	int ydim = mop->get_y_dimension();
 
+	DistCache dcache(xdim, ydim);
+
 	double *x = (double *) malloc(sizeof(*x) * xdim);
 	double *y = (double *) malloc(sizeof(*y) * ydim);
 
@@ -99,9 +93,10 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		mop->sample_feasible(x);
 		mop->make_guess(x, y);
 
-//		x_pop_feas.add(x);
-//		y_pop_feas.add(y);
+		dcache.add(x, y);
 	}
+
+	dcache.clear_non_pareto();
 
 	while ((time(0) - start_time) < timeout
 			&& mop->get_num_points() < num_to_find)
@@ -111,30 +106,8 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		mutate();
 
 		mop->make_guess(offspring, y);
-		if (mop->is_feasible(offspring))
-		{
-//			x_pop_feas.add(offspring);
-//			y_pop_feas.add(y);
-		}
-		else
-		{
-//			x_pop_inf.add(offspring);
-//			y_pop_inf.add(y);
-		}
-
-//		select();
-
-		FILE *debug_file = fopen("ga_debug.txt", "a");
-		fprintf(debug_file, "new population: ");
-//		for (unsigned int i=0;i<x_pop_feas.size(); i++)
-//		{
-//			fprintf(debug_file, "\n\t%d\t%lf\t", i, get_fitness(mop, x_pop_feas[i], y_pop_feas[i]));
-//			print_point(debug_file, x_pop_feas[i], xdim, false);
-//			fprintf(debug_file, "   --->   ");
-//			print_point(debug_file, y_pop_feas[i], mop->get_y_dimension(), false);
-//		}
-		fputc('\n', debug_file);
-		fclose(debug_file);
+		dcache.add(offspring, y);
+		select();
 	}
 
 	free(x);
@@ -142,27 +115,27 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 }
 
 
-double foo(int index)
+double GeneticSolver::find_isolated(int index, double *minsL, double *minsU, DistCache *cache)
 {
-	std::vector<XYPair *> points;
-	int dim;
-	std::set<int> f;
+	int ydim = cache->get_dim();
+	int size = cache->size();
 
-	double *minsL = (double *) alloca(sizeof(*minsL) * points.size());
-	double *minsU = (double *) alloca(sizeof(*minsU) * points.size());
-	for (int i=0; i<dim;i++)
+//	double *minsL = (double *) alloca(sizeof(*minsL) * ydim);
+//	double *minsU = (double *) alloca(sizeof(*minsU) * ydim);
+	for (int i=0; i<ydim;i++)
 	{
 		minsL[i] = DBL_MAX;
 		minsU[i] = DBL_MAX;
 	}
 
-	double *pnt = points.at(index)->y;
+	double *pnt = cache->getY(index);
 
 	double max = -DBL_MAX;
-	for (std::set<int>::iterator it = f.begin(); it != f.end(); it++)
+	for (int j = 0; j < size; j++)
 	{
-		double *other = points.at(*it)->y;
-		for (int i = 0; i < dim; i++)
+		double *other = cache->getY(j);
+
+		for (int i = 0; i < ydim; i++)
 		{
 			if (other[i] < pnt[i])
 			{
@@ -182,18 +155,4 @@ double foo(int index)
 			}
 		}
 	}
-
-	double max = -DBL_MAX;
-	for (int i = 0; i < dim; i++)
-	{
-		if (minsL[i] > max)
-		{
-			max = minsL[i];
-		}
-		if (minsU[i] > max)
-		{
-			max = minsU[i];
-		}
-	}
-	return max;
 }

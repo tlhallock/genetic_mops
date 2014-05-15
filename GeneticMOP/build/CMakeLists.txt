@@ -6,24 +6,19 @@ set(GeneticMop_VERSION_MINOR 0)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -march=native")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -march=native")
 
-# Represnter library
-add_library(Mops
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/utils.cc
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/math_functions.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/MOP.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/image/VectorImageSet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/image/RtreeImageSet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/IncrementalSampleSolver.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/DepthFirstRecursiveStencil.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/RandomSampleSolver.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/GeneticSolver.cpp)
+# Representer library
+file (GLOB lib_SRC
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/image/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/represent/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/*.cpp)
+add_library(Mops ${lib_SRC})
 
 # Test application library
-add_executable(TestMops
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/compare_solvers.cc
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/compare_dfs.cc
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/TestImageSet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/GeneticMOP.cpp)
+file(GLOB application_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/*.cpp)
+add_executable(TestMops ${application_SRC})
+
+
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../out/lib)
 

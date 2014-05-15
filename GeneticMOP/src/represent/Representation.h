@@ -20,69 +20,44 @@
 
 #include "../../../Rtree/src/qtree_point.h"
 
-class Representation;
-
-#define NUM_CLOSE_CACHE 4
 class XYPair
 {
 	friend class Representation;
 
 	double *x;
 	double *y;
-	int indices[NUM_CLOSE_CACHE];
-	double dists[NUM_CLOSE_CACHE];
 
 	bool pareto;
-	double improvement;
 public:
 	XYPair(double *x_, double *y_, int dim) :
 			x(qtree::qtree_point_dup(dim, x_)),
 			y(qtree::qtree_point_dup(dim, y_)),
-			pareto(false),
-			improvement(false)
-	{
-		for (int i = 0; i < NUM_CLOSE_CACHE; i++) {
-			indices[i] = 0;
-			dists[i] = 0;
-		}
-	};
+			pareto(false) {};
 	~XYPair()
 	{
-		if (x != NULL)
-		{
-			free(x);
-		}
+		free(x);
 		free(y);
 	}
 };
 
-class Representation
+class DistCache
 {
 private:
-	unsigned int cap;
 	int dim;
+	unsigned int cap;
 	std::vector<XYPair *> points;
 	double **distances;
-
-	char *selected;
-	std::set<int> indices;
 
 	double (*norm)(double *, double *, int);
 
 	bool accurate_dists;
-	bool accurate_masks;
 
-	void ensure_dists();
 	void ensure_masks();
 	bool is_pareto(int index);
-
-	void calc_n_nearest(int index, int *nearest, double *dists);
-	int get_nearest_index(int index);
+	void set_distance(int i, int j, double d);
 public:
-	Representation(unsigned int cap, int dim, double (*norm)(double *, double *, int));
-	virtual ~Representation();
-
-	void get_n_nearest(int index, int n, int *nearest, double *dists);
+	DistCache(unsigned int cap, int dim, double (*norm)(double *, double *, int));
+	virtual ~DistCache();
 
 	double *getY(int index)
 	{
@@ -98,11 +73,62 @@ public:
 	int get_dim() { return dim; }
 	int index_of(double *point);
 
-	void mark(int index, bool used);
 	void add(double *x, double *y);
 	void remove(int index);
-
 	void clear_non_pareto();
+};
+
+#define NUM_CLOSE_CACHE 4
+class ClosestCacheEntry
+{
+	XYPair *pair;
+	int indices[NUM_CLOSE_CACHE];
+	double dists[NUM_CLOSE_CACHE];
+
+	double improvement;
+public:
+	ClosestCacheEntry(XYPair *pair_) :
+			pair(pair_),
+			improvement(0)
+	{
+		for (int i = 0; i < NUM_CLOSE_CACHE; i++)
+		{
+			indices[i] = 0;
+			dists[i] = 0;
+		}
+	};
+	~ClosestCacheEntry() {}
+};
+
+class ClosestCache
+{
+private:
+	std::vector<ClosestCacheEntry *> points;
+	bool accurate_masks;
+
+	DistCache *dcache;
+	std::set<int> representation;
+
+	void ensure_masks();
+
+	int get_nearest_index(int index);
+	void calc_n_nearest(int index, int *nearest, double *dists);
+public:
+	ClosestCache(DistCache *dcache);
+	~ClosestCache();
+
+	void mark(int index, bool used);
+	void get_n_nearest(int index, int n, int *nearest, double *dists);
+
+	void change_to(int on, int off);
+};
+
+
+class Representation
+{
+public:
+	Representation(ClosestCache *cache);
+	virtual ~Representation();
 
 	// In each of the following, num is ignored...
 	double get_diversity_fitness(int num);
@@ -114,11 +140,6 @@ public:
 	void zero_improvements();
 	void greedy_improve_coverage(int num_loops);
 	void greedy_improve_diversity(int num_loops);
-
-	void fill_from(std::vector<int> *indices);
-	void copy_out(std::vector<int> indices_, char *mask);
-	void ensure_uses(unsigned int num_to_use);
-	void clear();
 };
 
 #endif /* INITIALSET_H_ */
