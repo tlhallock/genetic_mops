@@ -17,7 +17,7 @@ DistCache::DistCache(unsigned int cap_, int xdim_, int ydim_, double (*norm_)(do
 		norm(norm_),
 		accurate_dists(false)
 {
-	for (int i = 0; i < cap; i++)
+	for (unsigned int i = 0; i < cap; i++)
 	{
 		distances[i] = (double *) malloc(sizeof(*distances[i]) * i);
 	}
@@ -25,7 +25,7 @@ DistCache::DistCache(unsigned int cap_, int xdim_, int ydim_, double (*norm_)(do
 
 DistCache::~DistCache()
 {
-	for (int i = 0; i < cap; i++)
+	for (unsigned int i = 0; i < cap; i++)
 	{
 		free(distances[i]);
 	}
