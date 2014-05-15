@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#include "common.h"
+#include "../common.h"
 
 double get_index(double r)
 {
@@ -21,11 +21,9 @@ int main()
 	srand(seed);
 
 //	test_pareto_equivalence();
-
-	test_nearest();
-	//compare_solvers();
+//test_nearest();
+	compare_solvers();
 
 	return 0;
 }
-
 

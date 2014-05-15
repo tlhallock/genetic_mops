@@ -92,7 +92,7 @@ void compare_solvers()
 
 	{
 		puts("Using genetic algorithm.");
-		GeneticSolver gasolver(2, 2, 3);
+		GeneticSolver gasolver(2, 2, 10);
 
 		FILE *log = fopen("ga_points.txt", "w");
 

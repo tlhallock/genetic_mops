@@ -7,21 +7,22 @@
 
 #include "GeneticSolver.h"
 
-#include <time.h>
-#include <stdlib.h>
-#include <math.h>
-#include <limits.h>
-#include <float.h>
+#include "../common.h"
 
-GeneticSolver::GeneticSolver(int _xdim, int _ydim, int _breed_size) :
-	breed_size(_breed_size),
+GeneticSolver::GeneticSolver(int _xdim, int _ydim, int num_points) :
+	cap(500),
+	breed_size(2),
+	npoints(num_points),
 	xdim(_xdim),
 	ydim(_ydim),
 	current_fit((double **) malloc (sizeof(*current_fit) * breed_size)),
 	offspring((double *) malloc (sizeof (*offspring) * _xdim)),
-	pop((xy_pair *) malloc (sizeof (*pop) * 2 * TARGET_PNTS))
+	current_rep(),
+	cache(cap, xdim, ydim, &l_2),
+	ccache(&cache),
+	gene_selector(cap, 10)
 {
-	for (int i = 0; i < _breed_size; i++)
+	for (int i = 0; i < breed_size; i++)
 	{
 		current_fit[i] = NULL;
 	}
@@ -29,7 +30,6 @@ GeneticSolver::GeneticSolver(int _xdim, int _ydim, int _breed_size) :
 
 GeneticSolver::~GeneticSolver()
 {
-	free(pop);
 	free(current_fit);
 	free(offspring);
 }
@@ -39,7 +39,7 @@ double GeneticSolver::get_fitness(BoundedMopStats *board, double *x, double *y)
     return 0;
 }
 
-void GeneticSolver::bread()
+void GeneticSolver::breed()
 {
 	for (int i = 0; i < xdim; i++)
 	{
@@ -50,40 +50,80 @@ void GeneticSolver::bread()
 
 void GeneticSolver::find_fittest()
 {
-	if (exploring)
-	{
+	int rsize = cache.size();
 
+	int parent = 0;
+	if (rand() % 2)
+	{
+		double max = -DBL_MAX;
+		double *minsL = (double *) alloca(sizeof(*minsL) * ydim);
+		double *minsU = (double *) alloca(sizeof(*minsU) * ydim);
+
+		for (int i = 0; i < rsize / 3; i++)
+		{
+			int index = rand() % rsize;
+
+			if (get_isolation(index, minsL, minsU) > max)
+			{
+				parent = index;
+			}
+		}
 	}
 	else // improving representation
 	{
 
 	}
+
+	double *p = cache.getY(parent);
+	for (int i = 0; i < ydim; i++)
+	{
+		current_fit[0][i] = p[i];
+	}
+
+#define NUM_INCEST 3
+	int nearest[NUM_INCEST];
+	double dists[NUM_INCEST];
+	ccache.get_n_nearest(parent, NUM_INCEST, nearest, dists);
+	p = cache.getY(nearest[rand() % NUM_INCEST]);
+	for (int i = 0; i < ydim; i++)
+	{
+		current_fit[1][i] = p[i];
+	}
 }
 
 void GeneticSolver::mutate()
 {
-	FILE *debug_file = fopen("ga_debug.txt", "a");
-	fprintf(debug_file, "mutating: ");
-//	print_point(debug_file, offspring, xdim, false);
-
 	for (int i = 0; i < xdim; i++)
 	{
-//		offspring[i] += offspring[i] * mutation_factor * (2 * (rand() / (double) INT_MAX) - 1);
+		double randomNumber = 2 * rand() / (double) RAND_MAX - 1;
+		offspring[i] *= 1 + randomNumber / 100.0;
+	}
+}
+
+void GeneticSolver::select()
+{
+	if (cache.size() >= .90 * cap)
+	{
+		cache.clear_non_pareto();
+
+		while (cache.size() >= .90 * cap)
+		{
+			// remove the closest...
+			puts("implement this... 15709138560113508173507");
+			exit(1);
+		}
 	}
 
-	fprintf(debug_file, " to ");
-//	print_point(debug_file, offspring, xdim, true);
-	fclose(debug_file);
+	if (rand() % 100)
+	{
+		gene_selector.represent(npoints, &cache, &current_rep);
+		ccache.assign(&current_rep);
+	}
 }
 
 void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 {
 	time_t start_time = time(0);
-
-	int xdim = mop->get_x_dimension();
-	int ydim = mop->get_y_dimension();
-
-	DistCache dcache(xdim, ydim);
 
 	double *x = (double *) malloc(sizeof(*x) * xdim);
 	double *y = (double *) malloc(sizeof(*y) * ydim);
@@ -93,20 +133,23 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		mop->sample_feasible(x);
 		mop->make_guess(x, y);
 
-		dcache.add(x, y);
+		cache.add(x, y);
 	}
 
-	dcache.clear_non_pareto();
+	cache.clear_non_pareto();
+	gene_selector.represent(npoints, &cache, &current_rep);
+	ccache.assign(&current_rep);
 
 	while ((time(0) - start_time) < timeout
 			&& mop->get_num_points() < num_to_find)
 	{
 		find_fittest();
-		bread();
+		breed();
 		mutate();
 
 		mop->make_guess(offspring, y);
-		dcache.add(offspring, y);
+		cache.add(offspring, y);
+
 		select();
 	}
 
@@ -115,25 +158,22 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 }
 
 
-double GeneticSolver::find_isolated(int index, double *minsL, double *minsU, DistCache *cache)
+double GeneticSolver::get_isolation(int index, double *minsL, double *minsU)
 {
-	int ydim = cache->get_dim();
-	int size = cache->size();
+	int ydim = cache.get_ydim();
+	int size = cache.size();
 
-//	double *minsL = (double *) alloca(sizeof(*minsL) * ydim);
-//	double *minsU = (double *) alloca(sizeof(*minsU) * ydim);
 	for (int i=0; i<ydim;i++)
 	{
 		minsL[i] = DBL_MAX;
 		minsU[i] = DBL_MAX;
 	}
 
-	double *pnt = cache->getY(index);
+	double *pnt = cache.getY(index);
 
-	double max = -DBL_MAX;
 	for (int j = 0; j < size; j++)
 	{
-		double *other = cache->getY(j);
+		double *other = cache.getY(j);
 
 		for (int i = 0; i < ydim; i++)
 		{
@@ -155,4 +195,19 @@ double GeneticSolver::find_isolated(int index, double *minsL, double *minsU, Dis
 			}
 		}
 	}
+
+	// should try average...
+	double max = -DBL_MAX;
+	for (int i = 0; i < ydim; i++)
+	{
+		if (minsL[i] < DBL_MAX && minsL[i] > max)
+		{
+			max = minsL[i];
+		}
+		if (minsU[i] < DBL_MAX && minsU[i] > max)
+		{
+			max = minsU[i];
+		}
+	}
+	return max;
 }

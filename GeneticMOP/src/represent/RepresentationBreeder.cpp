@@ -11,19 +11,37 @@
 
 #define GA_VERBOSE 1
 
-static bool vec_contains(std::vector<int> *vec, int i)
+
+void RepresentationBreeder::ensure_uses(int index, unsigned int num_to_use)
 {
-	return std::find(vec->begin(), vec->end(), i) != vec->end();
+	std::set<int> *s = indices[index];
+
+	while (s->size() > num_to_use)
+	{
+		int to_del = rand() % s->size();
+		std::set<int>::iterator it = s->begin();
+		std::advance(it, to_del);
+		s->erase(it);
+	}
+
+	while (s->size() < num_to_use)
+	{
+		int to_add = rand() % current_size;
+		if (s->find(to_add) != s->end())
+		{
+			continue;
+		}
+		s->insert(to_add);
+	}
 }
 
 void RepresentationBreeder::cross_over(int parent1, int parent2, int num_to_use)
 {
-	int rsize = representation->size();
-	int idx1 = rand() % rsize;
+	int idx1 = rand() % current_size;
 	int idx2;
 	do
 	{
-		idx2 = rand() % rsize;
+		idx2 = rand() % current_size;
 	} while (idx1 == idx2);
 
 	if (GA_VERBOSE)
@@ -40,26 +58,22 @@ void RepresentationBreeder::cross_over(int parent1, int parent2, int num_to_use)
 
 	indices[0]->clear();
 
-	for (int i = 0; i < rsize; i++)
+	std::set<int>::iterator p1 = indices[parent1]->begin();
+	std::set<int>::iterator p2 = indices[parent2]->begin();
+	std::set<int>::iterator end = indices[parent1]->end();
+	for (int i = 0; p1 != end; i++, p1++, p2++)
 	{
-		char on;
+		int index;
 		if (i < idx1 || i >= idx2)
 		{
-			on = pop[parent1][i];
+			index = *p1;
 		}
 		else
 		{
-			on = pop[parent2][i];
+			index = *p2;
 		}
 
-		if (!on)
-		{
-			pop[0][i] = 0;
-			continue;
-		}
-
-		indices[0]->push_back(i);
-		pop[0][i] = 1;
+		indices[0]->insert(index);
 	}
 
 	ensure_uses(0, num_to_use);
@@ -99,42 +113,40 @@ void RepresentationBreeder::cross_over(int parent1, int parent2, int num_to_use)
 //	ensure_uses(0, num_to_use);
 //}
 
-void RepresentationBreeder::mutate(int num_to_flip, int num_to_use, double *costs)
+void RepresentationBreeder::mutate(int num_to_flip)
 {
-	int rsize = representation->size();
-
 	for (int i = 0; i < num_to_flip; i++)
 	{
-		int idx = rand() % indices[0]->size();
-		int turn_off = indices[0]->at(idx);
+		std::set<int>::iterator it = indices[0]->begin();
+		advance(it, rand() % indices[0]->size());
+		int turn_off = *it;
+		indices[0]->erase(it);
+
 		int turn_on;
 		do
 		{
-			turn_on = rand() % rsize;
-		} while (vec_contains(indices[0], turn_on));
+			turn_on = rand() % current_size;
+		} while (indices[0]->find(turn_on) != indices[0]->end());
 
 		if (GA_VERBOSE)
 		{
 			printf("flipping %d to %d\n", turn_off, turn_on);
 		}
 
-		indices[0]->at(idx) = turn_on;
-		pop[0][turn_off] = 0;
-		pop[0][turn_on] = 1;
+		indices[0]->insert(turn_on);
 	}
 }
 
-RepresentationBreeder::RepresentationBreeder(Representation *_rep, int _pop_size) :
-			pop_size(_pop_size),
-			pop((char **) malloc (sizeof(*pop) * (_pop_size + 1))),
-			indices((std::vector<int> **) malloc (sizeof(*indices) * (_pop_size + 1))),
-			fitness((double *) malloc (sizeof(*fitness) * (_pop_size + 1))),
-			representation(_rep)
+RepresentationBreeder::RepresentationBreeder(int _cap, int _pop_size) :
+		cap(_cap),
+		pop_size(_pop_size),
+		indices((std::set<int> **) malloc (sizeof(*indices) * (_pop_size + 1))),
+		fitness((double *) malloc (sizeof(*fitness) * (_pop_size + 1))),
+		current_size(0)
 {
 	for (int i = 0; i < pop_size + 1; i++)
 	{
-		indices[i] = new std::vector<int>;
-		pop[i] = (char *) malloc(sizeof(*pop[i]) * _pop_size);
+		indices[i] = new std::set<int>;
 	}
 }
 
@@ -143,33 +155,41 @@ RepresentationBreeder::~RepresentationBreeder()
 	for (int i = 0; i < pop_size + 1; i++)
 	{
 		delete indices[i];
-		free(pop[i]);
 	}
-	free(pop);
 	free(indices);
 	free(fitness);
 }
 
-void RepresentationBreeder::represent(int num_points, char *mask_out)
+void RepresentationBreeder::represent(int num_points, DistCache *dcache, std::set<int> *mask_out)
 {
-	int rsize = representation->size();
+	current_size = dcache->size();
+	if (current_size < cap)
+	{
+		puts("oops! 1234567876543678");
+		exit(1);
+	}
+
+	if (current_size < num_points)
+	{
+		mask_out->clear();
+		for (int i = 0; i < current_size; i++)
+		{
+			mask_out->insert(i);
+		}
+		return;
+	}
+
+	ClosestCache cc(dcache);
 
 	// select initial population
 	for (int i = 1; i <= pop_size; i++)
 	{
-
 		ensure_uses(i, num_points);
-
-		fitness[i] = representation->get_diversity_fitness(-13);
-
-
-
-
-		metric->get_fitness(pop[i], iset->get_all_pnts(), costs);
+		cc.assign(indices[i]);
+		fitness[i] = cc.get_diversity_fitness(-13);
 	}
 
 	int nloops = 100;
-
 	for (int i = 0; i < nloops; i++)
 	{
 		if (GA_VERBOSE)
@@ -195,21 +215,12 @@ void RepresentationBreeder::represent(int num_points, char *mask_out)
 		}
 
 		cross_over(p1, p2, num_points);
-		mutate(2, num_points, costs);
+		mutate(2);
 
-		representation->greedy_improve_diversity(3);
-
-
-		greedy_improve(metric, indices[0], pop[0]);
-
-		fitness[0] = metric->get_fitness(pop[0], iset->get_all_pnts(), costs);
+		cc.assign(indices[i]);
+		fitness[0] = cc.get_diversity_fitness(-13);
 
 		select(i);
-
-		if (GA_VERBOSE)
-		{
-//			sleep(1);
-		}
 	}
 
 	int most_fit_index = INT_MIN;
@@ -224,15 +235,13 @@ void RepresentationBreeder::represent(int num_points, char *mask_out)
 		}
 	}
 
-	greedy_improve(metric, indices[most_fit_index], pop[most_fit_index]);
 
-	char * most_fit_mask = pop[most_fit_index];
-	for (int i = 0; i < iset->size(); i++)
+	std::set<int> *rset = indices[most_fit_index];
+	mask_out->clear();
+	for (std::set<int>::iterator it=rset->begin(); it != rset->end(); it++)
 	{
-		mask_out[i] = most_fit_mask[i];
+		mask_out->insert(*it);
 	}
-
-	free(costs);
 }
 
 
@@ -265,17 +274,10 @@ void RepresentationBreeder::select(int generation)
 		printf("\tNew least fit: gen=\t%d\t%lf\n", generation, fitness[least_fit_index]);
 	}
 
-//	plot("test.m", iset, pop[0], fitness[0]);
-
 	{
-		std::vector<int> *tmp = indices[0];
+		std::set<int> *tmp = indices[0];
 		indices[0] = indices[least_fit_index];
 		indices[least_fit_index] = tmp;
-	}
-	{
-		char *tmp = pop[0];
-		pop[0] = pop[least_fit_index];
-		pop[least_fit_index] = tmp;
 	}
 	{
 		float tmp = fitness[0];
@@ -286,13 +288,12 @@ void RepresentationBreeder::select(int generation)
 
 void RepresentationBreeder::print(int index)
 {
-	int rsize = representation->size();
 	for (int i = 0; i <= pop_size; i++)
 	{
 		printf("%d f=%lf: ", i, fitness[i]);
-		for (int j = 0; j < rsize; j++)
+		for (int j = 0; j < current_size; j++)
 		{
-			if (pop[i][j])
+			if (indices[i]->find(j) != indices[j]->begin())
 			{
 				fputc('1', stdout);
 			}

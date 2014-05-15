@@ -8,26 +8,29 @@
 #ifndef REPRESENTATIONBREEDER_H_
 #define REPRESENTATIONBREEDER_H_
 
+#include "Representation.h"
+
 class RepresentationBreeder
 {
+	int cap;
 	int pop_size;
-	char **pop;
-	std::vector<int> **indices;
+	std::set<int> **indices;
 	double *fitness;
-	Representation *representation;
+
+	int current_size;
 
 	void ensure_uses(int index, unsigned int num_to_use);
 	void cross_over(int parent1, int parent2, int num_to_use);
-	void mutate(int num_to_flip, int num_to_use, double *costs);
+	void mutate(int num_to_flip);
 	void select(int generation);
 
 	void print(int index);
 
 public:
-	RepresentationBreeder(Representation *rep, int _pop_size);
+	RepresentationBreeder(int cap, int _pop_size);
 	~RepresentationBreeder();
 
-	void represent(int num_points, char *mask_out);
+	void represent(int num_points, DistCache *dcache, std::set<int> *rep_out);
 };
 
 
