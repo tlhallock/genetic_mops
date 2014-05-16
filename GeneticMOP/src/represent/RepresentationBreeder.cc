@@ -16,6 +16,15 @@ void RepresentationBreeder::ensure_uses(int index, unsigned int num_to_use)
 {
 	std::set<int> *s = indices[index];
 
+	for (std::set<int>::iterator it = s->begin(); it != s->end(); it++)
+	{
+		if (*it >= current_size)
+		{
+			s->clear();
+			break;
+		}
+	}
+
 	while (s->size() > num_to_use)
 	{
 		int to_del = rand() % s->size();
@@ -189,6 +198,7 @@ void RepresentationBreeder::represent(int num_points, DistCache *dcache, std::se
 		cc.assign(indices[i]);
 		fitness[i] = cc.get_diversity_fitness(-13);
 	}
+	fitness[0] = -1;
 
 	int nloops = 100;
 	for (int i = 0; i < nloops; i++)
@@ -258,6 +268,12 @@ void RepresentationBreeder::select(int generation)
 			least_fit_index = i;
 			least_fitness = fitness[i];
 		}
+	}
+
+	if (least_fit_index == INT_MIN)
+	{
+		puts("all elements have fitness of DBL_MAX!");
+		return;
 	}
 
 	if (GA_VERBOSE)

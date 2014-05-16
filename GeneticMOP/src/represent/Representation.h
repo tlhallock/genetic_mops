@@ -101,7 +101,7 @@ public:
 	void clear_non_pareto();
 };
 
-#define NUM_CLOSE_CACHE 4
+#define NUM_CLOSE_CACHE 5
 class ClosestCacheEntry
 {
 	friend class XYPair;
@@ -110,8 +110,10 @@ class ClosestCacheEntry
 	friend class Representation;
 private:
 	XYPair *pair;
-	int indices[NUM_CLOSE_CACHE];
-	double dists[NUM_CLOSE_CACHE];
+	int s_indices[NUM_CLOSE_CACHE];
+	double s_dists[NUM_CLOSE_CACHE];
+	int a_indices[NUM_CLOSE_CACHE];
+	double a_dists[NUM_CLOSE_CACHE];
 
 	double improvement;
 public:
@@ -119,13 +121,11 @@ public:
 			pair(pair_),
 			improvement(0)
 	{
-		for (int i = 0; i < NUM_CLOSE_CACHE; i++)
-		{
-			indices[i] = 0;
-			dists[i] = 0;
-		}
+		set(pair_);
 	};
 	~ClosestCacheEntry() {}
+
+	void set(XYPair *pair);
 };
 
 class ClosestCache
@@ -136,18 +136,33 @@ class ClosestCache
 	friend class Representation;
 private:
 	ClosestCacheEntry ** points;
-	bool accurate_masks;
-	bool accurate_dist;
+	bool accurate_selected_closest;
+	bool accurate_all_closest;
+	bool accurate_points;
 
 	DistCache *dcache;
 	std::set<int> representation;
 
 	void ensure_masks();
 
+
+
+
+
+
+
+	bool assigned;
+
+
+
 	void init();
 	bool uses(int index);
 	int get_nearest_index(int index);
-	void calc_n_nearest(int index, int *nearest, double *dists);
+	void calc_n_s_nearest(int index);
+	void cacl_n_s_nearest(int index, int other);
+	void calc_n_a_nearest(int index);
+	void cacl_n_a_nearest(int index, int other);
+	void ensure_all_closest();
 public:
 	ClosestCache(DistCache *dcache);
 	~ClosestCache();

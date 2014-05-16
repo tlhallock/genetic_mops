@@ -49,16 +49,11 @@ void summarize(ImageSet *image, const char *filename)
 
 void compare_solvers()
 {
-	long seed = time(NULL);
-	srand(seed);
-
 	FILE *debug = fopen("ga_debug.txt", "w");
-	fprintf(debug, "%ld\n", seed);
 	fclose(debug);
 
 
 	debug = fopen("debug_dfrs.txt", "w");
-	fprintf(debug, "%ld\n", seed);
 	fclose(debug);
 
 	VectorImageSet image(2);

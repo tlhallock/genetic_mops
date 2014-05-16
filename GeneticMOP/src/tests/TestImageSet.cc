@@ -38,9 +38,6 @@ void objective_func(double *x, double *y_out)
 
 void test_pareto_equivalence()
 {
-	long seed = time(NULL);
-	srand(seed);
-
 	VectorImageSet vimage(DIM);
 
 	qtree::qtree_point *lb = qtree::qtree_point_new(DIM);

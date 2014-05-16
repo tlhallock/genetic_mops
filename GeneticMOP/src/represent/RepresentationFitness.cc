@@ -11,12 +11,19 @@
 
 void ClosestCache::greedy_improve_coverage(int num_loops)
 {
+	ensure_masks();
+
 	bool improvement;
 	for (int i = 0; i < num_loops; i++)
 	{
 		improvement = false;
-		for (std::set<int>::iterator it = representation.begin(); it != representation.end(); it++)
+
+		int rsize = representation.size();
+		for (int i = 0; i < rsize; i++)
 		{
+			std::set<int>::iterator it = representation.begin();
+			std::advance(it, i);
+
 			if (dither_coverage_fitness (*it, -1300, 3))
 			{
 				improvement = true;
@@ -31,12 +38,18 @@ void ClosestCache::greedy_improve_coverage(int num_loops)
 
 void ClosestCache::greedy_improve_diversity(int num_loops)
 {
+	ensure_masks();
+
 	bool improvement;
 	for (int i = 0; i < num_loops; i++)
 	{
 		improvement = false;
-		for (std::set<int>::iterator it = representation.begin(); it != representation.end(); it++)
+		int rsize = representation.size();
+		for (int i = 0; i < rsize; i++)
 		{
+			std::set<int>::iterator it = representation.begin();
+			std::advance(it, i);
+
 			if (dither_diversity_fitness (*it, -1300, 3))
 			{
 				improvement = true;
@@ -53,6 +66,8 @@ void ClosestCache::greedy_improve_diversity(int num_loops)
 
 double ClosestCache::get_diversity_fitness(int num)
 {
+	ensure_masks();
+
 	double sum = 0;
 
 	double dist;
@@ -76,7 +91,7 @@ double ClosestCache::get_coverage_fitness(int num)
 	double dist;
 	int nearest;
 
-	int size = representation.size();
+	int size = dcache->size();
 	for (int i = 0; i < size; i++)
 	{
 		if (uses(i))
@@ -106,7 +121,7 @@ bool ClosestCache::dither_diversity_fitness(int index, int num, int num_alt)
 
 	for (int i = 0; i < num_alt; i++)
 	{
-		int alternate = points[index]->indices[i];
+		int alternate = points[index]->s_indices[i];
 		if (uses(alternate))
 		{
 			continue;
@@ -120,9 +135,9 @@ bool ClosestCache::dither_diversity_fitness(int index, int num, int num_alt)
 			if (nearest == index)
 			{
 				double new_nearest = dcache->get_distance(*it, alternate);
-				if (points[*it]->dists[1] < new_nearest)
+				if (points[*it]->s_dists[1] < new_nearest)
 				{
-					new_nearest = points[*it]->dists[1];
+					new_nearest = points[*it]->s_dists[1];
 				}
 				// if the nearest is the old one
 				increase += new_nearest - dcache->get_distance(*it, nearest);
@@ -164,14 +179,14 @@ bool ClosestCache::dither_coverage_fitness(int index, int num, int num_alt)
 		break_die();
 	}
 
-	int size = representation.size();
+	int dsize = dcache->size();
 
 	int best_index = index;
 	double improvement = 0;
 
 	for (int i = 0; i < num_alt; i++)
 	{
-		int alternate = points[index]->indices[i];
+		int alternate = points[index]->s_indices[i];
 		if (uses(alternate))
 		{
 			continue;
@@ -179,7 +194,7 @@ bool ClosestCache::dither_coverage_fitness(int index, int num, int num_alt)
 
 		double sum = 0;
 		double increase = 0.0;
-		for (int j = 0; j < size; j++)
+		for (int j = 0; j < dsize; j++)
 		{
 			if (uses(j))
 			{
@@ -190,9 +205,9 @@ bool ClosestCache::dither_coverage_fitness(int index, int num, int num_alt)
 			if (nearest == index)
 			{
 				double new_nearest = dcache->get_distance(j, alternate);
-				if (points[j]->dists[1] < new_nearest)
+				if (points[j]->s_dists[1] < new_nearest)
 				{
-					new_nearest = points[j]->dists[1];
+					new_nearest = points[j]->s_dists[1];
 				}
 				// if the nearest is the old one
 				increase += new_nearest - dcache->get_distance(j, nearest);

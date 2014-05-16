@@ -11,43 +11,41 @@
 
 void ClosestCache::init()
 {
-	for (int i = 0; i < dcache->size(); i++)
+	if (!assigned)
 	{
-		if (points[i] != NULL)
-		{
-			if (points[i]->pair == dcache->get(i))
-			{
-				continue;
-			}
-			else
-			{
-				delete points[i];
-			}
-		}
-		points[i] = new ClosestCacheEntry(dcache->get(i));
+		puts("foo");
+		break_die();
 	}
-	accurate_masks = false;
-	accurate_dist = true;
 
-	representation.clear();
+	int dsize = dcache->size();
+	for (int i = 0; i < dsize; i++)
+	{
+		points[i]->set(dcache->get(i));
+	}
+
+	accurate_selected_closest = false;
+	accurate_all_closest = true;
+	accurate_points = false;
 }
 
 ClosestCache::ClosestCache(DistCache *dcache_) :
 		points((ClosestCacheEntry **) malloc(sizeof(*points) * dcache_->capacity())),
-		accurate_masks(false),
-		accurate_dist(false),
+		accurate_selected_closest(false),
+		accurate_all_closest(false),
+		accurate_points(false),
 		dcache(dcache_),
 		representation()
 {
 	for (int i = 0; i < dcache_->capacity(); i++)
 	{
-		points[i] = NULL;
+		points[i] = new ClosestCacheEntry(NULL);
 	}
 }
 
 ClosestCache::~ClosestCache()
 {
-	for (int i = 0; i < dcache->capacity(); i++)
+	int dcap = dcache->capacity();
+	for (int i = 0; i < dcap; i++)
 	{
 		if (points[i] != NULL)
 		{
@@ -57,38 +55,50 @@ ClosestCache::~ClosestCache()
 	free(points);
 }
 
+void ClosestCache::ensure_all_closest()
+{
+
+}
+
 void ClosestCache::ensure_masks()
 {
-	if (!accurate_dist)
+	if (!accurate_points)
 	{
 		init();
 	}
 
-	if (accurate_masks)
+	if (!accurate_all_closest)
+	{
+		ensure_all_closest();
+	}
+
+	if (accurate_selected_closest)
 	{
 		return;
 	}
 
-	int size = representation.size();
+	int size = dcache->size();
 	for (int i = 0; i < size; i++)
 	{
-		calc_n_nearest(i, &points[i]->indices[0], &points[i]->dists[0]);
+		calc_n_nearest(i);
 	}
 
-	accurate_masks = true;
+	accurate_selected_closest = true;
 }
 
 void ClosestCache::point_added()
 {
-	accurate_dist = false;
+	accurate_points = false;
 }
 
 void ClosestCache::point_removed()
 {
-	accurate_dist = false;
+	accurate_points = false;
+	representation.clear();
+	assigned = false;
 }
 
-void ClosestCache::get_n_nearest(int uindex, int n, int *nearest, double *dists)
+void ClosestCache::get_n_nearest(int index, int n, int *nearest, double *dists)
 {
 	if (n > NUM_CLOSE_CACHE)
 	{
@@ -98,23 +108,77 @@ void ClosestCache::get_n_nearest(int uindex, int n, int *nearest, double *dists)
 
 	ensure_masks();
 
-	ClosestCacheEntry *entry = points[uindex];
+	ClosestCacheEntry *entry = points[index];
 	for (int i = 0; i < n; i++)
 	{
-		dists[i] = entry->dists[i];
-		nearest[i] = entry->indices[i];
+		dists[i] = entry->s_dists[i];
+		nearest[i] = entry->s_indices[i];
 	}
 }
 
-void ClosestCache::calc_n_nearest(int uindex, int *nearest, double *dists)
+
+void ClosestCache::cacl_n_nearest(int index, int other)
 {
-	unsigned int index = (unsigned int) uindex;
-	for (int j = 0; j < NUM_CLOSE_CACHE; j++)
+#define least_close_index (NUM_CLOSE_CACHE - 1)
+	double dist = dcache->get_distance(index, other);
+	if (dist >= points[index]->a_dists[least_close_index])
 	{
-		dists[j] = DBL_MAX;
-		nearest[j] = -13000;
+		return;
 	}
 
+	points[index]->a_indices[least_close_index] = other;
+	points[index]->a_dists[least_close_index] = dist;
+
+	for (int j = least_close_index; j > 0; j--)
+	{
+		if (points[index]->a_dists[j - 1] <= points[index]->a_dists[j])
+		{
+			break;
+		}
+
+		int tmp = points[index]->a_indices[j];
+		points[index]->a_indices[j] = points[index]->a_indices[j - 1];
+		points[index]->a_indices[j - 1] = tmp;
+
+		double td = points[index]->a_dists[j];
+		points[index]->a_dists[j] = points[index]->s_dists[j - 1];
+		points[index]->a_dists[j - 1] = td;
+	}
+
+	if (representation.find(other) == representation.end())
+	{
+		return;
+	}
+
+	points[index]->s_indices[least_close_index] = other;
+	points[index]->s_dists[least_close_index] = dist;
+
+	for (int j = least_close_index; j > 0; j--)
+	{
+		if (points[index]->s_dists[j - 1] <= points[index]->s_dists[j])
+		{
+			break;
+		}
+
+		int tmp = points[index]->s_indices[j];
+		points[index]->s_indices[j] = points[index]->s_indices[j - 1];
+		points[index]->s_indices[j - 1] = tmp;
+
+		double td = points[index]->s_dists[j];
+		points[index]->s_dists[j] = points[index]->s_dists[j - 1];
+		points[index]->s_dists[j - 1] = td;
+	}
+}
+
+void ClosestCache::calc_n_nearest(const int index)
+{
+	for (int j = 0; j < NUM_CLOSE_CACHE; j++)
+	{
+		points[index]->s_dists[j] = DBL_MAX;
+		points[index]->s_indices[j] = -13000;
+	}
+
+	int end = use == NULL ? dcache->size() : use->size();
 	for (std::set<int>::iterator it = representation.begin(); it != representation.end(); it++)
 	{
 		unsigned int i = *it;
@@ -124,29 +188,6 @@ void ClosestCache::calc_n_nearest(int uindex, int *nearest, double *dists)
 			continue;
 		}
 
-		double dist = dcache->get_distance(index, i);
-		if (dist >= dists[0])
-		{
-			continue;
-		}
-		nearest[NUM_CLOSE_CACHE-1] = i;
-		dists[NUM_CLOSE_CACHE-1] = dist;
-
-		for (int j = NUM_CLOSE_CACHE-1; j > 0; j--)
-		{
-			if (dists[j-1] <= dists[j])
-			{
-				break;
-			}
-
-			int tmp = nearest[j];
-			nearest[j] = nearest[j-1];
-			nearest[j-1] = tmp;
-
-			double td = dists[j];
-			dists[j] = dists[j-1];
-			dists[j-1] = td;
-		}
 	}
 }
 
@@ -157,49 +198,52 @@ bool ClosestCache::uses(int index)
 
 int ClosestCache::get_nearest_index(int index)
 {
-	return points[index]->indices[0];
+	return points[index]->s_indices[0];
 }
 
 void ClosestCache::assign(std::set<int> *indices_)
 {
+	assigned = true;
 	for (std::set<int>::iterator it = indices_->begin(); it != indices_->end(); it++)
 	{
 		printf("%d\t", *it);
 	}
 	putchar('\n');
 
-
-	representation = *indices_;
+	representation.clear();
+	for (std::set<int>::iterator it = indices_->begin(); it != indices_->end(); it++)
+	{
+		representation.insert(*it);
+	}
 	accurate_masks = false;
 }
 
 void ClosestCache::zero_improvements()
 {
-	int size = representation.size();
+	int size = dcache->size();
 	for (int i = 0; i < size; i++)
 	{
 		points[i]->improvement = 0;
 	}
 }
 
-
 void ClosestCache::mark(int index, bool used)
 {
 	std::set<int>::iterator it = representation.find(index);
-	if (used)
+	bool already_marked = it != representation.end();
+	if (used == already_marked)
 	{
-		if (it == representation.end())
-		{
-			representation.insert(index);
-			points[index]->improvement = 0;
-		}
+		return;
+	}
+
+	if (already_marked)
+	{
+		representation.erase(it);
 	}
 	else
 	{
-		if (it != representation.end())
-		{
-			representation.erase(it);
-		}
+		representation.insert(index);
+		points[index]->improvement = 0;
 	}
 
 	accurate_masks = false;
@@ -214,6 +258,16 @@ void ClosestCache::mark(int index, bool used)
 
 
 
+void ClosestCacheEntry::set(XYPair *pair_)
+{
+	pair = pair_;
+	improvement = 0;
+	for (int j = 0; j < NUM_CLOSE_CACHE; j++)
+	{
+		s_dists[j] = DBL_MAX;
+		s_indices[j] = -13000;
+	}
+}
 
 
 

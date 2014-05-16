@@ -11,7 +11,7 @@
 
 GeneticSolver::GeneticSolver(int _xdim, int _ydim, int num_points) :
 	cap(500),
-	breed_size(2),
+	breed_size(1),
 	npoints(num_points),
 	xdim(_xdim),
 	ydim(_ydim),
@@ -20,7 +20,8 @@ GeneticSolver::GeneticSolver(int _xdim, int _ydim, int num_points) :
 	current_rep(),
 	dcache(cap, xdim, ydim, &l_2),
 	ccache(&dcache),
-	gene_selector(cap, 10)
+	gene_selector(cap, 10),
+	num_in_gen(0)
 {
 	for (int i = 0; i < breed_size; i++)
 	{
@@ -87,6 +88,7 @@ void GeneticSolver::find_fittest()
 	}
 
 	current_fit[0] = dcache.getY(parent);
+#if 0
 
 	printf("Found fittest %d ", parent);
 	print_point(stdout, current_fit[0], xdim, true);
@@ -108,28 +110,68 @@ void GeneticSolver::find_fittest()
 		printf("There isn't a %d closest.\n", p2);
 		current_fit[1] = NULL;
 	}
+#endif
 }
 
-void GeneticSolver::mutate()
+bool GeneticSolver::mutate(BoundedMopStats *mop)
 {
-	for (int i = 0; i < xdim; i++)
+	bool feasible = false;
+
+	double mutate_factor = 1 / (10.0 + 90 * rand() / RAND_MAX);
+	int count = 0;
+#define NUM_ATTEMPTS 10
+	do
 	{
-		double randomNumber = 2 * rand() / (double) RAND_MAX - 1;
-		offspring[i] *= 1 + randomNumber / 100.0;
-	}
-	printf("mutated to = ");
+		for (int i = 0; i < xdim; i++)
+		{
+			double randomNumber = 2 * rand() / (double) RAND_MAX - 1;
+			offspring[i] *= 1 + randomNumber * mutate_factor;
+		}
+	} while (!(feasible = mop->is_feasible(offspring))
+				&& count++ < NUM_ATTEMPTS);
+
+	printf("mutated to = %s ", feasible ? "f" : "i");
 	print_point(stdout, offspring, xdim, true);
+
+	return feasible;
+}
+
+void GeneticSolver::euthanasia()
+{
+	puts("Performing euthanasia");
+
+	dcache.clear_non_pareto();
+	ccache.point_removed();
+	num_in_gen = 0;
+	gene_selector.represent(npoints, &dcache, &current_rep);
+	ccache.assign(&current_rep);
 }
 
 void GeneticSolver::select()
 {
+	if (dcache.size() <= npoints) // no need to represent
+	{
+		current_rep.clear();
+		for (int i = 0; i < dcache.size(); i++)
+		{
+			current_rep.insert(i);
+		}
+		return;
+	}
+
 	bool cleared = false;
-	if (dcache.size() >= .90 * cap)
+	if (num_in_gen > 3 * npoints)
 	{
 		cleared = true;
+		euthanasia();
+	}
 
-		dcache.clear_non_pareto();
-		ccache.point_removed();
+	if (dcache.size() >= .90 * cap)
+	{
+		if (!cleared)
+		{
+			euthanasia();
+		}
 
 		while (dcache.size() >= .90 * cap)
 		{
@@ -137,19 +179,6 @@ void GeneticSolver::select()
 			puts("implement this... 15709138560113508173507");
 			break_die();
 		}
-	}
-
-	if (dcache.size() <= npoints)
-	{
-		for (int i = 0; i < dcache.size(); i++)
-		{
-			current_rep.insert(i);
-		}
-	}
-	else if (cleared || (0 == rand() % 50 && dcache.size() > 2 * npoints))
-	{
-		gene_selector.represent(npoints, &dcache, &current_rep);
-		ccache.assign(&current_rep);
 	}
 }
 
@@ -171,22 +200,44 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 
 	dcache.clear_non_pareto();
 	ccache.point_removed();
-
 	gene_selector.represent(npoints, &dcache, &current_rep);
 	ccache.assign(&current_rep);
 
 	while ((time(0) - start_time) < timeout
 			&& mop->get_num_points() < num_to_find)
 	{
-		printf("currently have %d points to choose from.\n", dcache.size());
+		bool error = false;
+		printf("currently have %d points to choose from.\ncurrrent rep = ", dcache.size());
+		for (std::set<int>::iterator it = current_rep.begin(); it != current_rep.end(); it++)
+		{
+			printf("%d ", *it);
+			if (*it > dcache.size())
+			{
+				error=true;
+			}
+		}
+		putchar('\n');
+		if (error)
+		{
+			puts("Error 170187509817350837");
+			break_die();
+		}
+		for (std::set<int>::iterator it = current_rep.begin(); it != current_rep.end(); it++)
+		{
+			printf("at %d ", *it);
+			print_point(stdout, dcache.getY(*it), ydim, true);
+		}
 
-		find_fittest();
-		breed();
-		mutate();
+		do
+		{
+			find_fittest();
+			breed();
+		} while (!mutate(mop));
 
 		mop->make_guess(offspring, y);
 		dcache.add(offspring, y);
 		ccache.point_added();
+		num_in_gen++;
 
 		select();
 		putchar('\n');
@@ -194,6 +245,15 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 
 	free(x);
 	free(y);
+
+	euthanasia();
+
+	printf("Final representation: dsize=%d, rsize=%d\n", dcache.size(), current_rep.size());
+	for (std::set<int>::iterator it = current_rep.begin(); it != current_rep.end(); it++)
+	{
+		printf("at %d ", *it);
+		print_point(stdout, dcache.getY(*it), ydim, true);
+	}
 }
 
 

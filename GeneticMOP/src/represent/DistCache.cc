@@ -27,6 +27,10 @@ DistCache::DistCache(unsigned int cap_, int xdim_, int ydim_, double (*norm_)(do
 
 DistCache::~DistCache()
 {
+	for (std::vector<XYPair *>::iterator it = points.begin(); it != points.end(); it++)
+	{
+		delete *it;
+	}
 	for (unsigned int i = 0; i < cap; i++)
 	{
 		free(distances[i]);
@@ -64,6 +68,8 @@ void DistCache::ensure_paretos()
 
 	for (std::vector<XYPair *>::iterator i1 = points.begin(); i1 != points.end(); i1++)
 	{
+		(*i1)->pareto = true;
+
 		for (std::vector<XYPair *>::iterator i2 = points.begin(); i2 != points.end(); i2++)
 		{
 			if (i1 == i2)
@@ -71,9 +77,7 @@ void DistCache::ensure_paretos()
 				continue;
 			}
 
-			(*i1)->pareto = true;
-
-			if (qtree::qtree_point_dominates((*i1)->y, (*i2)->y, ydim))
+			if (qtree::qtree_point_dominates((*i2)->y, (*i1)->y, ydim))
 			{
 				(*i1)->pareto = false;
 				break;

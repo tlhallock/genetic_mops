@@ -32,9 +32,12 @@ private:
 	ClosestCache ccache;
 	RepresentationBreeder gene_selector;
 
+	int num_in_gen;
+
+	void euthanasia();
 	void breed();
 	void find_fittest();
-	void mutate();
+	bool mutate(BoundedMopStats *mop);
 	void select();
 
 	double get_isolation(int index, double *minsL, double *minsU);
