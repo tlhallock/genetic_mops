@@ -7,6 +7,8 @@
 
 #include "Representation.h"
 
+#include "../common.h"
+
 void ClosestCache::greedy_improve_coverage(int num_loops)
 {
 	bool improvement;
@@ -74,6 +76,7 @@ double ClosestCache::get_coverage_fitness(int num)
 	double dist;
 	int nearest;
 
+	int size = representation.size();
 	for (int i = 0; i < size; i++)
 	{
 		if (uses(i))
@@ -95,7 +98,7 @@ bool ClosestCache::dither_diversity_fitness(int index, int num, int num_alt)
 	if (num_alt > NUM_CLOSE_CACHE - 1)
 	{
 		puts("ERROR NOT CACHED 1324578173246591722295");
-		exit(1);
+		break_die();
 	}
 
 	int best_index = index;
@@ -158,8 +161,10 @@ bool ClosestCache::dither_coverage_fitness(int index, int num, int num_alt)
 	if (num_alt > NUM_CLOSE_CACHE - 1)
 	{
 		puts("ERROR NOT CACHED 66421641641");
-		exit(1);
+		break_die();
 	}
+
+	int size = representation.size();
 
 	int best_index = index;
 	double improvement = 0;

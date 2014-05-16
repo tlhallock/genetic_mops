@@ -66,9 +66,10 @@ private:
 	double (*norm)(double *, double *, int);
 
 	bool accurate_dists;
+	bool accurate_paretos;
 
+	void ensure_paretos();
 	void ensure_dists();
-	bool is_pareto(int index);
 	void set_distance(int i, int j, double d);
 public:
 	DistCache(unsigned int cap, int xdim, int ydim, double (*norm)(double *, double *, int));
@@ -86,6 +87,8 @@ public:
 	{
 		return points.at(index);
 	}
+
+	int capacity() { return cap; }
 
 	double get_distance(int i, int j);
 	int size() { return points.size(); }
@@ -132,15 +135,16 @@ class ClosestCache
 	friend class ClosestCacheEntry;
 	friend class Representation;
 private:
-	int size;
 	ClosestCacheEntry ** points;
 	bool accurate_masks;
+	bool accurate_dist;
 
 	DistCache *dcache;
 	std::set<int> representation;
 
 	void ensure_masks();
 
+	void init();
 	bool uses(int index);
 	int get_nearest_index(int index);
 	void calc_n_nearest(int index, int *nearest, double *dists);
@@ -153,6 +157,9 @@ public:
 
 	void change_to(int on, int off);
 	void assign(std::set<int> *mask);
+
+	void point_added();
+	void point_removed();
 
 	void zero_improvements();
 	void clear();

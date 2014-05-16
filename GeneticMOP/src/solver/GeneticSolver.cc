@@ -18,8 +18,8 @@ GeneticSolver::GeneticSolver(int _xdim, int _ydim, int num_points) :
 	current_fit((double **) malloc (sizeof(*current_fit) * breed_size)),
 	offspring((double *) malloc (sizeof (*offspring) * _xdim)),
 	current_rep(),
-	cache(cap, xdim, ydim, &l_2),
-	ccache(&cache),
+	dcache(cap, xdim, ydim, &l_2),
+	ccache(&dcache),
 	gene_selector(cap, 10)
 {
 	for (int i = 0; i < breed_size; i++)
@@ -34,32 +34,44 @@ GeneticSolver::~GeneticSolver()
 	free(offspring);
 }
 
-double GeneticSolver::get_fitness(BoundedMopStats *board, double *x, double *y)
-{
-    return 0;
-}
-
 void GeneticSolver::breed()
 {
 	for (int i = 0; i < xdim; i++)
 	{
-		int parent = rand() % breed_size;
+		int parent;
+		do
+		{
+			parent = rand() % breed_size;
+		} while(current_fit[parent] == NULL);
+
 		offspring[i] = current_fit[parent][i];
 	}
+
+	printf("offspring = ");
+	print_point(stdout, offspring, xdim, true);
 }
 
 void GeneticSolver::find_fittest()
 {
-	int rsize = cache.size();
+	int rsize = dcache.size();
 
-	int parent = 0;
-	if (rand() % 2)
+	int parent = -1555;
+	if (rand() % 2 || true)
 	{
 		double max = -DBL_MAX;
 		double *minsL = (double *) alloca(sizeof(*minsL) * ydim);
 		double *minsU = (double *) alloca(sizeof(*minsU) * ydim);
 
-		for (int i = 0; i < rsize / 3; i++)
+		int sample_size;
+		if (rsize < 3)
+		{
+			sample_size = 1;
+		} else
+		{
+			sample_size = rsize / 3;
+		}
+
+		for (int i = 0; i < sample_size; i++)
 		{
 			int index = rand() % rsize;
 
@@ -74,20 +86,27 @@ void GeneticSolver::find_fittest()
 
 	}
 
-	double *p = cache.getY(parent);
-	for (int i = 0; i < ydim; i++)
-	{
-		current_fit[0][i] = p[i];
-	}
+	current_fit[0] = dcache.getY(parent);
+
+	printf("Found fittest %d ", parent);
+	print_point(stdout, current_fit[0], xdim, true);
+
 
 #define NUM_INCEST 3
 	int nearest[NUM_INCEST];
 	double dists[NUM_INCEST];
 	ccache.get_n_nearest(parent, NUM_INCEST, nearest, dists);
-	p = cache.getY(nearest[rand() % NUM_INCEST]);
-	for (int i = 0; i < ydim; i++)
+	int p2 = rand() % NUM_INCEST;
+	if (nearest[p2] >= 0)
 	{
-		current_fit[1][i] = p[i];
+		current_fit[1] = dcache.getY(nearest[p2]);
+		printf("breeding with %d ", nearest[p2]);
+		print_point(stdout, current_fit[1], xdim, true);
+	}
+	else
+	{
+		printf("There isn't a %d closest.\n", p2);
+		current_fit[1] = NULL;
 	}
 }
 
@@ -98,25 +117,38 @@ void GeneticSolver::mutate()
 		double randomNumber = 2 * rand() / (double) RAND_MAX - 1;
 		offspring[i] *= 1 + randomNumber / 100.0;
 	}
+	printf("mutated to = ");
+	print_point(stdout, offspring, xdim, true);
 }
 
 void GeneticSolver::select()
 {
-	if (cache.size() >= .90 * cap)
+	bool cleared = false;
+	if (dcache.size() >= .90 * cap)
 	{
-		cache.clear_non_pareto();
+		cleared = true;
 
-		while (cache.size() >= .90 * cap)
+		dcache.clear_non_pareto();
+		ccache.point_removed();
+
+		while (dcache.size() >= .90 * cap)
 		{
 			// remove the closest...
 			puts("implement this... 15709138560113508173507");
-			exit(1);
+			break_die();
 		}
 	}
 
-	if (rand() % 100)
+	if (dcache.size() <= npoints)
 	{
-		gene_selector.represent(npoints, &cache, &current_rep);
+		for (int i = 0; i < dcache.size(); i++)
+		{
+			current_rep.insert(i);
+		}
+	}
+	else if (cleared || (0 == rand() % 50 && dcache.size() > 2 * npoints))
+	{
+		gene_selector.represent(npoints, &dcache, &current_rep);
 		ccache.assign(&current_rep);
 	}
 }
@@ -133,24 +165,31 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 		mop->sample_feasible(x);
 		mop->make_guess(x, y);
 
-		cache.add(x, y);
+		dcache.add(x, y);
+		ccache.point_added();
 	}
 
-	cache.clear_non_pareto();
-	gene_selector.represent(npoints, &cache, &current_rep);
+	dcache.clear_non_pareto();
+	ccache.point_removed();
+
+	gene_selector.represent(npoints, &dcache, &current_rep);
 	ccache.assign(&current_rep);
 
 	while ((time(0) - start_time) < timeout
 			&& mop->get_num_points() < num_to_find)
 	{
+		printf("currently have %d points to choose from.\n", dcache.size());
+
 		find_fittest();
 		breed();
 		mutate();
 
 		mop->make_guess(offspring, y);
-		cache.add(offspring, y);
+		dcache.add(offspring, y);
+		ccache.point_added();
 
 		select();
+		putchar('\n');
 	}
 
 	free(x);
@@ -160,20 +199,20 @@ void GeneticSolver::solve(BoundedMopStats *mop, int num_to_find, long timeout)
 
 double GeneticSolver::get_isolation(int index, double *minsL, double *minsU)
 {
-	int ydim = cache.get_ydim();
-	int size = cache.size();
+	int ydim = dcache.get_ydim();
+	int size = dcache.size();
 
-	for (int i=0; i<ydim;i++)
+	for (int i = 0; i < ydim; i++)
 	{
 		minsL[i] = DBL_MAX;
 		minsU[i] = DBL_MAX;
 	}
 
-	double *pnt = cache.getY(index);
+	double *pnt = dcache.getY(index);
 
 	for (int j = 0; j < size; j++)
 	{
-		double *other = cache.getY(j);
+		double *other = dcache.getY(j);
 
 		for (int i = 0; i < ydim; i++)
 		{

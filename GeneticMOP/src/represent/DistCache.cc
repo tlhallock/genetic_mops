@@ -7,6 +7,7 @@
 
 #include "Representation.h"
 
+#include "../common.h"
 
 DistCache::DistCache(unsigned int cap_, int xdim_, int ydim_, double (*norm_)(double *, double *, int)) :
 		xdim(ydim_),
@@ -15,7 +16,8 @@ DistCache::DistCache(unsigned int cap_, int xdim_, int ydim_, double (*norm_)(do
 		points(),
 		distances((double **) malloc (sizeof(*distances) * cap_)),
 		norm(norm_),
-		accurate_dists(false)
+		accurate_dists(false),
+		accurate_paretos(false)
 {
 	for (unsigned int i = 0; i < cap; i++)
 	{
@@ -45,19 +47,41 @@ void DistCache::ensure_dists()
 		double *p1 = getY(i);
 		for (unsigned int j = 0; j < i; j++)
 		{
-			points[i]->pareto = true;
-			double *p2 = getY(j);
-			distances[i][j] = norm(p1, p2, ydim);
-
-			if (points[i]->pareto &&
-					qtree::qtree_point_dominates(getY(j), getY(i), ydim))
-			{
-				points[i]->pareto = false;
-			}
+			distances[i][j] = norm(p1, getY(j), ydim);
 		}
 	}
 
 	accurate_dists = true;
+}
+
+void DistCache::ensure_paretos()
+{
+
+	if (accurate_paretos)
+	{
+		return;
+	}
+
+	for (std::vector<XYPair *>::iterator i1 = points.begin(); i1 != points.end(); i1++)
+	{
+		for (std::vector<XYPair *>::iterator i2 = points.begin(); i2 != points.end(); i2++)
+		{
+			if (i1 == i2)
+			{
+				continue;
+			}
+
+			(*i1)->pareto = true;
+
+			if (qtree::qtree_point_dominates((*i1)->y, (*i2)->y, ydim))
+			{
+				(*i1)->pareto = false;
+				break;
+			}
+		}
+	}
+
+	accurate_paretos = true;
 }
 
 
@@ -85,7 +109,7 @@ void DistCache::set_distance(int i, int j, double d)
 	if (i == j)
 	{
 		puts("What!?! 250629877650276528765082754");
-		exit(1);
+		break_die();
 	}
 
 	ensure_dists();
@@ -121,6 +145,7 @@ void DistCache::add(double *x, double *y)
 	{
 		set_distance(i, size, norm(points.at(i)->y, points.at(size)->y, ydim));
 	}
+	accurate_paretos = false;
 }
 
 void DistCache::remove(int index)
@@ -128,18 +153,15 @@ void DistCache::remove(int index)
 	delete points.at(index);
 	points.erase(points.begin() + index);
 	accurate_dists = false;
-}
-
-bool DistCache::is_pareto(int index)
-{
-	return points.at(index)->pareto;
+	accurate_paretos = false;
 }
 
 void DistCache::clear_non_pareto()
 {
-	for (int i = points.size() - 1; i >= 0; i++)
+	ensure_paretos();
+	for (int i = points.size() - 1; i >= 0; i--)
 	{
-		if (!is_pareto(i))
+		if (!points.at(i)->pareto)
 		{
 			remove(i);
 		}

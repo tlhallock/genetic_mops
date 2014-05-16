@@ -6,8 +6,6 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-using namespace std;
-
 #include "../common.h"
 
 double get_index(double r)
@@ -18,10 +16,11 @@ double get_index(double r)
 int main()
 {
 	long seed = time(NULL);
-	srand(seed);
+//	srand(seed);
+	srand(50000);
 
 //	test_pareto_equivalence();
-//test_nearest();
+//	test_nearest();
 	compare_solvers();
 
 	return 0;

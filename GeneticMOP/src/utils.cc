@@ -82,3 +82,8 @@ void log_guess(FILE *log, double *x, int xdim, double *y, int ydim)
 	fputc(']', log);
 	fputc('\n', log);
 }
+
+void break_die()
+{
+	exit(1);
+}

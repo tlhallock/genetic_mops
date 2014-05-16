@@ -28,7 +28,7 @@ private:
 
 	std::set<int> current_rep;
 
-	DistCache cache;
+	DistCache dcache;
 	ClosestCache ccache;
 	RepresentationBreeder gene_selector;
 
@@ -36,7 +36,6 @@ private:
 	void find_fittest();
 	void mutate();
 	void select();
-	double get_fitness(BoundedMopStats *board, double *x, double *y);
 
 	double get_isolation(int index, double *minsL, double *minsU);
 public:

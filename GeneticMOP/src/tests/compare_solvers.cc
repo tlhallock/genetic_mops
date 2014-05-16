@@ -72,8 +72,8 @@ void compare_solvers()
 	xmax[1] = 1;
 
 	BoundedMopStats board(2, 2, (double *)&xmin, (double *)&xmax, &image,
-//			&objective_function_1, &is_feasible_function_1);
-			&objective_function_4, &is_feasible_function_2);
+			&objective_function_1, &is_feasible_function_1);
+//			&objective_function_4, &is_feasible_function_2);
 
 	{
 		puts("Using random sampling.");

@@ -16,8 +16,6 @@
 //============================================================================
 
 
-using namespace std;
-
 #include "../common.h"
 
 #include "../image/VectorImageSet.h"

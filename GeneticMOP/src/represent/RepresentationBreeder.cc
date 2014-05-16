@@ -126,7 +126,8 @@ void RepresentationBreeder::mutate(int num_to_flip)
 		do
 		{
 			turn_on = rand() % current_size;
-		} while (indices[0]->find(turn_on) != indices[0]->end());
+		} while (turn_on == turn_off ||
+				indices[0]->find(turn_on) != indices[0]->end());
 
 		if (GA_VERBOSE)
 		{
@@ -163,13 +164,13 @@ RepresentationBreeder::~RepresentationBreeder()
 void RepresentationBreeder::represent(int num_points, DistCache *dcache, std::set<int> *mask_out)
 {
 	current_size = dcache->size();
-	if (current_size < cap)
+	if (current_size > cap)
 	{
 		puts("oops! 1234567876543678");
-		exit(1);
+		break_die();
 	}
 
-	if (current_size < num_points)
+	if (current_size <= num_points)
 	{
 		mask_out->clear();
 		for (int i = 0; i < current_size; i++)
@@ -217,7 +218,7 @@ void RepresentationBreeder::represent(int num_points, DistCache *dcache, std::se
 		cross_over(p1, p2, num_points);
 		mutate(2);
 
-		cc.assign(indices[i]);
+		cc.assign(indices[0]);
 		fitness[0] = cc.get_diversity_fitness(-13);
 
 		select(i);
@@ -293,7 +294,7 @@ void RepresentationBreeder::print(int index)
 		printf("%d f=%lf: ", i, fitness[i]);
 		for (int j = 0; j < current_size; j++)
 		{
-			if (indices[i]->find(j) != indices[j]->begin())
+			if (indices[i]->find(j) != indices[i]->end())
 			{
 				fputc('1', stdout);
 			}

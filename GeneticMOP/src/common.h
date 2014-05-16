@@ -42,6 +42,8 @@ void test_nearest();
 void test_pareto_equivalence();
 void compare_solvers();
 
+void break_die();
+
 
 #endif	/* COMMON_H */
 
