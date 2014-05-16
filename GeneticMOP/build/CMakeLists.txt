@@ -8,20 +8,15 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -march=native")
 
 # Representer library
 file (GLOB lib_SRC
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/*.h
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/image/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/image/*.h
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/represent/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/represent/*.h
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/*.h)
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/image/*.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/represent/*.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/solver/*.cc)
 add_library(Mops ${lib_SRC})
 
 # Test application library
 file(GLOB application_SRC
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/*.h)
+	${CMAKE_CURRENT_SOURCE_DIR}/../src/tests/*.cc)
 add_executable(TestMops ${application_SRC})
 
 
